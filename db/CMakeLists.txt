@@ -10,8 +10,8 @@ find_package(Threads REQUIRED)
 find_package(msgpack)
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
-set(GMock_LIBRARY "/usr/local/lib/libgmock.a")
-set(GMock_LIBRARY_MAIN "/usr/local/lib/libgmock_main.a")
+set(GMock_LIBRARY "/usr/local/lib/libgmock.so")
+set(GMock_LIBRARY_MAIN "/usr/local/lib/libgmock_main.so")
 set(GMock_BOTH_LIBRARIES ${GMock_LIBRARY} ${GMock_LIBRARY_MAIN})
 
 include_directories(${SRC_DIR})
@@ -27,15 +27,17 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/llssdb/)
 
 file(GLOB SOURCES ${SRC_DIR}/lua/*.cpp
-        ${SRC_DIR}/node/*.cpp
+        ${SRC_DIR}/folder/*.cpp
         ${SRC_DIR}/engine/*.cpp
         ${SRC_DIR}/network/*.cpp
+        ${SRC_DIR}/network/transfer/*.cpp
         ${SRC_DIR}/filesystem/*.cpp)
 
 file(GLOB HEADERS ${SRC_DIR}/lua/*.h
-        ${SRC_DIR}/node/*.h
+        ${SRC_DIR}/folder/*.h
         ${SRC_DIR}/engine/*.h
         ${SRC_DIR}/network/*.h
+        ${SRC_DIR}/network/transfer/*.h
         ${SRC_DIR}/filesystem/*.h)
 
 file(GLOB TEST_SOURCES ${SRC_DIR}/tests/test_client.cpp
