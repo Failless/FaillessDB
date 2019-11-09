@@ -1,35 +1,60 @@
-#include <iostream>
-#include "../core/client.h"
+#include <string>
+#include "llssclient/core/client.h"
+#include "llssclient/network/mp_client.h"
+#include "llssclient/filesystem/filesystem.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-using ::testing::AtLeast;
-using ::testing::DoAll;
-using ::testing::Return;
-using ::testing::SetArgReferee;
+namespace failless::client::tests {
 
-using namespace client_core;
+    using ::testing::AtLeast;
+    using ::testing::DoAll;
+    using ::testing::Return;
+    using ::testing::SetArgReferee;
 
-class mock_client : public client {
-public:
-    explicit mock_client( uintptr_t interpreter, class mp_client* mp_client, class filesystem* filesystem, char* config ) : client( interpreter, mp_client, filesystem, config ){};
-    MOCK_METHOD0(read_query, size_t() );
-    MOCK_METHOD0( send, size_t() );
-    MOCK_METHOD0( params, size_t() );
-private:
-    MOCK_METHOD0(parse_query, size_t());
-};
+    using std::string;
 
-TEST(DynamicArrayTest, ReallocateCalledOnce) {
-    uintptr_t interpreter = 0;
-    mp_client* mp_client = 0;
-    filesystem* filesystem = 0;
-    char* config = 0;
-    mock_client client{interpreter, mp_client, filesystem, config};
-    EXPECT_CALL( mock_client, read_query()).Times(AtLeast(1) );
-}
+    using namespace failless::client::client_core;
 
-int main(int argc, char** argv) {
-    ::testing::InitGoogleMock(&argc, argv);
-    return RUN_ALL_TESTS();
+    class mock_client : public client_interface {
+    public:
+
+        MOCK_METHOD1(read_query, size_t(string
+                query ));
+
+        MOCK_METHOD0(send, size_t());
+
+        MOCK_METHOD2(params, size_t(int
+                argc, char * *arg ));
+    private:
+        MOCK_METHOD1(parse_query, size_t(string
+                query ));
+    };
+
+    class best_client {
+        mock_client *client;
+    public:
+        best_client(mock_client *client) : client(client) {}
+
+        bool get_data(string) {
+            string test_query = "test";
+            client->read_query(test_query);
+            return true;
+        }
+    };
+
+    TEST(best_client_test, can_read_query) {
+        mock_client mock_client;
+        string test_query = "test";
+        EXPECT_CALL(mock_client, read_query(test_query)).Times(AtLeast(1));
+
+        best_client best_client(&mock_client);
+
+    }
+
+    int main(int argc, char **argv) {
+        ::testing::InitGoogleMock(&argc, argv);
+        return RUN_ALL_TESTS();
+    }
+
 }
