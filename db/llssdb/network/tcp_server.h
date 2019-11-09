@@ -3,7 +3,6 @@
 
 #include "llssdb/network/tcp_server_interface.h"
 
-
 namespace failless {
 namespace db {
 namespace network {
@@ -18,9 +17,6 @@ public:
   void setResponseFunction(
       std::function<transfer::Response(transfer::Request &)> &generate_response)
       override;
-
-private:
-  std::function<transfer::Response(transfer::Request &)> generate_response_;
 };
 
 } // namespace network

@@ -29,6 +29,7 @@ public:
 
 protected:
   Host host;
+  std::function<transfer::Response(transfer::Request &)> generate_response_;
 };
 
 } // namespace network
