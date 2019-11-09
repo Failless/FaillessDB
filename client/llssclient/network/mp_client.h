@@ -1,15 +1,15 @@
 #ifndef LLSSCLIENT_NETWORK_MP_CLIENT_H_
 #define LLSSCLIENT_NETWORK_MP_CLIENT_H_
 
-namespace mp_client_network {
+//#include <msgpack.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/asio/ip/icmp.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/noncopyable.hpp>
 
-    #include <msgpack.hpp>
-    #include <boost/asio/io_service.hpp>
-    #include <boost/asio/deadline_timer.hpp>
-    #include <boost/asio/ip/icmp.hpp>
-    #include <boost/asio/ip/tcp.hpp>
-    #include <boost/enable_shared_from_this.hpp>
-    #include <boost/noncopyable.hpp>
+namespace failless::client::mp_client_network {
 
     using namespace boost::asio;
 

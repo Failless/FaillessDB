@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace filesystem_filesystem {
+namespace failless::client::filesystem_filesystem {
 
     class filesystem_interface {
     public:

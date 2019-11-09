@@ -1,20 +1,19 @@
 #ifndef LLSSCLIENT_CORE_CLIENT_H_
 #define LLSSCLIENT_CORE_CLIENT_H_
 
+#include <cstddef>
 #include <string>
 #include <cstddef>
 #include <cstdint>
+#include "llssclient/network/mp_client.h"
+#include "llssclient/filesystem/filesystem.h"
 
-namespace client_core {
-
-    #include "../network/mp_client.h"
-    #include "../filesystem/filesystem.h"
+namespace failless::client::client_core {
 
     using std::string;
-    using std::size_t;
 
-    using namespace mp_client_network;
-    using namespace filesystem_filesystem;
+    using namespace failless::client::mp_client_network;
+    using namespace failless::client::filesystem_filesystem;
 
     class client_interface {
     public:
@@ -32,7 +31,7 @@ namespace client_core {
         explicit client( uintptr_t interpreter, mp_client* mp_client, filesystem* filesystem, char* config );
         ~client();
         size_t read_query( string query );
-        size_t send() = 0;
+        size_t send();
         size_t params( int argc, char **argv );
     private:
         size_t parse_query( string query );
