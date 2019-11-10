@@ -9,44 +9,34 @@
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/noncopyable.hpp>
 
-namespace failless::client::mp_client_network {
+namespace failless::client::mp_client {
 
     using namespace boost::asio;
 
-    class mp_client_interface {
+    const int MAX_MSG = 1024;
+
+    class MpClientInterface {};
+
+    class MpClient : public MpClientInterface {
     public:
+        explicit MpClient();
 
-    private:
-
-    };
-
-    class mp_client
-            : public mp_client_interface, public boost::enable_shared_from_this<mp_client>, boost::noncopyable {
-    public:
-        mp_client(const std::string &username);
-        ~mp_client();
-        void start(ip::tcp::endpoint ep);
+        ~MpClient();
+        static void Start(const ip::tcp::endpoint& ep);
 
         typedef boost::system::error_code error_code;
-        typedef boost::shared_ptr<mp_client> ptr;
+        typedef boost::shared_ptr<MpClient> ptr;
 
-        static ptr start(ip::tcp::endpoint ep, const std::string &username);
-        void stop();
-        bool started();
-
-    private:
-        size_t read_complete(const boost::system::error_code &err, size_t bytes);
+        static ptr Start(const ip::tcp::endpoint& ep, const std::string &username);
+        static void Stop();
+        static bool Started();
 
     private:
-        ip::tcp::socket sock_;
-        enum {
-            max_msg = 1024
-        };
-        char read_buffer_[max_msg];
-        char write_buffer_[max_msg];
-        bool started_;
-        std::string username_;
-        deadline_timer timer_;
+        static size_t ReadComplete_(const boost::system::error_code &err, size_t bytes);
+
+    private:
+        char read_buffer_[MAX_MSG]{};
+        char write_buffer_[MAX_MSG]{};
     };
 }
 

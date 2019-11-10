@@ -8,38 +8,42 @@
 #include "llssclient/network/mp_client.h"
 #include "llssclient/filesystem/filesystem.h"
 
-namespace failless::client::client_core {
+namespace failless::client::client {
 
     using std::string;
 
-    using namespace failless::client::mp_client_network;
-    using namespace failless::client::filesystem_filesystem;
+    using namespace failless::client::mp_client;
+    using namespace failless::client::filesystem;
 
-    class client_interface {
+    class ClientInterface {
     public:
-        explicit client_interface();
-        virtual ~client_interface();
-        virtual size_t read_query( string query ) = 0;
-        virtual size_t send() = 0;
-        virtual size_t params( int argc, char **argv ) = 0;
+        ClientInterface() = default;
+        ~ClientInterface() = default;
+        virtual size_t ReadQuery( string query ) = 0;
+        virtual size_t Send() = 0;
+        virtual size_t Params( int argc, char **argv ) = 0;
+        int Test(string query) {
+            ReadQuery(query);
+            return EXIT_SUCCESS;
+        }
     private:
-        virtual size_t parse_query( string query ) = 0;
+        virtual size_t ParseQuery_( string query ) = 0;
     };
 
-    class client : public client_interface {
+    class Client : public ClientInterface {
     public:
-        explicit client( uintptr_t interpreter, mp_client* mp_client, filesystem* filesystem, char* config );
-        ~client();
-        size_t read_query( string query );
-        size_t send();
-        size_t params( int argc, char **argv );
+        Client() = default;
+        Client(MpClient* mp_client, FileSystem* filesystem, string config);
+        ~Client() = default;
+        size_t ReadQuery( string query ) override;
+        size_t Send() override;
+        size_t Params( int argc, char **argv ) override;
     private:
-        size_t parse_query( string query );
+        size_t ParseQuery_( string query ) override;
     private:
-        uintptr_t interpreter;
-        mp_client* mp_client;
-        filesystem* filesystem;
-        char* config;
+        MpClient* mp_client_;
+        FileSystem* filesystem_;
+        string config_;
     };
 
 }
