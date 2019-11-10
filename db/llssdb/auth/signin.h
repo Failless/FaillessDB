@@ -9,9 +9,9 @@
 
 class SignIn {
 public:
-    std::string login(std::string login, std::string pass);  // token
+    std::string Login(std::string login, std::string pass);  // token
     explicit SignIn(std::string directory);
-    ~SignIn();
+    ~SignIn() = default;
 private:
     std::string server_db_conn_;
     std::string login_;

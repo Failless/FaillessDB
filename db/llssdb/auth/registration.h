@@ -9,9 +9,9 @@
 
 class Registration {
 public:
-    bool register(std::string login, std::string pass);  // WTF
+    bool Register(std::string login, std::string pass);  // WTF
     explicit Registration(std::string directory);
-    ~Registration();
+    ~Registration() = default;
 private:
     std::string server_db_conn_;
     std::string login_;

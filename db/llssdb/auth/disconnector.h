@@ -9,18 +9,15 @@
 
 class Disconnector {
 public:
-    bool disconnect(std::string token);  // (token)
+    bool Disconnect(std::string token);  // (token)
     explicit Disconnector(std::string directory);
-    ~Disconnector();
+    ~Disconnector() = default;
 private:
     std::string server_db_conn_;
     std::string pid_;
     std::string dir_;
     std::string token_;
-    bool send_msg_to_SM();  // how?
-    bool free_RAM();
-    bool copy_to_HDD();
-    // calling login function
+    bool Send_msg_to_SM();  // how?
 };
 
 #endif //FAILLESS_DISCONNECTOR_H

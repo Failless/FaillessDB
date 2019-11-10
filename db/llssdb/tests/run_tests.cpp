@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 #include "llssdb/tests/test_server.h"
+#include "llssdb/tests/test_auth.h"
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
