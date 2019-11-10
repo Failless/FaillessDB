@@ -26,6 +26,7 @@ public:
   virtual void
   SetResponseFunction(std::function<transfer::Response(transfer::Request &)>
                           &generate_response) = 0;
+  virtual ~TcpServerInterface() = default;
 
 protected:
   Host host;

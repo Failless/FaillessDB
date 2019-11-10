@@ -14,7 +14,7 @@ public:
   TcpServer() = default;
   explicit TcpServer(Host host);
   TcpServer(std::string ip, int port);
-  ~TcpServer() = default;
+  ~TcpServer() override = default;
   void SetConfig(std::string ip, int port) override;
   void Listen() override;
   Host GetSettings() override;
