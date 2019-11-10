@@ -49,7 +49,7 @@ Simple, Fast, Key-Value In-Memory Database
 
 Интерфейс Сетевого клиента на данный момент времени отсуствует.
 Реализация сетевого клиента на уровне структуры класса содержит:
-```с++
+```c++
 class MpClient : public MpClientInterface {
 public:
     explicit MpClient();
