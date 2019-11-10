@@ -20,11 +20,11 @@ struct Host {
 class TcpServerInterface : boost::noncopyable {
 public:
   TcpServerInterface() = default;
-  virtual void setConfig(std::string ip, int port) = 0;
-  virtual void listen() = 0;
-  virtual Host getSettings() = 0;
+  virtual void SetConfig(std::string ip, int port) = 0;
+  virtual void Listen() = 0;
+  virtual Host GetSettings() = 0;
   virtual void
-  setResponseFunction(std::function<transfer::Response(transfer::Request &)>
+  SetResponseFunction(std::function<transfer::Response(transfer::Request &)>
                           &generate_response) = 0;
 
 protected:

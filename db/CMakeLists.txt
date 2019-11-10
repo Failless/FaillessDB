@@ -2,12 +2,12 @@ cmake_minimum_required(VERSION 3.15)
 project(llssdb C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem thread system REQUIRED)
+find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem thread system timer chrono REQUIRED)
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/llssclient")
 
-find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
-find_package(msgpack)
+find_package(msgpack REQUIRED)
+find_package(GTest REQUIRED)
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
 set(GMock_LIBRARY "/usr/local/lib/libgmock.so")
@@ -22,7 +22,7 @@ include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(${GMock_INCLUDE_DIR})
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -std=c++17 -fPIC -no-pie -phtread -lpthread -lboost_system")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -std=c++17 -fPIC -no-pie -pthread -lpthread -lboost_system")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -std=c++17 -fPIC -no-pie -pthread -lpthread -lboost_system -lboost_timer -lboost_chrono -lrt")
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/llssdb/)
 
@@ -41,9 +41,12 @@ file(GLOB HEADERS ${SRC_DIR}/lua/*.h
         ${SRC_DIR}/filesystem/*.h)
 
 file(GLOB TEST_SOURCES ${SRC_DIR}/tests/test_client.cpp
+        ${SRC_DIR}/tests/simple/*.cpp
         ${SRC_DIR}/tests/run_tests.cpp)
 
 file(GLOB TEST_HEADERS ${SRC_DIR}/tests/*.h
+        ${SRC_DIR}/tests/simple/*.hpp
+        ${SRC_DIR}/tests/simple/*.h
         ${SRC_DIR}/tests/*.hpp)
 
 add_executable(runTests ${TEST_SOURCES} ${TEST_HEADERS} ${SOURCES} ${HEADERS})

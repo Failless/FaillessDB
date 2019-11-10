@@ -13,8 +13,14 @@ class Response : boost::noncopyable {
 public:
   Response() = default;
   explicit Response(const Request &request);
+  explicit Response(const engine::Task& task) {
+    data_ = task.data;
+    size_ = task.data_size;
+  }
 
 protected:
+  int8_t *data_;
+  size_t size_;
   boost::uuids::uuid uuid{};
 };
 

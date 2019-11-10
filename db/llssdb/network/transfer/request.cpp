@@ -1,9 +1,14 @@
-//
-// Created by starman on 09.11.2019.
-//
+#include "llssdb/network/transfer/request.h"
 
-#include "request.h"
-failless::db::network::transfer::Request::Request(
-    const boost::uuids::uuid &client_id, std::string token,
-    failless::db::network::transfer::request_type type) {
-}
+namespace failless {
+namespace db {
+namespace network {
+namespace transfer {
+
+Request::Request(const boost::uuids::uuid &client_id, std::string token,
+                 request_type type) {}
+
+} // namespace transfer
+} // namespace network
+} // namespace db
+} // namespace failless

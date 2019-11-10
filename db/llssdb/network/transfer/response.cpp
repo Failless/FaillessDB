@@ -1,3 +1,13 @@
 #include "llssdb/network/transfer/response.h"
-failless::db::network::transfer::Response::Response(
-    const failless::db::network::transfer::Request &request) {}
+
+namespace failless {
+namespace db {
+namespace network {
+namespace transfer {
+
+Response::Response(const Request &request) {}
+
+} // namespace transfer
+} // namespace network
+} // namespace db
+} // namespace failless
