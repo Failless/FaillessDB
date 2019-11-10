@@ -1,5 +1,6 @@
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
         ${CMAKE_CURRENT_SOURCE_DIR}/llssdb/)
+
 include_directories(${SRC_DIR})
 
 file(GLOB SOURCES ${SRC_DIR}/lua/*.cpp
@@ -28,7 +29,6 @@ file(GLOB TEST_HEADERS ${SRC_DIR}/tests/*.h
 
 add_executable(run-db-tests ${TEST_SOURCES} ${TEST_HEADERS} ${SOURCES} ${HEADERS})
 set_target_properties(run-db-tests PROPERTIES LINKER_LANGUAGE CXX)
-
 target_link_libraries(run-db-tests ${GTEST_BOTH_LIBRARIES})
 target_link_libraries(run-db-tests ${GMock_BOTH_LIBRARIES})
 target_link_libraries(run-db-tests ${CMAKE_THREAD_LIBS_INIT})
