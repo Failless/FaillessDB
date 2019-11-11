@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(failless C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem thread system REQUIRED)
+find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono thread system REQUIRED)
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/llssclient")
 
 find_package(GTest REQUIRED)

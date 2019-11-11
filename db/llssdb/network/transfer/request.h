@@ -25,6 +25,8 @@ public:
   Request() = default;
   Request(const boost::uuids::uuid &client_id, std::string token,
           request_type type);
+  ~Request() = default;
+
   void SetData(int8_t *data, size_t size) {
     data_ = data;
     size_ = size;
@@ -39,7 +41,6 @@ public:
           boost::chrono::microseconds(ms.time_since_epoch().count())
     };
   }
-  ~Request() = default;
 
 protected:
   int8_t *data_ = nullptr;

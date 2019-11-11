@@ -1,5 +1,5 @@
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/llssdb/)
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/db/
+        ${CMAKE_CURRENT_SOURCE_DIR}/db/llssdb/)
 
 include_directories(${SRC_DIR})
 

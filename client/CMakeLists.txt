@@ -1,5 +1,5 @@
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/llssclient/)
+set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/client/
+        ${CMAKE_CURRENT_SOURCE_DIR}/client/llssclient/)
 
 include_directories(${SRC_DIR})
 
