@@ -21,6 +21,7 @@ network::transfer::Response testFunction(network::transfer::Request &request) {
 
   return network::transfer::Response(request.GetData());
 }
+/*
 
 TEST(ServerTest, SetConnection) {
   auto server =
@@ -61,6 +62,7 @@ TEST_F(TestTcpServerImpl, SendData) {
   EXPECT_EQ(data, set_data);
 //  tcp_server->Listen();
 }
+*/
 
 TEST(ServerTest, GetData) {}
 

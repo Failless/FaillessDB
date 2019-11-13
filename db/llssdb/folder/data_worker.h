@@ -1,39 +1,46 @@
 #ifndef LLSSDB_FOLDER_DATA_WORKER_H_
 #define LLSSDB_FOLDER_DATA_WORKER_H_
 
-#include <boost/container/set.hpp>
+#include <set>
 #include <string>
-
-// TODO(EgorBedov): consider making interface and then template
-
-using std::string;
 
 
 class IDataWorker {
 public:
-    IDataWorker() = default;
-    ~IDataWorker() = default;
-    virtual int Create() = 0;
-    virtual int Read() = 0;
-    virtual int Modify() = 0;
-    virtual int Remove() = 0;
+    explicit IDataWorker() :
+        directory_(SetDirectory()),
+        length_(SetLength())
+//        dataset_(SetDataSet())
+        {}
+    virtual ~IDataWorker() = default;
+    virtual bool Create() = 0;
+    virtual bool Read() = 0;
+    virtual bool Update() = 0;
+    virtual bool Delete() = 0;
+
+private:
+    virtual std::string SetDirectory() {
+        return "/dev/null"; // TODO: remove me
+    }
+    virtual int32_t SetLength() {
+        return 0;
+    }
+//    virtual std::set<int, std::string> SetDataSet() {} // TODO: nah
+
+    std::string directory_{};
+    int length_ = 0;
+    std::set<int, std::string> dataset_{};
 };
 
 
 class DataWorker : public IDataWorker {
 public:
-    DataWorker() = default;
-    explicit DataWorker(string directory);
-    ~DataWorker() = default;
+    ~DataWorker() override = default;
 
-    int Create() override;
-    int Read() override;
-    int Modify() override;
-    int Remove() override;
-private:
-    string directory_{};
-    int length_ = 0;
-    boost::container::set<int, string> dataset_{};
+    bool Create() override;
+    bool Read() override;
+    bool Update() override;
+    bool Delete() override;
 };
 
 #endif // LLSSDB_FOLDER_DATA_WORKER_H_

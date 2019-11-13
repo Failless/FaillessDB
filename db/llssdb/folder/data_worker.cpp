@@ -3,24 +3,20 @@
 #include <iostream>
 #include <utility>
 
-DataWorker::DataWorker(std::string directory) : directory_(std::move(directory)) {}
 
-int DataWorker::Create() {
+bool DataWorker::Create() {
     return 0;
 }
 
-int DataWorker::Read() {
+bool DataWorker::Read() {
     return 0;
 }
 
-int DataWorker::Modify() {
+bool DataWorker::Update() {
     return 0;
 }
 
-int DataWorker::Remove() {
+bool DataWorker::Delete() {
 
     return 0;
 }
-
-//DataWorker::DataWorker(string directory) : directory_(directory) {}
-

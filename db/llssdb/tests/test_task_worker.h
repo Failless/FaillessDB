@@ -14,16 +14,16 @@ using ::testing::AtLeast;
 
 class MockTaskWorker : public ITaskWorker {
 public:
-    explicit MockTaskWorker(DataWorker *_data_worker) : ITaskWorker(_data_worker) {};
+    MockTaskWorker() : ITaskWorker() {};
     MOCK_METHOD0(IsEmpty, bool());
     MOCK_METHOD0(CompleteTask, int());
 };
 
 TEST(ITaskManager, AddTask) {
-    auto *dw = new DataWorker;
-    MockTaskWorker mockTaskWorker(dw);
+    MockTaskWorker mockTaskWorker;
     EXPECT_CALL(mockTaskWorker, IsEmpty()).Times(AtLeast(1));
     EXPECT_CALL(mockTaskWorker, CompleteTask()).Times(AtLeast(1));
+
     Task temp_task(Task::CREATE, "trash");
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }

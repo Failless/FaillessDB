@@ -1,9 +1,10 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "llssdb/tests/test_auth.h"
+#include "llssdb/tests/test_data_worker.h"
 #include "llssdb/tests/test_server.h"
 #include "llssdb/tests/test_task_worker.h"
 #include "llssdb/tests/test_server_manager.h"
-#include "llssdb/tests/test_auth.h"
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

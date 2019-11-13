@@ -7,6 +7,9 @@ TaskWorker (TW)
 #ifndef LLSSDB_FOLDER_TASK_WORKER_H
 #define LLSSDB_FOLDER_TASK_WORKER_H
 
+// TODO: what's the relationship between TaskWorker and DataWorker?
+// TW should be higher so it will create DW, not being created after
+
 
 #include "task.h"
 #include "data_worker.h"
@@ -16,8 +19,8 @@ TaskWorker (TW)
 
 class ITaskWorker {
 public:
-    explicit ITaskWorker(DataWorker *_data_worker) : data_worker_(_data_worker) {};
-//    TaskWorker() = default;
+//    explicit ITaskWorker(DataWorker *_data_worker) : data_worker_(_data_worker) {};
+    ITaskWorker() = default;
     virtual ~ITaskWorker() = default;
 
     int AddTask(const Task& task) {
@@ -30,12 +33,15 @@ private:
     virtual int CompleteTask() = 0;
 
     std::queue<Task> task_queue_;
-    DataWorker* data_worker_;
+    DataWorker data_worker_;
 };
 
 
 class TaskWorker : public ITaskWorker {
+public:
     ~TaskWorker() override = default;
+
+private:
     bool IsEmpty() override {
         return true;
     }
