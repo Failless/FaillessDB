@@ -1,3 +1,4 @@
+/*
 #include "llssdb/folder/data_worker.h"
 
 #include <iostream>
@@ -20,3 +21,4 @@ bool DataWorker::Delete() {
 
     return 0;
 }
+*/

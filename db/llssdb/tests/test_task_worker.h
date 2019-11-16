@@ -5,6 +5,7 @@
 #include <gtest/gtest.h>
 
 #include "llssdb/folder/task.h"
+#include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
 
 namespace failless::db::tests {
@@ -12,45 +13,52 @@ namespace failless::db::tests {
 using ::testing::_;
 using ::testing::AtLeast;
 
-class MockTaskWorker : public ITaskWorker {
+class MockTaskWorker : public TaskWorker {
 public:
-    MockTaskWorker() : ITaskWorker() {};
+    MockTaskWorker() : TaskWorker() {};
     MOCK_METHOD0(IsEmpty, bool());
-    MOCK_METHOD0(Create, void());
-    MOCK_METHOD0(Read, void());
-    MOCK_METHOD0(Update, void());
-    MOCK_METHOD0(Delete, void());
+    MOCK_METHOD1(Create, bool(const u_int8_t& data));
+    MOCK_METHOD1(Read, bool(const u_int8_t& data));
+    MOCK_METHOD1(Update, bool(const u_int8_t& data));
+    MOCK_METHOD1(Delete, bool(const u_int8_t& data));
 };
 
-TEST(ITaskManager, Create) {
-    MockTaskWorker mockTaskWorker;
-    EXPECT_CALL(mockTaskWorker, Create()).Times(AtLeast(1));
+TEST(TaskManager, Create) {
+    MockFileSystem mockFileSystem;
+    const u_int8_t& data = 0;
+    int key = 0;
+    Task temp_task(Task::CREATE, data);
 
-    Task temp_task(Task::CREATE, 0);
-    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+//    EXPECT_CALL(TaskWorker, Create(data)).Times(AtLeast(1));
+    TaskWorker taskWorker(&mockFileSystem);
+    EXPECT_CALL(mockFileSystem, Set(key, data)).Times(AtLeast(1));
+    EXPECT_EQ(TaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }
 
-TEST(ITaskManager, Read) {
+TEST(TaskManager, Read) {
     MockTaskWorker mockTaskWorker;
-    EXPECT_CALL(mockTaskWorker, Read()).Times(AtLeast(1));
+    const u_int8_t& data = 0;
+    EXPECT_CALL(mockTaskWorker, Read(data)).Times(AtLeast(1));
 
-    Task temp_task(Task::READ, 0);
+    Task temp_task(Task::READ, data);
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }
 
 TEST(ITaskManager, Update) {
     MockTaskWorker mockTaskWorker;
-    EXPECT_CALL(mockTaskWorker, Update()).Times(AtLeast(1));
+    const u_int8_t& data = 0;
+    EXPECT_CALL(mockTaskWorker, Update(data)).Times(AtLeast(1));
 
-    Task temp_task(Task::UPDATE, 0);
+    Task temp_task(Task::UPDATE, data);
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }
 
 TEST(ITaskManager, Delete) {
     MockTaskWorker mockTaskWorker;
-    EXPECT_CALL(mockTaskWorker, Delete()).Times(AtLeast(1));
+    const u_int8_t& data = 0;
+    EXPECT_CALL(mockTaskWorker, Delete(data)).Times(AtLeast(1));
 
-    Task temp_task(Task::DELETE, 0);
+    Task temp_task(Task::DELETE, data);
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }
 

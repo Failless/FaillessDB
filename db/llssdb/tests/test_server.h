@@ -1,3 +1,4 @@
+/*
 #ifndef LLSSDB_TESTS_TEST_SERVER_H_
 #define LLSSDB_TESTS_TEST_SERVER_H_
 
@@ -72,3 +73,4 @@ TEST(ServerTest, Credentionals) {}
 } // namespace failless
 
 #endif // LLSSDB_TESTS_TEST_SERVER_H_
+*/
