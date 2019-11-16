@@ -9,20 +9,27 @@
 using ::testing::_;
 using ::testing::AtLeast;
 
-class MockTaskWorker : public Authorization {
+class MockTaskWorker : public IAuthorization {
 public:
-//    explicit MockTaskWorker() : IAuthorization() {};
-    MOCK_METHOD2(Reg, bool(std::string login, std::string pass));
-    // MOCK_METHOD2(Login, bool(std::string login, std::string pass));
-    // MOCK_METHOD2(Disconnect, bool(std::string login, std::string pass));
+    MOCK_METHOD1(CheckCollisions, bool(std::string login));
+    MOCK_METHOD2(Registration, bool(std::string login, std::string pass));
+    MOCK_METHOD2(SignIn, bool(std::string login, std::string pass));
 };
 
-TEST(IAuthorization, Reg) {
+TEST(IAuthorization, Registration) {
     MockTaskWorker mockTaskWorker;
     std::string login = "login";
     std::string pass = "pass";
-    EXPECT_CALL(mockTaskWorker, Reg(login, pass)).Times(AtLeast(1));
+    EXPECT_CALL(mockTaskWorker, Registration(login, pass)).Times(AtLeast(1));
     EXPECT_EQ(mockTaskWorker.Test(login, pass), EXIT_SUCCESS);
+}
+
+TEST(IAuthorization, SignIn) {
+    MockTaskWorker mockTaskWorker;
+    std::string login = "login";
+    std::string pass = "pass";
+    EXPECT_CALL(mockTaskWorker, SignIn(login, pass)).Times(AtLeast(1));
+    EXPECT_EQ(mockTaskWorker.CheckCollisions(login), EXIT_SUCCESS);
 }
 
 #endif

@@ -1,35 +1,21 @@
 #ifndef LLSSDB_AUTH_AUTHORIZATION_H_
 #define LLSSDB_AUTH_AUTHORIZATION_H_
 
-#include "registration.h"
-#include "signin.h"
-#include <string>
-
-class IAuthorization {
-public:
-  virtual bool Reg(std::string login, std::string pass) = 0;
-  virtual bool Login(std::string login, std::string pass) = 0;
-  explicit IAuthorization() = default;
-  ~IAuthorization() = default;
-
-  int Test(std::string login, std::string pass) {
-    Reg(std::move(login), std::move(pass));
-    return EXIT_SUCCESS;
-  }
-};
+#include "llssdb/auth/iauthorization.h"
 
 class Authorization : public IAuthorization {
 public:
-  Authorization() = default;
-  explicit Authorization(std::string directory);
-  ~Authorization() = default;
-
-  bool Reg(std::string login, std::string pass) override;
-  bool Login(std::string login, std::string pass) override;
+    Authorization() = default;
+    explicit Authorization(std::string directory);
+    bool Registration(std::string login, std::string pass) override;
+    bool SignIn(std::string login, std::string pass) override;
+    ~Authorization() = default;
 
 private:
-  std::string server_db_conn_{};
-  // Registration reg_;
-  // SignIn sign_;
+    std::map<std::string, struct UserInfo> Users;
+    std::string Hasher(std::string login);
+    bool IsAuth(std::string login);
+    bool CheckCollisions(std::string login);
+// add tire_
 };
 #endif // LLSSDB_AUTH_AUTHORIZATION_H_

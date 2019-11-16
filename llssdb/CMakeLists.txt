@@ -21,5 +21,5 @@ file(GLOB HEADERS ${SRC_DIR}/lua/*.h
         ${SRC_DIR}/network/transfer/*.h
         ${SRC_DIR}/filesystem/*.h)
 
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} auth/user_info.h auth/iauthorization.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
