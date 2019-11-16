@@ -9,7 +9,7 @@ namespace db {
 namespace network {
 namespace transfer {
 
-class Response : boost::noncopyable {
+class Response {
 public:
   Response() = default;
   explicit Response(const Request &request);
