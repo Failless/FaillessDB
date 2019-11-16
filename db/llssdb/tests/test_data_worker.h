@@ -26,14 +26,14 @@ public:
 //    MOCK_METHOD0(SetDataSet, std::set<int, std::string>());
 };
 
-TEST(IDataWorker, Create) {
+/*TEST(IDataWorker, Create) {
     MockDataWorker mockDataWorker;
     EXPECT_CALL(mockDataWorker, SetDirectory()).Times(AtLeast(1));
     EXPECT_CALL(mockDataWorker, SetLength()).Times(AtLeast(1));
 //    EXPECT_CALL(mockDataWorker, SetDataSet()).Times(AtLeast(1));
 
     TaskWorker tw;
-}
+}*/
 
 } // namespace failless
 

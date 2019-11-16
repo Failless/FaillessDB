@@ -19,7 +19,6 @@ ServerManager (SM) принимает три вида запроса:
 #define LLSSDB_ENGINE_SERVER_MANAGER_H_
 
 #include "llssdb/folder/task.h"
-#include "llssdb/folder/node.h"
 #include <map>
 #include <queue>
 #include <string>
@@ -56,7 +55,6 @@ private:
 
   static ServerManager *sm_;
   std::queue<string> request_queue_;
-  std::map<int, Node *> active_nodes_;
 };
 } // namespace engine
 } // namespace db
