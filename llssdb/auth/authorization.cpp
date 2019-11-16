@@ -20,22 +20,23 @@ bool Authorization::IsAuth(std::string login) {
 }
 
 bool Authorization::Registration(std::string login, std::string pass) {
-//    auto cli_id = Users[login].client_id;
-//    if (cli_id) {
-//        return true;
-//    } else {
-//        return false;
-//    }
-    return false;
+    if (CheckCollisions(login)) {
+        return false;
+    }
+    UserInfo *User = new UserInfo;
+    User->login = login;
+    User->pass_hash = Hasher(login);
+    // User->client_id; User->dir; toDO ???
+    Users[login] = *User;
+    return true;
 }
 
 bool Authorization::CheckCollisions(std::string login) {
-//    if (Users.count(login)){
-//        return false;
-//    } else {
-//        return true;
-//    }
-    return false;
+    if (Users.count(login)){
+        return true;  // such login already in structs
+    } else {
+        return false;
+    }
 }
 
 bool Authorization::SignIn(std::string login, std::string pass) {

@@ -24,18 +24,10 @@ TEST(IAuthorization, Registration) {
     EXPECT_EQ(iauth.Test(login, pass), EXIT_SUCCESS);
 }
 
-//TEST(IAuthorization, SignIn) {
-//    MockTaskWorker mockTaskWorker;
-//    std::string login = "login";
-//    std::string pass = "pass";
-//    EXPECT_CALL(mockTaskWorker, SignIn(login, pass)).Times(AtLeast(1));
-//    EXPECT_EQ(mockTaskWorker.CheckCollisions(login), EXIT_SUCCESS);
-//}
-
 class MockAuth : public Authorization {
 public:
     MOCK_METHOD2(Registration, bool(std::string login, std::string pass));
-    MOCK_METHOD2(SignIn, bool(std::string login, std::string pass));
+    // MOCK_METHOD2(SignIn, bool(std::string login, std::string pass));
     MOCK_METHOD1(CheckCollisions, bool(std::string login));
 };
 
@@ -43,6 +35,7 @@ TEST(Authorization, SignIn) {
     MockAuth auth;
     std::string login = "login";
     std::string pass = "pass";
+
     EXPECT_CALL(auth, CheckCollisions(login)).Times(AtLeast(1));
     EXPECT_EQ(auth.SignIn(login, pass), EXIT_SUCCESS);
 }
