@@ -43,3 +43,7 @@ bool Authorization::SignIn(std::string login, std::string pass) {
     return false;
 }
 
+Authorization::Authorization(std::string directory) {
+
+}
+

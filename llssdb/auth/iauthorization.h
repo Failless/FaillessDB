@@ -15,7 +15,7 @@ class IAuthorization : boost::noncopyable {
 public:
     virtual bool Registration(std::string login, std::string pass) = 0;
     virtual bool SignIn(std::string login, std::string pass) = 0;
-    explicit IAuthorization() = default;
+    IAuthorization() = default;
     ~IAuthorization() = default;
 
     // mock_test1

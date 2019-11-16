@@ -15,7 +15,7 @@ private:
     std::map<std::string, struct UserInfo> Users;
     std::string Hasher(std::string login);
     bool IsAuth(std::string login);
-    bool CheckCollisions(std::string login);
+    virtual bool CheckCollisions(std::string login);
 // add tire_
 };
 #endif // LLSSDB_AUTH_AUTHORIZATION_H_
