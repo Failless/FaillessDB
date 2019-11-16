@@ -18,7 +18,6 @@ namespace db {
 namespace tests {
 
 network::transfer::Response testFunction(network::transfer::Request &request) {
-
   return network::transfer::Response(request.GetData());
 }
 
@@ -29,8 +28,9 @@ TEST(ServerTest, SetConnection) {
   std::string ip = "127.0.0.1";
   server->SetConfig(ip, port);
   network::transfer::Request request{};
-  std::function<network::transfer::Response()> foo =
-      [&](network::transfer::Request &) -> network::transfer::Response { return testFunction(request); };
+
+  std::function<network::transfer::Response(network::transfer::Request &)> foo =
+      [&](network::transfer::Request &) { return testFunction(request); };
   server->SetResponseFunction(foo);
   auto host = server->GetSettings();
   EXPECT_EQ(host.ip, "127.0.0.1");

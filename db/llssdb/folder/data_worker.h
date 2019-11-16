@@ -29,7 +29,7 @@ private:
 
     std::string directory_{};
     int length_ = 0;
-    std::set<int, std::string> dataset_{};
+    std::set<int, std::string> dataset_;
 };
 
 
