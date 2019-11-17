@@ -47,7 +47,7 @@ target_link_libraries(failless-cli llsscli)
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
-######llsscli test sources#######
+######llssdb test sources#######
 file(GLOB TEST_DB_SOURCES ${TESTS_DIR}/tests_db/*.cpp
         ${TESTS_DIR}/tests_db/simple/*.cpp
         ${TESTS_DIR}/tests_db/run_tests.cpp)
@@ -57,7 +57,7 @@ file(GLOB TEST_DB_HEADERS ${TESTS_DIR}/tests_db/*.h
         ${TESTS_DIR}/tests_db/simple/*.h
         ${TESTS_DIR}/tests_db/*.hpp)
 
-######llssdb test sources########
+######llsscli test sources########
 file(GLOB TEST_CLI_SOURCES ${TESTS_DIR}/tests_cli/test_client.cpp
         ${TESTS_DIR}/tests_cli/run_tests.cpp)
 

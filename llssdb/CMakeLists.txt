@@ -10,6 +10,7 @@ file(GLOB SOURCES ${SRC_DIR}/lua/*.cpp
         ${SRC_DIR}/auth/*.cpp
         ${SRC_DIR}/engine/*.cpp
         ${SRC_DIR}/network/*.cpp
+        ${SRC_DIR}/common/*.cpp
         ${SRC_DIR}/network/transfer/*.cpp
         ${SRC_DIR}/filesystem/*.cpp)
 
@@ -18,6 +19,7 @@ file(GLOB HEADERS ${SRC_DIR}/lua/*.h
         ${SRC_DIR}/auth/*.h
         ${SRC_DIR}/engine/*.h
         ${SRC_DIR}/network/*.h
+        ${SRC_DIR}/common/*.h
         ${SRC_DIR}/network/transfer/*.h
         ${SRC_DIR}/filesystem/*.h)
 

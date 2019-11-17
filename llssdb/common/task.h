@@ -7,7 +7,7 @@
 
 namespace failless {
 namespace db {
-namespace engine {
+namespace common {
 
 struct Task {
     size_t data_size = 0;
@@ -18,7 +18,7 @@ struct Task {
     bool operator==(const Task &r) const;
 };
 
-}  // namespace engine
+}  // namespace common
 }  // namespace db
 }  // namespace failless
 

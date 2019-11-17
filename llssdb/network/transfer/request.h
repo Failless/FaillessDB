@@ -6,12 +6,11 @@
 #include <boost/uuid/uuid.hpp>
 #include <cstdint>
 #include <string>
-#include "llssdb/engine/task.h"
+#include "llssdb/common/task.h"
 
 namespace failless {
 namespace db {
 namespace network {
-namespace transfer {
 
 enum request_type {
     SELECT = 0,
@@ -45,7 +44,6 @@ class Request : boost::noncopyable {
     request_type type_{};
 };
 
-}  // namespace transfer
 }  // namespace network
 }  // namespace db
 }  // namespace failless

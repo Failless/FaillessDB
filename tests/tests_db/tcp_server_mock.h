@@ -10,7 +10,7 @@ namespace tests {
 
 class MockTcpServer : public network::TcpServer {
  public:
-    MOCK_METHOD1(PushTask_, void(engine::Task task));
+    MOCK_METHOD1(PushTask_, void(common::Task task));
 };
 
 }  // namespace tests

@@ -6,7 +6,6 @@
 namespace failless {
 namespace db {
 namespace network {
-namespace transfer {
 
 class Response {
  public:
@@ -23,7 +22,6 @@ class Response {
     boost::uuids::uuid uuid{};
 };
 
-}  // namespace transfer
 }  // namespace network
 }  // namespace db
 }  // namespace failless

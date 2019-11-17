@@ -2,14 +2,14 @@
 #define LLSSDB_NETWORK_TCP_SERVER_H_
 
 #include <boost/lockfree/queue.hpp>
-#include "llssdb/engine/task.h"
+#include "llssdb/common/task.h"
 #include "llssdb/network/tcp_server_interface.h"
 
 namespace failless {
 namespace db {
 namespace network {
 
-class TcpServer : public TcpServerInterface {
+class TcpServer : public ITcpServer {
  public:
     TcpServer() = default;
     explicit TcpServer(Host host);
@@ -19,11 +19,11 @@ class TcpServer : public TcpServerInterface {
     void Listen() override;
     Host GetSettings() override;
     void SetResponseFunction(
-        std::function<transfer::Response(transfer::Request &)> &generate_response) override;
+        std::function<Response(Request &)> &generate_response) override;
 
  protected:
-    void PushTask_(engine::Task task);
-    boost::lockfree::queue<engine::Task> *queue_ = nullptr;
+    void PushTask_(common::Task task);
+    boost::lockfree::queue<common::Task> *queue_ = nullptr;
     Host host_{};
 };
 
