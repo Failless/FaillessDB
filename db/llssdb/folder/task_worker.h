@@ -40,10 +40,7 @@ protected:
 
 class TaskWorker : public ITaskWorker {
 public:
-    explicit ITaskWorker(FileSystem* _fs) :
-      task_queue_(nullptr),
-      data_queue_(nullptr),
-      fs(_fs) {}
+    explicit TaskWorker(FileSystem* _fs) : ITaskWorker(_fs) {};
     ~TaskWorker() override = default;
 
     int AddTask(const Task& task) override {

@@ -11,11 +11,10 @@
 namespace failless::db::tests {
 
 using ::testing::_;
-using ::testing::AtLeast;
 
 class MockTaskWorker : public TaskWorker {
 public:
-    MockTaskWorker() : TaskWorker() {};
+    MockTaskWorker(FileSystem* _fs) : TaskWorker(_fs) {};
     MOCK_METHOD0(IsEmpty, bool());
     MOCK_METHOD1(Create, bool(const u_int8_t& data));
     MOCK_METHOD1(Read, bool(const u_int8_t& data));
@@ -24,42 +23,87 @@ public:
 };
 
 TEST(TaskManager, Create) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    u_int8_t data = 0;
+    Task temp_task(Task::CREATE, data);
+
+    EXPECT_CALL(mockTaskWorker, Create(data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+}
+
+
+TEST(TaskManager, Read) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    u_int8_t data = 0;
+    Task temp_task(Task::READ, data);
+
+    EXPECT_CALL(mockTaskWorker, Read(data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+}
+
+TEST(TaskManager, Update) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    u_int8_t data = 0;
+    Task temp_task(Task::UPDATE, data);
+
+    EXPECT_CALL(mockTaskWorker, Update(data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+}
+
+TEST(TaskManager, Delete) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    u_int8_t data = 0;
+    Task temp_task(Task::DELETE, data);
+
+    EXPECT_CALL(mockTaskWorker, Delete(data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+}
+
+TEST(TaskManager, CREATE_Calling_Set) {
     MockFileSystem mockFileSystem;
-    const u_int8_t& data = 0;
+    u_int8_t data = 0;
     int key = 0;
     Task temp_task(Task::CREATE, data);
 
-//    EXPECT_CALL(TaskWorker, Create(data)).Times(AtLeast(1));
+    EXPECT_CALL(mockFileSystem, Set(key, data)).Times(1);
+
     TaskWorker taskWorker(&mockFileSystem);
-    EXPECT_CALL(mockFileSystem, Set(key, data)).Times(AtLeast(1));
-    EXPECT_EQ(TaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+    taskWorker.AddTask(temp_task);
 }
 
-TEST(TaskManager, Read) {
-    MockTaskWorker mockTaskWorker;
-    const u_int8_t& data = 0;
-    EXPECT_CALL(mockTaskWorker, Read(data)).Times(AtLeast(1));
-
+TEST(TaskManager, READ_Calling_Get) {
+    MockFileSystem mockFileSystem;
+    u_int8_t data = 0;
+    int key = 0;
     Task temp_task(Task::READ, data);
-    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+
+    EXPECT_CALL(mockFileSystem, Get(key)).Times(1);
+
+    TaskWorker taskWorker(&mockFileSystem);
+    taskWorker.AddTask(temp_task);
 }
 
-TEST(ITaskManager, Update) {
-    MockTaskWorker mockTaskWorker;
-    const u_int8_t& data = 0;
-    EXPECT_CALL(mockTaskWorker, Update(data)).Times(AtLeast(1));
-
+TEST(TaskManager, UPDATE_Calling_Set) {
+    MockFileSystem mockFileSystem;
+    u_int8_t data = 0;
+    int key = 0;
     Task temp_task(Task::UPDATE, data);
-    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+
+    EXPECT_CALL(mockFileSystem, Set(key, data)).Times(1);
+
+    TaskWorker taskWorker(&mockFileSystem);
+    taskWorker.AddTask(temp_task);
 }
 
-TEST(ITaskManager, Delete) {
-    MockTaskWorker mockTaskWorker;
-    const u_int8_t& data = 0;
-    EXPECT_CALL(mockTaskWorker, Delete(data)).Times(AtLeast(1));
-
+TEST(TaskManager, DELETE_Calling_Remove) {
+    MockFileSystem mockFileSystem;
+    u_int8_t data = 0;
     Task temp_task(Task::DELETE, data);
-    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+
+    EXPECT_CALL(mockFileSystem, Remove(data)).Times(1);
+
+    TaskWorker taskWorker(&mockFileSystem);
+    taskWorker.AddTask(temp_task);
 }
 
 } // namespace failless::db::tests

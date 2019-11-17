@@ -18,11 +18,44 @@ using ::testing::AtLeast;
 class MockFileSystem : public FileSystem {
 public:
   MockFileSystem() : FileSystem() {};
-  MOCK_METHOD1(Get, u_int8_t(int key));
+  MOCK_METHOD1(Get, bool(int key));
   MOCK_METHOD2(Set, bool(int key, u_int8_t data));
-  MOCK_METHOD1(GetRange, u_int8_t(int key));
+  MOCK_METHOD1(GetRange, bool(int key));
   MOCK_METHOD1(Remove, bool(int key));
 };
+
+TEST(FileSystem, Get) {
+    MockFileSystem mockFileSystem;
+    int key = 0;
+
+    EXPECT_CALL(mockFileSystem, Get(key)).Times(1);
+    mockFileSystem.Get(key);
+}
+
+TEST(FileSystem, Set) {
+    MockFileSystem mockFileSystem;
+    int key = 0;
+    u_int8_t data = 0;
+
+    EXPECT_CALL(mockFileSystem, Set(key, data)).Times(1);
+    mockFileSystem.Set(key, data);
+}
+
+TEST(FileSystem, GetRange) {
+    MockFileSystem mockFileSystem;
+    int key = 0;
+
+    EXPECT_CALL(mockFileSystem, GetRange(key)).Times(1);
+    mockFileSystem.GetRange(key);
+}
+
+TEST(FileSystem, Remove) {
+    MockFileSystem mockFileSystem;
+    int key = 0;
+
+    EXPECT_CALL(mockFileSystem, Remove(key)).Times(1);
+    mockFileSystem.Remove(key);
+}
 
 }
 

@@ -15,19 +15,6 @@ using ::testing::DoAll;
 using ::testing::Return;
 using ::testing::SetArgPointee;
 
-using engine::ServerManager;
-
-class MockServerManager : public ServerManager {
-public:
-//    MockServerManager() { Instance(); };
-    MOCK_METHOD0(Instance, void());
-};
-
-TEST(NodeTest, TestCall) {
-//    MockServerManager mockServerManager;
-//    EXPECT_CALL(mockNode, TestCall()).Times(AtLeast(1));
-//    EXPECT_TRUE(engine::ServerManager::Instance()->TestTest());
-}
 
 } // namespace failless::db::tests
 
