@@ -1,22 +1,14 @@
 
 #include "server_manager.h"
 
-#include <iostream>
-#include <queue>
-#include <string>
-#include <vector>
-
-using std::queue;
-using std::string;
-using std::vector;
 namespace failless {
 namespace db {
 namespace engine {
 ServerManager* ServerManager::sm_;
 
 }
-} // namespace llssdb
-} // namespace failless
+}  // namespace db
+}  // namespace failless
 
 // ServerManager::~ServerManager() {
 //    for ( auto & active_node : active_nodes_ ) {

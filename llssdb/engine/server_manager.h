@@ -1,28 +1,11 @@
-/*
- * Singleton
- *
-ServerManager (SM) принимает три вида запроса:
-    1 - На создание ноды:
-        Сам создаёт ноду
-    2 - На CRUD:
-        Посылает запрос дальше на ноду
-    3 - На удаление ноды:
-        Посылает запрос на ноду
-        Удаляет из вектора рабочих нод
-
-    Работают два потока:
-     Один принимает и добавляет в очередь реквест
-     Второй следит за наполнением очереди, парсит и раздает запросы
-*/
-
 #ifndef LLSSDB_ENGINE_SERVER_MANAGER_H_
 #define LLSSDB_ENGINE_SERVER_MANAGER_H_
 
-#include "folder/node.h"
-#include "folder/task.h"
 #include <map>
 #include <queue>
 #include <string>
+#include "llssdb/folder/node.h"
+#include "llssdb/folder/task.h"
 
 namespace failless {
 namespace db {
@@ -31,7 +14,7 @@ namespace engine {
 using std::string;
 
 class ServerManager {
-public:
+ public:
     static ServerManager *Instance() {
         if (!sm_) {
             sm_ = new ServerManager;
@@ -45,7 +28,8 @@ public:
 
     int GetRequest(const string &request);
     int SendResponse(const string &response);
-private:
+
+ private:
     ServerManager() { Instance(); }
 
     int HandleRequest();
@@ -54,12 +38,12 @@ private:
     void KillNode();
     void SendTask(const Task &task);
 
-  static ServerManager *sm_;
-  std::queue<string> request_queue_;
-  std::map<int, Node *> active_nodes_;
+    static ServerManager *sm_;
+    std::queue<string> request_queue_;
+    std::map<int, Node *> active_nodes_;
 };
-} // namespace engine
-} // namespace llssdb
-} // namespace failless
+}  // namespace engine
+}  // namespace db
+}  // namespace failless
 
-#endif // LLSSDB_ENGINE_SERVER_MANAGER_H_
+#endif  // LLSSDB_ENGINE_SERVER_MANAGER_H_

@@ -1,5 +1,5 @@
-#ifndef FAILLESS_NETWORK_MP_CLIENT_INTERFACE_H_
-#define FAILLESS_NETWORK_MP_CLIENT_INTERFACE_H_
+#ifndef LLSSCLI_NETWORK_MP_CLIENT_INTERFACE_H_
+#define LLSSCLI_NETWORK_MP_CLIENT_INTERFACE_H_
 
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/core/noncopyable.hpp>
@@ -33,4 +33,4 @@ protected:
 } // namespace llsscli
 } // namespace failless
 
-#endif // FAILLESS_NETWORK_MP_CLIENT_INTERFACE_H_
+#endif // LLSSCLI_NETWORK_MP_CLIENT_INTERFACE_H_

@@ -1,16 +1,12 @@
-#ifndef LLSSCLIENT_FILESYSTEM_FILESYSTEM_H_
-#define LLSSCLIENT_FILESYSTEM_FILESYSTEM_H_
+#ifndef LLSSCLI_FILESYSTEM_FILESYSTEM_H_
+#define LLSSCLI_FILESYSTEM_FILESYSTEM_H_
 
-#include <cstddef>
-#include <cstdint>
 #include <string>
 
 namespace failless::client::filesystem {
 
-using std::string;
-
 class FileSystemInterface {
-public:
+ public:
     FileSystemInterface() = default;
     ~FileSystemInterface() = default;
 
@@ -20,18 +16,19 @@ public:
 };
 
 class FileSystem : public FileSystemInterface {
-public:
-    explicit FileSystem(string file_name);
-
+ public:
+    FileSystem() = default;
+    explicit FileSystem(std::string file_name);
     ~FileSystem() = default;
 
     size_t ReadFile(uintptr_t data) override;
 
     size_t WriteFile(uintptr_t data) override;
 
-private:
-    string file_name_;
+ private:
+    std::string file_name_;
 };
-}  // failless::llsscli::filesystem
 
-#endif // LLSSCLIENT_FILESYSTEM_FILESYSTEM_H_
+}  // namespace failless::client::filesystem
+
+#endif  // LLSSCLI_FILESYSTEM_FILESYSTEM_H_

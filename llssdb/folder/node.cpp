@@ -1,4 +1,4 @@
-#include "node.h"
+#include "llssdb/folder/node.h"
 /*
 #include <utility>
 
@@ -8,7 +8,4 @@ Node::Node(std::string directory) :
 */
 #include "node.h"
 
-bool Node::TestCall() {
-    return true;
-}
-
+bool Node::TestCall() { return true; }

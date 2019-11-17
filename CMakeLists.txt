@@ -43,7 +43,7 @@ target_link_libraries(failless-server llssdb)
 
 # compile client
 add_executable(failless-cli ${CLIENT_SRC_LIST})
-target_link_libraries(failless-cli llssclient)
+target_link_libraries(failless-cli llsscli)
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
@@ -71,7 +71,7 @@ target_link_libraries(run-cli-tests ${GMock_BOTH_LIBRARIES})
 target_link_libraries(run-cli-tests ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(run-cli-tests ${Boost_LIBRARIES})
 target_link_libraries(run-cli-tests ${msgpack_LIBRARIES})
-target_link_libraries(run-cli-tests llssclient)
+target_link_libraries(run-cli-tests llsscli)
 
 add_executable(run-db-tests ${TEST_DB_SOURCES} ${TEST_DB_HEADERS})
 target_link_libraries(run-db-tests ${GTEST_BOTH_LIBRARIES})

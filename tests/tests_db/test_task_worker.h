@@ -1,5 +1,5 @@
-#ifndef LLSSDB_TESTS_TEST_TASK_WORKER_H
-#define LLSSDB_TESTS_TEST_TASK_WORKER_H
+#ifndef TESTS_DB_TEST_TASK_WORKER_H_
+#define TESTS_DB_TEST_TASK_WORKER_H_
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -13,8 +13,8 @@ using ::testing::_;
 using ::testing::AtLeast;
 
 class MockTaskWorker : public ITaskWorker {
-public:
-    explicit MockTaskWorker(DataWorker *_data_worker) : ITaskWorker(_data_worker) {};
+ public:
+    explicit MockTaskWorker(DataWorker *_data_worker) : ITaskWorker(_data_worker){};
     MOCK_METHOD0(IsEmpty, bool());
     MOCK_METHOD0(CompleteTask, int());
 };
@@ -28,6 +28,6 @@ TEST(ITaskManager, AddTask) {
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }
 
-} // namespace failless
+}  // namespace failless::db::tests
 
-#endif //LLSSDB_TESTS_TEST_TASK_WORKER_H
+#endif  // TESTS_DB_TEST_TASK_WORKER_H_

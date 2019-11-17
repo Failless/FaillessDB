@@ -8,9 +8,8 @@
 
 using std::string;
 
-
 class IDataWorker {
-public:
+ public:
     IDataWorker() = default;
     ~IDataWorker() = default;
     virtual int Create() = 0;
@@ -19,9 +18,8 @@ public:
     virtual int Remove() = 0;
 };
 
-
 class DataWorker : public IDataWorker {
-public:
+ public:
     DataWorker() = default;
     explicit DataWorker(string directory);
     ~DataWorker() = default;
@@ -30,10 +28,11 @@ public:
     int Read() override;
     int Modify() override;
     int Remove() override;
-private:
+
+ private:
     string directory_{};
     int length_ = 0;
     boost::container::set<int, string> dataset_{};
 };
 
-#endif // LLSSDB_FOLDER_DATA_WORKER_H_
+#endif  // LLSSDB_FOLDER_DATA_WORKER_H_

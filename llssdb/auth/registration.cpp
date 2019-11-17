@@ -1,10 +1,10 @@
-#include "registration.h"
+#include "llssdb/auth/registration.h"
 
 bool Registration::Register(std::string login, std::string pass) { return false; }
 
 bool Registration::CheckCollisions_() {
-  login_ = {};
-  return false;
+    login_ = {};
+    return false;
 }
 
 bool Registration::CreateDir_() { return false; }

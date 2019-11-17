@@ -1,5 +1,5 @@
-#ifndef LLSSDB_TESTS_TEST_AUTH_H_
-#define LLSSDB_TESTS_TEST_AUTH_H_
+#ifndef TESTS_DB_TEST_AUTH_H_
+#define TESTS_DB_TEST_AUTH_H_
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -10,8 +10,8 @@ using ::testing::_;
 using ::testing::AtLeast;
 
 class MockTaskWorker : public Authorization {
-public:
-//    explicit MockTaskWorker() : IAuthorization() {};
+ public:
+    //    explicit MockTaskWorker() : IAuthorization() {};
     MOCK_METHOD2(Reg, bool(std::string login, std::string pass));
     // MOCK_METHOD2(Login, bool(std::string login, std::string pass));
     // MOCK_METHOD2(Disconnect, bool(std::string login, std::string pass));

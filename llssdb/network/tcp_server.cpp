@@ -1,6 +1,6 @@
 #include "tcp_server.h"
-#include "llssdb/engine/task.h"
 #include <utility>
+#include "llssdb/engine/task.h"
 
 namespace failless {
 namespace db {
@@ -13,8 +13,7 @@ void TcpServer::Listen() {}
 Host TcpServer::GetSettings() { return Host("0.0.0.0", 0); }
 
 void TcpServer::SetResponseFunction(
-    std::function<transfer::Response(transfer::Request &)> &generate_response) {
-}
+    std::function<transfer::Response(transfer::Request &)> &generate_response) {}
 
 void TcpServer::PushTask_(engine::Task task) {}
 
@@ -22,6 +21,6 @@ TcpServer::TcpServer(Host host) : host_(std::move(host)) {}
 
 TcpServer::TcpServer(std::string ip, int port) : host_(std::move(ip), port) {}
 
-} // namespace network
-} // namespace llssdb
-} // namespace failless
+}  // namespace network
+}  // namespace db
+}  // namespace failless
