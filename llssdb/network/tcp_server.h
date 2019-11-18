@@ -5,6 +5,7 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/lockfree/queue.hpp>
 #include "llssdb/common/task.h"
+#include "llssdb/network/connection.h"
 #include "llssdb/network/tcp_server_interface.h"
 
 namespace failless {
@@ -15,7 +16,7 @@ namespace ip = boost::asio::ip;
 
 class TcpServer : public ITcpServer {
  public:
-    TcpServer();
+    TcpServer() = delete;
     explicit TcpServer(Host host);
     TcpServer(std::string ip, unsigned short port);
     ~TcpServer() override = default;
@@ -23,13 +24,15 @@ class TcpServer : public ITcpServer {
     void Listen() override;
     Host GetSettings() override;
     void SetResponseFunction(std::function<Response(Request &)> &generate_response) override;
+
  protected:
     void PushTask_(common::Task task);
     Host host_{};
 
  private:
-    void Read_();
-    void Write_();
+    void Accept_();
+    static void AcceptHandler_(const boost::system::error_code &error);
+
     boost::lockfree::queue<common::Task> *queue_ = nullptr;
     boost::asio::io_service io_service_;
     ip::tcp::socket socket_;
@@ -37,6 +40,7 @@ class TcpServer : public ITcpServer {
     ip::tcp::acceptor acceptor_;
     /// The data to be sent to each client.
     std::vector<common::Task> tasks_;
+    std::vector<Connection> connections_;
     bool is_run_ = false;
 };
 

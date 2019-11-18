@@ -5,7 +5,14 @@ namespace failless {
 namespace db {
 namespace common {
 
-enum operators { SET = 0, GET, UPDATE, DELETE, CREATE, KILL };
+enum operators {
+    SET = 0,
+    GET,
+    UPDATE,
+    DELETE,
+    CREATE,
+    KILL
+};
 
 }  // namespace common
 }  // namespace db

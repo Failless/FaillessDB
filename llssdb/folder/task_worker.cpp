@@ -23,7 +23,7 @@ int TaskWorker::CompleteTask() {
             data_worker_->Create();
             break;
         case Task::READ:
-            data_worker_->Read();
+            data_worker_->Start();
             break;
         case Task::UPDATE:
             data_worker_->Modify();

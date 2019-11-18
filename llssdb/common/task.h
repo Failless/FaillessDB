@@ -1,7 +1,8 @@
-#ifndef LLSSDB_ENGINE_TASK_H_
-#define LLSSDB_ENGINE_TASK_H_
+#ifndef FAILLESS_LLSSDB_ENGINE_TASK_H_
+#define FAILLESS_LLSSDB_ENGINE_TASK_H_
 
 #include <boost/chrono/system_clocks.hpp>
+#include <boost/uuid/random_generator.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <string>
 
@@ -22,4 +23,4 @@ struct Task {
 }  // namespace db
 }  // namespace failless
 
-#endif  // LLSSDB_ENGINE_TASK_H_
+#endif  // FAILLESS_LLSSDB_ENGINE_TASK_H_
