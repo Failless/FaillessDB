@@ -11,7 +11,7 @@ class Response {
  public:
     Response() = default;
     explicit Response(const Request &request);
-    explicit Response(const engine::Task &task) {
+    explicit Response(const common::Task &task) {
         data_ = task.data;
         size_ = task.data_size;
     }

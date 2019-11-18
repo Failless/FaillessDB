@@ -11,10 +11,10 @@ namespace db {
 namespace network {
 
 struct Host {
-    std::string ip{};
+    boost::asio::ip::address ip{};
     unsigned short port = 0;
     Host() = default;
-    Host(std::string ip_, short port_) : ip(std::move(ip_)), port(port_) {}
+    Host(std::string ip_, unsigned short port_) : ip(std::move(ip_)), port(port_) {}
 };
 
 class ITcpServer : boost::noncopyable {
@@ -23,12 +23,11 @@ class ITcpServer : boost::noncopyable {
     virtual void SetConfig(std::string ip, int port) = 0;
     virtual void Listen() = 0;
     virtual Host GetSettings() = 0;
-    virtual void SetResponseFunction(
-        std::function<Response(Request &)> &generate_response) = 0;
+    virtual void SetResponseFunction(std::function<Response(Request &)> &generate_response) = 0;
     virtual ~ITcpServer() = default;
 
  protected:
-    Host host;
+    Host host_;
     std::function<Response(Request &)> generate_response_;
 };
 
