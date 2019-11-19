@@ -16,7 +16,6 @@ namespace engine {
  */
 class IServerManager : boost::noncopyable {
  public:
-    IServerManager() = default;
     virtual ~IServerManager() = 0;
 
     /**

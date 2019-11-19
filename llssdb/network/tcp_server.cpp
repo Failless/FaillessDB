@@ -53,7 +53,7 @@ TcpServer::TcpServer(Host host)
       acceptor_(io_service_, ip::tcp::endpoint(host_.ip, host_.port)) {}
 
 TcpServer::TcpServer(std::string ip, unsigned short port)
-    : host_(std::move(ip), port),
+    : host_(ip, port),
       socket_(io_service_),
       acceptor_(io_service_, ip::tcp::endpoint(ip::address::from_string(ip), port)) {}
 

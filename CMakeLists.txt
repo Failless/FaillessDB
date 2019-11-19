@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14)
 project(failless C CXX)
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 17)
 
 find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
