@@ -2,14 +2,14 @@
 #include <string>
 
 
-std::string Authorization::Hasher(std::string login) {
+std::string Authorization::Hasher_(std::string login) {
     // return boost::hasher<login>;
     // std::hash<std::string> Hash;
     // return Hash<login>;
     return login;
 }
 
-bool Authorization::IsAuth(std::string login) {
+bool Authorization::IsAuth_(std::string login) {
 //    auto cli_id = Users[login].client_id;
 //    if (cli_id) {
 //        return true;
@@ -20,19 +20,19 @@ bool Authorization::IsAuth(std::string login) {
 }
 
 bool Authorization::Registration(std::string login, std::string pass) {
-    if (CheckCollisions(login)) {
+    if (CheckCollisions_(login)) {
         return false;
     }
     UserInfo *User = new UserInfo;
     User->login = login;
-    User->pass_hash = Hasher(login);
+    User->pass_hash = Hasher_(login);
     // User->client_id; User->dir; toDO ???
-    Users[login] = *User;
+    Users_[login] = *User;
     return true;
 }
 
-bool Authorization::CheckCollisions(std::string login) {
-    if (Users.count(login)){
+bool Authorization::CheckCollisions_(std::string login) {
+    if (Users_.count(login)){
         return true;  // such login already in structs
     } else {
         return false;
@@ -40,7 +40,7 @@ bool Authorization::CheckCollisions(std::string login) {
 }
 
 bool Authorization::SignIn(std::string login, std::string pass) {
-    CheckCollisions(login);
+    CheckCollisions_(login);
     return false;
 }
 
