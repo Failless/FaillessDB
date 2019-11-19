@@ -1,48 +1,40 @@
 #ifndef FAILLESS_FILE_SYSTEM_H
 #define FAILLESS_FILE_SYSTEM_H
 
-
 #include <boost/noncopyable.hpp>
+#include <rocksdb/db.h>
+#include <rocksdb/options.h>
+#include <string>
+
+namespace failless::db::folder {
+
+using std::string;
 
 class FileSystemInterface : boost::noncopyable {
 public:
-  explicit FileSystemInterface() = default;
-  virtual ~FileSystemInterface() = default;
+    explicit FileSystemInterface() = default;
+    virtual ~FileSystemInterface() = default;
 
-  virtual bool Get(int key) = 0;
-  virtual bool Set(int key, u_int8_t data) = 0;
-  virtual bool GetRange(int key) = 0;
-  virtual bool Remove(int key) = 0;
+    virtual bool Get(const string key) = 0;
+    virtual bool Set(const string key, const int8_t value) = 0;
+    virtual bool GetRange(const string key) = 0;
+    virtual bool Remove(const string key) = 0;
 //  virtual Serialize(u_int8_t)
 };
 
 class FileSystem : public FileSystemInterface {
 public:
-  ~FileSystem() override = default;
+    explicit FileSystem(const string& db_path);
+    ~FileSystem() override;
 
-  bool Get(int key) override {
-    // Call RocksDB
-    // Put data in shared queue
-    return true;
-  }
+    bool Get(const string key) override;
+    bool Set(const string key, const int8_t value) override;
+    bool GetRange(const string key) override;
+    bool Remove(const string key) override;
 
-  bool Set(int key, u_int8_t data) override {
-    // Call RocksDB
-    // Put data in shared queue
-    return true;
-  }
-
-  bool GetRange(int key) override {
-    // Call RocksDB
-    // Put data in shared queue
-    return true;
-  }
-
-  bool Remove(int key) override {
-    // Call RocksDB
-    return true;
-  }
+    rocksdb::DB *db_;
 };
 
+}
 
 #endif // FAILLESS_FILE_SYSTEM_H

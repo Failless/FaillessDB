@@ -26,7 +26,6 @@ ServerManager* ServerManager::sm_;
 //
 // int ServerManager::GetRequest(const std::string& request) {
 //    request_queue_.push(request);
-//    // TODO: just for the sake of tests
 //    Task task(Task::CREATE, request);
 //    SendTask(task);
 //    // should delete that later cuz i wanna sleep so bad

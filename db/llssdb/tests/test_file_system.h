@@ -4,6 +4,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <string>
 
 #include "llssdb/folder/task.h"
 #include "llssdb/folder/file_system.h"
@@ -14,47 +15,43 @@ namespace failless::db::tests {
 
 using ::testing::_;
 using ::testing::AtLeast;
+using folder::FileSystem;
+using std::string;
 
 class MockFileSystem : public FileSystem {
 public:
-  MockFileSystem() : FileSystem() {};
-  MOCK_METHOD1(Get, bool(int key));
-  MOCK_METHOD2(Set, bool(int key, u_int8_t data));
-  MOCK_METHOD1(GetRange, bool(int key));
-  MOCK_METHOD1(Remove, bool(int key));
+  explicit MockFileSystem(const string& db_path) : FileSystem(db_path) {};
+  MOCK_METHOD1(Get, bool(string key));
+  MOCK_METHOD2(Set, bool(string key, int8_t value));
+  MOCK_METHOD1(GetRange, bool(string key));
+  MOCK_METHOD1(Remove, bool(string key));
 };
 
-TEST(FileSystem, Get) {
-    MockFileSystem mockFileSystem;
-    int key = 0;
+string test_db_path = "/storage/test_user/test_file";
 
-    EXPECT_CALL(mockFileSystem, Get(key)).Times(1);
-    mockFileSystem.Get(key);
-}
+TEST(FileSystem, Set_and_Get) {
+    FileSystem fs(test_db_path);
+    string key = "test_key";
+    int8_t value = 32;
 
-TEST(FileSystem, Set) {
-    MockFileSystem mockFileSystem;
-    int key = 0;
-    u_int8_t data = 0;
-
-    EXPECT_CALL(mockFileSystem, Set(key, data)).Times(1);
-    mockFileSystem.Set(key, data);
+    EXPECT_EQ(fs.Set(key, value), true);
+    EXPECT_EQ(fs.Get(key), true);
 }
 
 TEST(FileSystem, GetRange) {
-    MockFileSystem mockFileSystem;
-    int key = 0;
+    FileSystem fs(test_db_path);
+    string key = "test_key";
 
-    EXPECT_CALL(mockFileSystem, GetRange(key)).Times(1);
-    mockFileSystem.GetRange(key);
+//    EXPECT_CALL(fs, GetRange(key)).Times(1);
+//    fs.GetRange(key);
 }
 
 TEST(FileSystem, Remove) {
-    MockFileSystem mockFileSystem;
-    int key = 0;
+    FileSystem fs(test_db_path);
+    string key = "test_key";
 
-    EXPECT_CALL(mockFileSystem, Remove(key)).Times(1);
-    mockFileSystem.Remove(key);
+//    EXPECT_CALL(fs, Remove(key)).Times(1);
+//    fs.Remove(key);
 }
 
 }

@@ -1,9 +1,3 @@
-/*
-TaskWorker (TW)
-    1. Принимает таски от SM добавляет в очередь.
-    2. Раздаёт из очереди своему DW
-*/
-
 #ifndef LLSSDB_FOLDER_TASK_WORKER_H
 #define LLSSDB_FOLDER_TASK_WORKER_H
 
@@ -15,63 +9,67 @@ TaskWorker (TW)
 #include <queue>
 #include <string>
 
+namespace failless::db::folder {
+
+using std::string;
+
 class ITaskWorker : boost::noncopyable {
 public:
-    explicit ITaskWorker(FileSystem* _fs) :
-      task_queue_(nullptr),
-      data_queue_(nullptr),
-      fs(_fs) {}
+    explicit ITaskWorker(FileSystem *_fs) :
+            task_queue_(nullptr),
+            data_queue_(nullptr),
+            fs(_fs) {}
     virtual ~ITaskWorker() = default;
 
-    virtual int AddTask(const Task& task) = 0;
+    virtual int AddTask(const Task &task) = 0;
 
 protected:
     virtual bool IsEmpty() = 0;
-    virtual int DoTask(const Task& task) = 0;
-    virtual bool Create(const u_int8_t& data) = 0;
-    virtual bool Read(const u_int8_t& data) = 0;
-    virtual bool Update(const u_int8_t& data) = 0;
-    virtual bool Delete(const u_int8_t& data) = 0;
+    virtual int DoTask(const Task &task) = 0;
+    virtual bool Create(const int8_t &value) = 0;
+    virtual bool Read(const int8_t &value) = 0;
+    virtual bool Update(const int8_t &value) = 0;
+    virtual bool Delete(const int8_t &value) = 0;
 
-    std::queue<Task>* task_queue_;
-    std::queue<u_int8_t>* data_queue_;
-    FileSystem* fs;
+    std::queue<Task> *task_queue_;
+    std::queue<int8_t> *data_queue_;
+    FileSystem *fs;
 };
 
 class TaskWorker : public ITaskWorker {
 public:
-    explicit TaskWorker(FileSystem* _fs) : ITaskWorker(_fs) {};
+    explicit TaskWorker(FileSystem *_fs) : ITaskWorker(_fs) {};
     ~TaskWorker() override = default;
 
-    int AddTask(const Task& task) override {
-      // Add async queue
-      DoTask(task);
-      return EXIT_SUCCESS;
+    int AddTask(const Task &task) override {
+        // Add async queue
+        DoTask(task);
+        return EXIT_SUCCESS;
     };
 
 protected:
-    int DoTask(const Task& task) override {
+    int DoTask(const Task &task) override {
         switch (task.command) {
-          // TODO: order them in most frequent
+            // TODO: order them in most frequent
             case Task::NEW:
-              break;
+                break;
             case Task::KILL:
-              break;
+                break;
             case Task::CREATE:
-              Create(task.data);
-              break;
+                Create(task.value);
+                break;
             case Task::READ:
-              Read(task.data);
-              break;
+                Read(task.value);
+                break;
             case Task::UPDATE:
-              Update(task.data);
-              break;
+                Update(task.value);
+                break;
             case Task::DELETE:
-              Delete(task.data);
-              break;
+                Delete(task.value);
+                break;
             default:
-              return EXIT_FAILURE;
-            }
+                return EXIT_FAILURE;
+        }
         return EXIT_SUCCESS;
     }
 
@@ -79,28 +77,29 @@ protected:
         return true;
     }
 
-    bool Create(const u_int8_t& data) override {
-        int key = 0;
-        // key is getting from data
-        return fs->Set(key, data);
+    bool Create(const int8_t &value) override {
+        string key = "0";
+        // key is getting from value
+        return fs->Set(key, value);
     }
 
-    bool Read(const u_int8_t& data) override {
-        int key = 0;
+    bool Read(const int8_t &value) override {
+        string key = "0";
         fs->Get(key);
         return true;
     }
 
-    bool Update(const u_int8_t& data) override {
-        int key = 0;
-        return fs->Set(key, data);
+    bool Update(const int8_t &value) override {
+        string key = "0";
+        return fs->Set(key, value);
     }
 
-    bool Delete(const u_int8_t& data) override {
-        int key = 0;
+    bool Delete(const int8_t &value) override {
+        string key = "0";
         return fs->Remove(key);
     }
 };
 
+}
 
 #endif // LLSSDB_FOLDER_TASK_WORKER_H

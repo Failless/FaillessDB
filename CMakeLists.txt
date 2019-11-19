@@ -9,6 +9,11 @@ find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(msgpack REQUIRED)
 
+find_library(ROCKSDB_LIBRARY rocksdb
+  HINTS ${CMAKE_SOURCE_DIR}/../../.. $ENV{ROCKSDB_ROOT} ${ROCKSDB_ROOT}
+  PATH_SUFFIXES lib lib64
+  PATHS /usr /usr/local /opt /opt/local)
+
 set(GMock_INCLUDE_DIR "/usr/local/include")
 if(EXISTS "/usr/local/lib/libgmock.a")
     set(GMock_LIBRARY "/usr/local/lib/libgmock.a")
@@ -34,3 +39,4 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/db/CMakeLists.txt)
 
 message("Boost version ${Boost_VERSION} found at ${Boost_DIR}")
 message("Msgpack version ${msgpack_VERSION} found at ${msgpack_DIR}")
+message("RocksDB library at ${ROCKSDB_LIBRARY}")

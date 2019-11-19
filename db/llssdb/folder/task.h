@@ -17,9 +17,9 @@ struct Task {
     };
 
     Command command;
-    uint8_t data;   // Набор байт
+    int8_t value;   // Набор байт
 
-    Task(Command _command, uint8_t _data) : command(_command), data(_data) {};
+    Task(Command _command, int8_t _value) : command(_command), value(_value) {};
 };
 
 #endif // LLSSDB_FOLDER_TASK_H
