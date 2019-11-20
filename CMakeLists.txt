@@ -8,11 +8,7 @@ set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/llssclient")
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(msgpack REQUIRED)
-
-find_library(ROCKSDB_LIBRARY rocksdb
-  HINTS ${CMAKE_SOURCE_DIR}/../../.. $ENV{ROCKSDB_ROOT} ${ROCKSDB_ROOT}
-  PATH_SUFFIXES lib lib64
-  PATHS /usr /usr/local /opt /opt/local)
+find_library(ROCKSDB_LIBRARY rocksdb REQUIRED)
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
 if(EXISTS "/usr/local/lib/libgmock.a")
@@ -33,6 +29,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(${GMock_INCLUDE_DIR})
+include_directories(${RocksDB_INCLUDE_DIR})
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/client/CMakeLists.txt)
 include(${CMAKE_CURRENT_SOURCE_DIR}/db/CMakeLists.txt)

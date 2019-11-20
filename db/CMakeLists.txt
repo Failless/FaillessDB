@@ -36,6 +36,7 @@ target_link_libraries(run-db-tests ${GMock_BOTH_LIBRARIES})
 target_link_libraries(run-db-tests ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(run-db-tests ${Boost_LIBRARIES})
 target_link_libraries(run-db-tests ${msgpack_LIBRARIES})
+target_link_libraries(run-db-tests ${ROCKSDB_LIBRARY})
 
 add_executable(failless-server ${CMAKE_CURRENT_SOURCE_DIR}/db/main.cpp ${SOURCES} ${HEADERS})
 target_link_libraries(failless-server ${CMAKE_THREAD_LIBS_INIT})

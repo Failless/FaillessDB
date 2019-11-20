@@ -13,7 +13,7 @@ using std::string;
 
 FileSystem::FileSystem(const string& db_path) {
 //    DB* db;
-    Options options;
+    rocksdb::Options options;
 
     // Optimize RocksDB. This is the easiest way to get RocksDB to perform well
     options.IncreaseParallelism();
@@ -33,7 +33,7 @@ FileSystem::~FileSystem() {
     delete db_;
 }
 
-bool FileSystem::Get(const string key) {
+bool FileSystem::Get(const string& key) {
     /// Check if db is open
     // Status s = DB::Open(options, test_db_path, &db_);
     /// Get value by key
@@ -41,41 +41,43 @@ bool FileSystem::Get(const string key) {
     Slice slice_key = key;
     Status s = db_->Get(ReadOptions(), slice_key, &string_value);
 
-    if ( !s.ok() ) return false;
-
+    return s.ok();
     /// Put in shared queue
-    return true;
 }
 
-bool FileSystem::Set(const string key, const int8_t value) {
+bool FileSystem::Set(const string& key, const int8_t* value) {
     /// Check if db is open
     /// Find value by key
 //    std::string str=boost::lexical_cast<std::string, int>(i);
-    string string_value = std::to_string(value);
-    Slice slice_key = key;
-    Status s = db_->Get(ReadOptions(), slice_key, &string_value);
-    if ( !s.ok() ) {
-        fprintf(stderr, "Failed to find a key-value pair"); // TODO(EgorBedov): fix that later
-        return false;
-    }
 
-    /// Put value by key
-    s = db_->Put(WriteOptions(), slice_key, string_value);
-    if ( !s.ok() ) {
-        fprintf(stderr, "Failed to put a value"); // TODO(EgorBedov): fix that later
-        return false;
-    }
+//    string string_value = std::to_string(value);
+    Slice slice_key = key;
+    rocksdb::PinnableSlice slice;
+    rocksdb::ColumnFamilyHandle* column_family_handle = nullptr;
+
+//    Status s = db_->Get(ReadOptions(), column_family_handle, slice_key, &slice);
+//    if ( !s.ok() ) {
+//        fprintf(stderr, "Failed to find a key-value pair"); // TODO(EgorBedov): fix that later
+//        return false;
+//    }
+
+//    /// Put value by key
+//    s = db_->Put(WriteOptions(), slice_key, string_value);
+//    if ( !s.ok() ) {
+//        fprintf(stderr, "Failed to put a value"); // TODO(EgorBedov): fix that later
+//        return false;
+//    }
 
     return true;
 }
 
-bool FileSystem::GetRange(const string key) {
+bool FileSystem::GetRange(const string& key) {
     // Call RocksDB
     // Put data in shared queue
     return true;
 }
 
-bool FileSystem::Remove(const string key) {
+bool FileSystem::Remove(const string& key) {
     /// Check if db is open
 
     /// Find key

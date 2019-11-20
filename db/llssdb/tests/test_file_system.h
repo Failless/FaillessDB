@@ -21,10 +21,10 @@ using std::string;
 class MockFileSystem : public FileSystem {
 public:
   explicit MockFileSystem(const string& db_path) : FileSystem(db_path) {};
-  MOCK_METHOD1(Get, bool(string key));
-  MOCK_METHOD2(Set, bool(string key, int8_t value));
-  MOCK_METHOD1(GetRange, bool(string key));
-  MOCK_METHOD1(Remove, bool(string key));
+  MOCK_METHOD1(Get, bool(string key)) const string&;
+  MOCK_METHOD2(Set, bool(string key, int8_t value)) const string& const int8_t;
+  MOCK_METHOD1(GetRange, bool(string key)) const string&;
+  MOCK_METHOD1(Remove, bool(string key)) const string&;
 };
 
 string test_db_path = "/storage/test_user/test_file";
