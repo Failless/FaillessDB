@@ -26,9 +26,9 @@ public:
 protected:
     virtual bool IsEmpty() = 0;
     virtual int DoTask(const Task &task) = 0;
-    virtual bool Create(const int8_t &value) = 0;
+    virtual bool Create(const int8_t *value) = 0;
     virtual bool Read(const int8_t &value) = 0;
-    virtual bool Update(const int8_t &value) = 0;
+    virtual bool Update(const int8_t *value) = 0;
     virtual bool Delete(const int8_t &value) = 0;
 
     std::queue<Task> *task_queue_;
@@ -56,13 +56,13 @@ protected:
             case Task::KILL:
                 break;
             case Task::CREATE:
-                Create(task.value);
+                Create(&task.value);
                 break;
             case Task::READ:
                 Read(task.value);
                 break;
             case Task::UPDATE:
-                Update(task.value);
+                Update(&task.value);
                 break;
             case Task::DELETE:
                 Delete(task.value);
@@ -77,7 +77,7 @@ protected:
         return true;
     }
 
-    bool Create(const int8_t &value) override {
+    bool Create(const int8_t *value) override {
         string key = "0";
         // key is getting from value
         return fs->Set(key, value);
@@ -89,7 +89,7 @@ protected:
         return true;
     }
 
-    bool Update(const int8_t &value) override {
+    bool Update(const int8_t *value) override {
         string key = "0";
         return fs->Set(key, value);
     }

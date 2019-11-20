@@ -17,16 +17,16 @@ class MockTaskWorker : public TaskWorker {
 public:
     explicit MockTaskWorker(FileSystem* _fs) : TaskWorker(_fs) {};
     MOCK_METHOD0(IsEmpty, bool());
-    MOCK_METHOD1(Create, bool(const int8_t& value));
+    MOCK_METHOD1(Create, bool( const int8_t *value));
     MOCK_METHOD1(Read, bool(const int8_t& value));
-    MOCK_METHOD1(Update, bool(const int8_t& value));
+    MOCK_METHOD1(Update, bool( const int8_t *value));
     MOCK_METHOD1(Delete, bool(const int8_t& value));
 };
 
 TEST(TaskManager, Create) {
     MockTaskWorker mockTaskWorker(nullptr);
-    int8_t value = 0;
-    Task temp_task(Task::CREATE, value);
+    int8_t value[3] = {1, 2, 3};
+    Task temp_task(Task::CREATE, value[1]);
 
     EXPECT_CALL(mockTaskWorker, Create(value)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
@@ -44,8 +44,8 @@ TEST(TaskManager, Read) {
 
 TEST(TaskManager, Update) {
     MockTaskWorker mockTaskWorker(nullptr);
-    int8_t value = 0;
-    Task temp_task(Task::UPDATE, value);
+    int8_t value[3] = {1, 2, 3};
+    Task temp_task(Task::UPDATE, value[1]);
 
     EXPECT_CALL(mockTaskWorker, Update(value)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
@@ -62,9 +62,9 @@ TEST(TaskManager, Delete) {
 
 TEST(TaskManager, CREATE_Calling_Set) {
     MockFileSystem mockFileSystem(test_db_path);
-    int8_t value = 0;
+    int8_t value[3] = {1, 2, 3};
     std::string key = "0";
-    Task temp_task(Task::CREATE, value);
+    Task temp_task(Task::CREATE, value[1]);
 
     EXPECT_CALL(mockFileSystem, Set(key, value)).Times(1);
 
@@ -86,9 +86,9 @@ TEST(TaskManager, READ_Calling_Get) {
 
 TEST(TaskManager, UPDATE_Calling_Set) {
     MockFileSystem mockFileSystem(test_db_path);
-    int8_t value = 0;
+    int8_t value[3] = {1, 2, 3};
     string key = "0";
-    Task temp_task(Task::UPDATE, value);
+    Task temp_task(Task::UPDATE, value[1]);
 
     EXPECT_CALL(mockFileSystem, Set(key, value)).Times(1);
 
