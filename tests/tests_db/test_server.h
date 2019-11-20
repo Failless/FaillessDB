@@ -47,8 +47,9 @@ TEST(ServerTest, PushTask) {
     boost::uuids::uuid client_id = generator();
     auto now = boost::chrono::system_clock::now();
     auto ms = boost::chrono::time_point_cast<boost::chrono::milliseconds>(now);
-    common::Task task{0, nullptr, query, client_id,
-                      boost::chrono::microseconds(ms.time_since_epoch().count())};
+    int8_t val[3] = {1, 2, 3};
+    common::Task task(0, 3, val, &query, client_id,
+                      boost::chrono::microseconds(ms.time_since_epoch().count()));
     EXPECT_CALL(mock_tcp_server, PushTask_(task)).Times(AtLeast(1));
 }
 

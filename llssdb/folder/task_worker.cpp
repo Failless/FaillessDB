@@ -1,9 +1,4 @@
 #include "llssdb/folder/task_worker.h"
-
-failless::db::folder::TaskWorker::TaskWorker() {
-
-}
-
 /*
 #include "folder/task_worker.h"
 

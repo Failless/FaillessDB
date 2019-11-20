@@ -30,6 +30,8 @@ class Task {
 
     Task(operators _command, std::string* _query)
         : folder_id(0), data_size(0), data(nullptr), query(_query), command(_command) {}
+    Task(operators _command, int8_t *_data, size_t _size)
+        : folder_id(0), data_size(_size), data(_data), query(nullptr), command(_command) {}
     Task(const Task& task) = default;
     Task& operator=(const Task&) = default;
     ~Task() = default;
