@@ -10,9 +10,9 @@ void ServerManager::Reload() {}
 
 void ServerManager::Run() {
     while (is_run_) {
-        if (!task_queue_.empty()) {
-            auto task = task_queue_.pop();
-        }
+//        if (!task_queue_.empty()) {
+//            auto task = task_queue_.pop();
+//        }
     }
 }
 
