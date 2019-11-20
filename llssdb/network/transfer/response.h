@@ -12,8 +12,8 @@ class Response {
     Response() = default;
     explicit Response(const Request &request);
     explicit Response(const common::Task &task) {
-        data_ = task.data;
-        size_ = task.data_size;
+//        data_ = task.data;
+//        size_ = task.data_size;
     }
 
  protected:

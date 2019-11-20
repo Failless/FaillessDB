@@ -1,4 +1,6 @@
 #include "llssdb/engine/server_manager.h"
+#include <iostream>
+#include <thread>
 
 namespace failless {
 namespace db {
@@ -9,18 +11,46 @@ void ServerManager::SetTask(common::Task task) {}
 void ServerManager::Reload() {}
 
 void ServerManager::Run() {
+    is_run_ = true;
+    const int kMsDelay = 100;  // it's temporary
+    common::Task task{};
     while (is_run_) {
-//        if (!task_queue_.empty()) {
-//            auto task = task_queue_.pop();
-//        }
+        if (task_queue_.empty()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(kMsDelay));
+            continue;  // May by it will be better if I change if-body to all code below here
+        }
+        task_queue_.pop(task);
+        switch (task.command) {
+            case common::operators::CREATE: {
+                int folder_num = CreateFolder_(task.client_id);
+                std::cout << "Created new folder with id " << folder_num << std::endl;
+                break;
+            }
+            case common::operators::KILL: {
+                KillFolder_(task.folder_id);
+                break;
+            }
+            case common::operators::CONNECT: {
+                // create task_worker for exist folder in the other thread
+                break;
+            }
+            case common::operators::DISCONNECT: {
+                // join tread with exist task_worker which have created data dump before
+                break;
+            }
+            default: {
+                Execute_(task);
+                break;
+            }
+        }
     }
 }
 
-void ServerManager::Stop() {}
+void ServerManager::Stop() { is_run_ = false; }
 
-bool ServerManager::Execute_(common::operators command) { return false; }
+bool ServerManager::Execute_(common::Task& task) { return false; }
 
-bool ServerManager::CreateFolder_() { return false; }
+int ServerManager::CreateFolder_(boost::uuids::uuid& client_id) { return false; }
 
 bool ServerManager::KillFolder_(int folder_id) { return false; }
 

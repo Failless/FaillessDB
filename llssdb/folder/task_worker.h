@@ -8,33 +8,43 @@ TaskWorker (TW)
 
 #include <queue>
 #include <string>
+#include "llssdb/common/task.h"
 #include "llssdb/folder/data_worker.h"
-#include "llssdb/folder/task.h"
+
+namespace failless {
+namespace db {
+namespace folder {
 
 class ITaskWorker {
  public:
-    explicit ITaskWorker(DataWorker* _data_worker) : data_worker_(_data_worker){};
-    //    TaskWorker() = default;
     virtual ~ITaskWorker() = default;
-
-    int AddTask(const Task& task) {
-        IsEmpty();
-        CompleteTask();
+    int AddTask(const common::Task& task) {
+        IsEmpty_();
+        CompleteTask_();
         return EXIT_SUCCESS;
     };
 
- private:
-    virtual bool IsEmpty() = 0;
-    virtual int CompleteTask() = 0;
+ protected:
+    virtual bool IsEmpty_() = 0;
+    virtual int CompleteTask_() = 0;
 
-    std::queue<Task> task_queue_;
-    DataWorker* data_worker_;
 };
 
 class TaskWorker : public ITaskWorker {
+ public:
+    TaskWorker();
     ~TaskWorker() override = default;
-    bool IsEmpty() override { return true; }
-    int CompleteTask() override { return EXIT_SUCCESS; }
+    bool IsEmpty_() override { return true; }
+    int CompleteTask_() override { return EXIT_SUCCESS; }
+
+ private:
+
+    std::queue<common::Task> task_queue_;
+    std::unique_ptr<IDataWorker> data_worker_;
 };
+
+}  // namespace folder
+}  // namespace db
+}  // namespace failless
 
 #endif  // LLSSDB_FOLDER_TASK_WORKER_H_

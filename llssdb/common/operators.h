@@ -11,7 +11,9 @@ enum operators {
     UPDATE,
     DELETE,
     CREATE,
-    KILL
+    KILL,
+    CONNECT,
+    DISCONNECT
 };
 
 }  // namespace common

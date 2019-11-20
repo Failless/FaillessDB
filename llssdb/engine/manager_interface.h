@@ -16,7 +16,7 @@ namespace engine {
  */
 class IServerManager : boost::noncopyable {
  public:
-    virtual ~IServerManager() = 0;
+    virtual ~IServerManager() = default;
 
     /**
      * Set task to common queue for inside task handler
@@ -49,10 +49,10 @@ class IServerManager : boost::noncopyable {
  protected:
     /**
      * This method used for execute all queries or commands from client
-     * @param command
+     * @param task
      * @return
      */
-    virtual bool Execute_(common::operators command) = 0;
+    virtual bool Execute_(common::Task& task) = 0;
 };
 
 }  // namespace engine

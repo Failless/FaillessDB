@@ -4,7 +4,6 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "llssdb/folder/task.h"
 #include "llssdb/folder/task_worker.h"
 
 namespace failless::db::tests {
@@ -12,19 +11,20 @@ namespace failless::db::tests {
 using ::testing::_;
 using ::testing::AtLeast;
 
-class MockTaskWorker : public ITaskWorker {
+class MockTaskWorker : public folder::TaskWorker {
  public:
-    explicit MockTaskWorker(DataWorker *_data_worker) : ITaskWorker(_data_worker){};
+    MockTaskWorker() : TaskWorker(){};
     MOCK_METHOD0(IsEmpty, bool());
     MOCK_METHOD0(CompleteTask, int());
 };
 
 TEST(ITaskManager, AddTask) {
     auto *dw = new DataWorker;
-    MockTaskWorker mockTaskWorker(dw);
+    MockTaskWorker mockTaskWorker;
     EXPECT_CALL(mockTaskWorker, IsEmpty()).Times(AtLeast(1));
     EXPECT_CALL(mockTaskWorker, CompleteTask()).Times(AtLeast(1));
-    Task temp_task(Task::CREATE, "trash");
+    std::string query = "trash";
+    common::Task temp_task(common::operators::CREATE, &query);
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }
 

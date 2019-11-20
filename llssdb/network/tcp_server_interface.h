@@ -21,12 +21,11 @@ struct Host {
 
 class ITcpServer : boost::noncopyable {
  public:
-    ITcpServer() = default;
+    virtual ~ITcpServer() = default;
     virtual void SetConfig(std::string ip, int port) = 0;
     virtual void Listen() = 0;
     virtual Host GetSettings() = 0;
     virtual void SetResponseFunction(std::function<Response(Request &)> &generate_response) = 0;
-    virtual ~ITcpServer() = default;
 
  protected:
     Host host_;

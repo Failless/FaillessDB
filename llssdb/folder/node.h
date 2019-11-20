@@ -8,6 +8,10 @@
 #include "log_manager.h"
 #include "task_worker.h"
 
+namespace failless {
+namespace db {
+namespace folder {
+
 class Node {
  public:
     explicit Node(std::string directory);
@@ -31,5 +35,9 @@ class TestNode : public Node {
         return true;
     }
 };
+
+}  // namespace folder
+}  // namespace db
+}  // namespace failless
 
 #endif  // LLSSDB_FOLDER_NODE_H_

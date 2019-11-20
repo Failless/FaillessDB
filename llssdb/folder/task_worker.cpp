@@ -1,3 +1,9 @@
+#include "llssdb/folder/task_worker.h"
+
+failless::db::folder::TaskWorker::TaskWorker() {
+
+}
+
 /*
 #include "folder/task_worker.h"
 
@@ -8,7 +14,7 @@ int TaskWorker::Add_Task(const Task& task) {
     return EXIT_SUCCESS;
 }
 
-bool TaskWorker::IsEmpty() {
+bool TaskWorker::IsEmpty_() {
     return task_queue_.empty();
 }
 
@@ -16,7 +22,7 @@ TaskWorker::TaskWorker(DataWorker *_data_worker) : data_worker_(_data_worker) {
 
 }
 
-int TaskWorker::CompleteTask() {
+int TaskWorker::CompleteTask_() {
     Task current_task = task_queue_.front();
     switch ( current_task.command ) {
         case Task::CREATE:

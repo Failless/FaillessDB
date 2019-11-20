@@ -6,6 +6,12 @@ Node::Node(std::string directory) :
     task_worker_(&data_worker_),
     data_worker_(DataWorker(std::move(directory))) {}
 */
-#include "node.h"
+namespace failless {
+namespace db {
+namespace folder {
 
 bool Node::TestCall() { return true; }
+
+}  // namespace folder
+}  // namespace db
+}  // namespace failless
