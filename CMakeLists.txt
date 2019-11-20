@@ -17,7 +17,7 @@ set(FAILLESS_DB_LIB "${CMAKE_CURRENT_SOURCE_DIR}/llssdb")
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(msgpack REQUIRED)
-find_library(ROCKSDB_LIBRARY rocksdb)
+find_library(ROCKSDB_LIBRARY rocksdb REQUIRED)
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
 if(EXISTS "/usr/local/lib/libgmock.a")
