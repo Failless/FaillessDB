@@ -11,27 +11,31 @@ namespace failless::db::folder {
 using std::string;
 
 class FileSystemInterface : boost::noncopyable {
- public:
+public:
     FileSystemInterface() = default;
     virtual ~FileSystemInterface() = default;
 
     virtual bool Get(const string &key) = 0;
-    virtual bool Set(const string &key, const int8_t *value) = 0;
+    virtual bool Set(const string &key, int8_t value) = 0;
     virtual bool GetRange(const string &key) = 0;
     virtual bool Remove(const string &key) = 0;
-    //  virtual Serialize(u_int8_t)
+    virtual bool EraseAll(const string& db_path) = 0;
 };
 
 class FileSystem : public FileSystemInterface {
- public:
+public:
     explicit FileSystem(const string &db_path);
     ~FileSystem() override;
 
     bool Get(const string &key) override;
-    bool Set(const string &key, const int8_t *value) override;
+    bool Set(const string &key, int8_t value) override;
     bool GetRange(const string &key) override;
     bool Remove(const string &key) override;
+    bool EraseAll(const string& db_path) override;
 
+private:
+    bool OpenDB(const string &db_path);
+    bool CloseDB();
     rocksdb::DB *db_;
 };
 

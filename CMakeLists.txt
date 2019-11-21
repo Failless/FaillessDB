@@ -5,8 +5,9 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -fPIC -no-pie -phtread -lpthread -lboost_system")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lboost_system -lrocksdb -lsnappy -lbz2 -lz -lrt")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -fPIC -no-pie -phtread -lpthread")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lbz2 -lz")
+# removed -lrocksdb and -lsnappy and -lrt
 
 set(DATABSE_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_db.cpp)
 set(CLIENT_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_cli.cpp)
@@ -90,4 +91,4 @@ target_link_libraries(run-db-tests ${ROCKSDB_LIBRARY})
 
 message("Boost version ${Boost_VERSION} found at ${Boost_DIR}")
 message("Msgpack version ${msgpack_VERSION} found at ${msgpack_DIR}")
-message("RocksDB version ${RocksDB_VERSION} found at ${RocksDB_DIR} and RocksDB library at ${ROCKSDB_LIBRARY}")
+message("RocksDB library at ${ROCKSDB_LIBRARY}")

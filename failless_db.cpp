@@ -1,6 +1,5 @@
 #include <thread>
 #include "llssdb/engine/server_manager.h"
-#include "llssdb/folder/data_worker.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/utils/config_manager.h"
@@ -12,7 +11,7 @@ int main(/*int argc, char **argv*/) {
         new failless::db::folder::FileSystem("../cmake-build-debug"));
     std::string kKey = "key";
     int8_t data[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-    file_system->Set(kKey, data);
+//    file_system->Set(kKey, data); TODO(rowbotman): fix it later
 
     //    std::shared_ptr<IDataWorker> data_worker(new DataWorker());
     //    data_worker->Create();
