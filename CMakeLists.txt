@@ -73,7 +73,7 @@ target_link_libraries(run-cli-tests ${Boost_LIBRARIES})
 target_link_libraries(run-cli-tests ${msgpack_LIBRARIES})
 target_link_libraries(run-cli-tests llssclient)
 
-add_executable(run-db-tests ${TEST_DB_SOURCES} ${TEST_DB_HEADERS})
+add_executable(run-db-tests ${TEST_DB_SOURCES} ${TEST_DB_HEADERS} tests/tests_db/test_config.h)
 target_link_libraries(run-db-tests ${GTEST_BOTH_LIBRARIES})
 target_link_libraries(run-db-tests ${GMock_BOTH_LIBRARIES})
 target_link_libraries(run-db-tests ${CMAKE_THREAD_LIBS_INIT})
