@@ -1,37 +1,53 @@
 #include "llssdb/auth/authorization.h"
+#include <iostream>
+#include <openssl/sha.h>
+#include <cstring>
 
-// #include <iostream>
-
-//using boost::uuids::detail::md5;
-
-std::string Authorization::toString_(const boost::uuids::detail::md5::digest_type &digest)
+bool simpleSHA256(void* input, unsigned long length, unsigned char* md)
 {
-    const auto charDigest = reinterpret_cast<const char *>(&digest);
-    std::string result;
-    boost::algorithm::hex(charDigest, charDigest + sizeof(boost::uuids::detail::md5::digest_type
-                                                              ), std::back_inserter(result));
-    return result;
+    SHA256_CTX context;
+    if(!SHA256_Init(&context))
+        return false;
+    if(!SHA256_Update(&context, (unsigned char*)input, length))
+        return false;
+    return SHA256_Final(md, &context) != 0;
+
 }
 
-std::string Authorization::Hasher_(std::string login, std::string pass) {
+unsigned char * Authorization::Hasher_(std::string login, std::string pass) {
     std::string salt = login;
     int j = 0;
     for (int i = login.size()-1; i >= 0; --i)
         salt[j++] = login[i];  // salt - reversed login - unique
-    boost::uuids::detail::md5 hash;
-    boost::uuids::detail::md5::digest_type digest;
 
-    hash.process_bytes(pass.data(), pass.size());
-    hash.get_digest(digest);
-    std::string new_hash = toString_(digest)+salt;
-
-    hash.process_bytes(new_hash.data(), new_hash.size());
-    hash.get_digest(digest);
-    return toString_(digest);
+    unsigned char md[SHA256_DIGEST_LENGTH]; // 32 bytes
+    const char * str_c = pass.c_str();
+    char * copy = new char[strlen(str_c)];
+    strcpy(copy, str_c);
+    if (!simpleSHA256(copy, pass.size(), md)) {
+        std::cerr << "error in hasher" << std::endl;
+    }
+    delete str_c;
+    return md;
 }
 
-bool Authorization::IsAuth_(std::string login) {
-    return Users_[login].is_conn;
+bool Authorization::RemoveUser(std::string login, std::string pass) {
+    if (Users_.count(login) == 0) {
+        return false;
+    }
+    unsigned char *pass_hash = Hasher_(login, pass);
+    if (Users_[login].pass_hash == pass_hash) {
+        Users_.erase(login);
+        return true;
+    }
+    return false;
+}
+
+bool Authorization::IsAuth(std::string login, std::string pass, int table_id) {
+    unsigned char *pass_hash = Hasher_(login, pass);
+    int u_id = Users_[login].table_id;
+    unsigned char *u_hash = Users_[login].pass_hash;
+    return u_id == table_id && u_hash == pass_hash;
 }
 
 bool Authorization::Registration(std::string login, std::string pass) {
@@ -51,18 +67,6 @@ bool Authorization::CheckCollisions_(std::string login) {
     } else {
         return false;
     }
-}
-
-bool Authorization::SignIn(std::string login, std::string pass) {
-    if (IsAuth_(login)) {
-        return false;
-    }
-    std::string hash = Hasher_(login, pass);
-    if (Users_[login].pass_hash == hash) {
-        // toDo some signIn logic
-        return true;
-    }
-    return false;
 }
 
 Authorization::Authorization(std::string login) {

@@ -13,7 +13,7 @@
 
 struct UserInfo {
     std::string login;
-    std::string pass_hash;
+    unsigned char *pass_hash;
     boost::uuids::uuid client_id;
     bool is_conn;
     int table_id;

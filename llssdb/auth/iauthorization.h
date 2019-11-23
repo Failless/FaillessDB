@@ -14,14 +14,9 @@
 class IAuthorization : boost::noncopyable {
 public:
     virtual bool Registration(std::string login, std::string pass) = 0;
-    virtual bool SignIn(std::string login, std::string pass) = 0;
+    virtual bool IsAuth(std::string login, std::string pass, int table_id) = 0;
+    virtual bool RemoveUser(std::string login, std::string pass) = 0;
     virtual ~IAuthorization() = default;
-
-    // mock_test1
-    int Test(std::string login, std::string pass) {
-        Registration(std::move(login), std::move(pass));
-        return EXIT_SUCCESS;
-    }
 };
 
 #endif //FAILLESS_IAUTHORIZATION_H

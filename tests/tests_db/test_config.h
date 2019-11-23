@@ -23,7 +23,7 @@ public:
     }
 };
 
-TEST(Parser, ReadConfig_) {
+TEST(ReadConfig_, Parser) {
     MockConfig conf;
     EXPECT_CALL(conf, ParseConfig_(conf.config)).Times(AtLeast(1));
     EXPECT_EQ(conf.ReadConfig_(), EXIT_SUCCESS);

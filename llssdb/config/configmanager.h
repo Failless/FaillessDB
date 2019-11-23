@@ -11,7 +11,8 @@ class ConfigManager {
 public:
     ConfigManager() = default;
     ~ConfigManager() = default;
-    struct Settings Config;
+    Settings Config;
+
     bool ReadConfig_();
 
 private:

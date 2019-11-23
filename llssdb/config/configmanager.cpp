@@ -7,6 +7,7 @@
 bool ConfigManager::ReadConfig_() {
     // reading
     std::string config = "info from file";
+
     ParseConfig_(config);
     return true;
 }
