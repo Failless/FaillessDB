@@ -1,5 +1,7 @@
-#include <iostream>
+#include "llsscli/core/client.h"
+
+using namespace failless::client::core;
 
 int main(int argc, char **argv) {
-  return 0;
+    Client user = Client();
 }
