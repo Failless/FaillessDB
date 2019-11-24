@@ -7,10 +7,12 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 file(GLOB SOURCES ${SRC_DIR}/core/*.cpp
                   ${SRC_DIR}/network/*.cpp
+                  ${SRC_DIR}/serialization/*.cpp
                   ${SRC_DIR}/filesystem/*.cpp)
 
 file(GLOB HEADERS ${SRC_DIR}/core/*.h
                   ${SRC_DIR}/network/*.h
+                  ${SRC_DIR}/serialization/*.h
                   ${SRC_DIR}/file_system/*.h)
 
 add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
