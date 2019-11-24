@@ -42,6 +42,8 @@ add_subdirectory(${FAILLESS_CLIENT_LIB})
 # compile server
 add_executable(failless-server ${DATABSE_SRC_LIST})
 target_link_libraries(failless-server llssdb)
+target_link_libraries(failless-server ${Boost_LIBRARIES})
+target_link_libraries(failless-server ${msgpack_LIBRARIES})
 
 # compile client
 add_executable(failless-cli ${CLIENT_SRC_LIST})

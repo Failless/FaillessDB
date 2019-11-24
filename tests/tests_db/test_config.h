@@ -8,25 +8,27 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "llssdb/config/configmanager.h"
+#include "llssdb/utils/config_manager.h"
+#include "llssdb/common/settings.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
 
-
-class MockConfig : public ConfigManager {
+class MockConfig : public failless::db::utils::ConfigManager {
 public:
-    std::string config;
-    MOCK_METHOD1(ParseConfig_, std::string(std::string config));
-    MockConfig() {
-        config = "config_info";
-    }
+    MOCK_METHOD2(WriteToSettings_, void(std::string settings, std::string stream));
 };
 
-TEST(ReadConfig_, Parser) {
+TEST(WriteToSettings_, Parser) {
     MockConfig conf;
-    EXPECT_CALL(conf, ParseConfig_(conf.config)).Times(AtLeast(1));
-    EXPECT_EQ(conf.ReadConfig_(), EXIT_SUCCESS);
+    failless::db::common::Settings settings;
+    std::string settings_fake;
+    std::string fake_stream;
+
+    EXPECT_CALL(conf, WriteToSettings_(settings_fake, fake_stream)).Times(AtLeast(1));
+
+    EXPECT_EQ(conf.Initialize(settings), true);
+
 }
 
 #endif //FAILLESS_TEST_CONFIG_H
