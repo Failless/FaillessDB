@@ -1,5 +1,5 @@
-#ifndef FAILLESS_SERIALIZATION_H
-#define FAILLESS_SERIALIZATION_H
+#ifndef FAILLESS_SERIALIZER_INTERFACE_H
+#define FAILLESS_SERIALIZER_INTERFACE_H
 
 #include <boost/noncopyable.hpp>
 #include <msgpack.hpp>
@@ -31,4 +31,4 @@ private:
 } // namespace llsscli
 } // namespace failless
 
-#endif //FAILLESS_SERIALIZATION_H
+#endif //FAILLESS_SERIALIZER_INTERFACE_H
