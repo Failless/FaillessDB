@@ -10,7 +10,7 @@ namespace network {
 class NetworkClient : public NetworkClientInterface {
 public:
     NetworkClient() = default;
-    explicit NetworkClient(boost::asio::io_service& IO_Service, tcp::resolver::iterator end_point_iter);
+    NetworkClient(boost::asio::io_service& io_service, tcp::resolver::iterator end_point_iter);
     ~NetworkClient();
 
     void Close() override;

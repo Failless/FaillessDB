@@ -39,7 +39,7 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode, tcp::
         tcp::endpoint EndPoint = *EndPointIter;
 
         socket_.async_connect(EndPoint,
-                               boost::bind(&NetworkClient::OnConnect_, this, boost::asio::placeholders::error, ++EndPointIter));
+                              boost::bind(&NetworkClient::OnConnect_, this, boost::asio::placeholders::error, ++EndPointIter));
     }
 }
 
@@ -69,7 +69,7 @@ void NetworkClient::OnSend_(const boost::system::error_code& error_code)
         send_buffer_ = "";
 
         socket_.async_receive(boost::asio::buffer(recieve_buffer_, buflen_),
-                               boost::bind(&NetworkClient::OnReceive_, this, boost::asio::placeholders::error));
+                              boost::bind(&NetworkClient::OnReceive_, this, boost::asio::placeholders::error));
     }
     else
     {
