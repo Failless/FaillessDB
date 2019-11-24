@@ -14,17 +14,17 @@ TaskWorker::TaskWorker(const std::string &db_path) : ITaskWorker(db_path) {
 }
 
 // TODO(EgorBedov): this func is endless so make it void
-int TaskWorker::AddTask(const common::Task &task, common::operators command) {
+int TaskWorker::AddTask(const common::Task &task) {
     /// Check input_queue_ for emptiness
 
     /// If not empty then do task
-    DoTask(task, command);
+    DoTask(task);
     return EXIT_SUCCESS;
 };
 
 
-int TaskWorker::DoTask(const common::Task &task, common::operators command) {
-    switch (command) {
+int TaskWorker::DoTask(const common::Task &task) {
+    switch (task.command) {
         // TODO: order them in most frequent
         case common::operators::KILL:
             break;
@@ -49,13 +49,13 @@ int TaskWorker::DoTask(const common::Task &task, common::operators command) {
 
 bool TaskWorker::Set(const common::Task &task_in) {
     /// Create key-value pair(s) on hdd
-    bool result = fs_.Set(task_in.payload.key, task_in.payload.value, task_in.payload.size);
+    bool result = fs_.Set(*task_in.payload.key, task_in.payload.value, task_in.payload.size);
 
     /// Send answer to output_queue_
     /// Update in-memory storage
 
     if ( result ) {
-        std::cout << "{" << task_in.payload.key << ": " << task_in.payload.size << "} was set\n";
+        std::cout << "{" << *task_in.payload.key << ": " << task_in.payload.size << "} was set\n";
     }
     return result;
 }
@@ -64,16 +64,17 @@ bool TaskWorker::Set(const common::Task &task_in) {
 bool TaskWorker::Read(const common::Task &task_in) {
     common::Task task_out;
     task_out.client_id = task_in.client_id;
-    task_out.payload.key = task_in.payload.key;
+    task_out.payload.key = new std::string(*task_in.payload.key);
+    task_out.command = common::operators::ANSWER;
 
     bool result;
 
-    if ( local_storage_ && (local_storage_->at(task_in.payload.key).in_memory) ) {
-        task_out.payload.value = local_storage_->at(task_in.payload.key).value;
+    if ( local_storage_ && (local_storage_->at(*task_in.payload.key).in_memory) ) {
+        task_out.payload.value = local_storage_->at(*task_in.payload.key).value;
         result = true;
         std::cout << "In-Memory ";
     } else {
-        result = fs_.Get(task_in.payload.key, task_out.payload.value, task_out.payload.size);
+        result = fs_.Get(*task_in.payload.key, task_out.payload.value, task_out.payload.size);
         std::cout << "On HDD ";
     }
 
@@ -100,13 +101,13 @@ bool TaskWorker::Update(const common::Task &task_in) {
 
 bool TaskWorker::Delete(const common::Task &task_in) {
     /// Delete key-value pair(s) on hdd
-    bool result = fs_.Remove(task_in.payload.key);
+    bool result = fs_.Remove(*task_in.payload.key);
 
     /// Send answer
 
     /// Update in-memory storage
     if ( local_storage_ )
-        local_storage_->erase(task_in.payload.key);
+        local_storage_->erase(*task_in.payload.key);
 
     return result;
 }

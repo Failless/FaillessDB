@@ -13,15 +13,15 @@ using std::string;
 
 
 FileSystem::FileSystem(const string& db_path/*, std::map<string, ValueInfo>*& local_storage*/) {
-    OpenDB(db_path);
+    OpenDB_(db_path);
 //    LoadInMemory(local_storage);
 }
 
 FileSystem::~FileSystem() {
-    CloseDB();
+    CloseDB_();
 }
 
-bool FileSystem::OpenDB(const std::string &db_path) {
+bool FileSystem::OpenDB_(const std::string &db_path) {
     //    DB* db;
     Options options;
 
@@ -32,9 +32,6 @@ bool FileSystem::OpenDB(const std::string &db_path) {
     /// Create the DB if it's not already present
     options.create_if_missing = true;
 
-    /// Open default column family
-//    column_families.emplace_back(kDefaultColumnFamilyName, ColumnFamilyOptions());
-
     /// Open DB with default ColumnFamily
     Status s = DB::Open(options, db_path, &db_);
     if ( !s.ok() ) {
@@ -44,11 +41,7 @@ bool FileSystem::OpenDB(const std::string &db_path) {
     return true;
 }
 
-void FileSystem::CloseDB() {
-//    /// Delete all ColumnFamilyHandles
-//    for (auto handle : handles) {
-//        delete handle;
-//    }
+void FileSystem::CloseDB_() {
     /// Close db
     Status s = db_->Close();
     if ( !s.ok() )
@@ -89,16 +82,16 @@ bool FileSystem::Remove(const string& key) {
     return true;
 }
 
-bool FileSystem::EraseAll(const string& db_path) {
+void FileSystem::EraseAll(const string& db_path) {
     /// First of all close DB, otherwise it's undefined behaviour
-    CloseDB();
+    CloseDB_();
 
     /// Erase everything
     Options options;
     DestroyDB(db_path, options);
 
     /// Open DB again because we call for this func in destructor
-    OpenDB(db_path);
+    OpenDB_(db_path);
 }
 
 uint64_t FileSystem::AmountOfKeys() {

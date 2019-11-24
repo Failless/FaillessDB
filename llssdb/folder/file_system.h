@@ -1,5 +1,5 @@
-#ifndef FAILLESS_FILE_SYSTEM_H
-#define FAILLESS_FILE_SYSTEM_H
+#ifndef FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
+#define FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
 
 #include <rocksdb/db.h>
 #include <rocksdb/options.h>
@@ -20,7 +20,7 @@ public:
     virtual bool Set(const string &key, int8_t* value_in, size_t size_in) = 0;
 //    virtual bool GetRange(const string &key, int8_t* value) = 0;
     virtual bool Remove(const string &key) = 0;
-    virtual bool EraseAll(const string& db_path) = 0;
+    virtual void EraseAll(const string& db_path) = 0;
 };
 
 class FileSystem : public FileSystemInterface {
@@ -32,19 +32,17 @@ public:
     bool Set(const string &key, int8_t* value_in, size_t size_in) override;
 //    bool GetRange(const string &key, int8_t* value) override;
     bool Remove(const string &key) override;
-    bool EraseAll(const string& db_path) override;
+    void EraseAll(const string& db_path) override;
 
     uint64_t AmountOfKeys();
     void LoadInMemory(std::map<string, ValueInfo>*& local_storage);
 
 private:
-    bool OpenDB(const string &db_path);
-    void CloseDB();
+    bool OpenDB_(const string &db_path);
+    void CloseDB_();
     rocksdb::DB *db_;
-//    std::vector<rocksdb::ColumnFamilyDescriptor> column_families;
-//    std::vector<rocksdb::ColumnFamilyHandle*> handles;
 };
 
 }  // namespace failless::db::folder
 
-#endif  // FAILLESS_FILE_SYSTEM_H
+#endif  // FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
