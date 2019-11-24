@@ -3,13 +3,14 @@
 #include <openssl/sha.h>
 #include <cstring>
 
-bool simpleSHA256(void* input, unsigned long length, unsigned char* md)
-{
+bool simpleSHA256(void* input, unsigned long length, unsigned char* md) {
     SHA256_CTX context;
-    if(!SHA256_Init(&context))
+    if(!SHA256_Init(&context)) {
         return false;
-    if(!SHA256_Update(&context, (unsigned char*)input, length))
+    }
+    if(!SHA256_Update(&context, (unsigned char*)input, length)) {
         return false;
+    }
     return SHA256_Final(md, &context) != 0;
 
 }
@@ -32,7 +33,7 @@ unsigned char * Authorization::Hasher_(std::string login, std::string pass) {
 }
 
 bool Authorization::RemoveUser(std::string login, std::string pass) {
-    if (Users_.count(login) == 0) {
+    if (!Users_.count(login)) {
         return false;
     }
     unsigned char *pass_hash = Hasher_(login, pass);
@@ -63,7 +64,7 @@ bool Authorization::Registration(std::string login, std::string pass) {
 
 bool Authorization::CheckCollisions_(std::string login) {
     if (Users_.count(login)){
-        return true;  // such login already in structs
+        return true;
     } else {
         return false;
     }

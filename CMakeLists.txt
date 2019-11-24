@@ -87,4 +87,4 @@ target_link_libraries(run-db-tests ${OPENSSL_LIBRARIES})
 
 message("Boost version ${Boost_VERSION} found at ${Boost_DIR}")
 message("Msgpack version ${msgpack_VERSION} found at ${msgpack_DIR}")
-message("Msgpack version ${OPENSSL_VERSION} found at ${OPENSSL_LIBRARIES}")
+message("OpenSSL version ${OPENSSL_VERSION} found at ${OPENSSL_LIBRARIES}")
