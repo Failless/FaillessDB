@@ -22,7 +22,7 @@ unsigned char * Authorization::Hasher_(std::string login, std::string pass) {
         salt[j++] = login[i];  // salt - reversed login - unique
 
     unsigned char md[SHA256_DIGEST_LENGTH]; // 32 bytes
-    const char * str_c = pass.c_str();
+    const char * str_c = pass.c_str();  // TODO remove c-style 
     char * copy = new char[strlen(str_c)];
     strcpy(copy, str_c);
     if (!simpleSHA256(copy, pass.size(), md)) {

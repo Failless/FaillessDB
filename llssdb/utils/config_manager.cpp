@@ -40,7 +40,7 @@ void failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::
         } else if (name=="port") {
             settings.port = std::stoi(value);
         } else if (name=="setonly") {
-            if (std::stoi(value)==1){
+            if (std::stoi(value)==1) {
                 settings.setonly = true;
             }
         } else if (name=="readonly") {
@@ -48,7 +48,7 @@ void failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::
                 settings.readonly = true;
             }
         } else if (name=="lua") {
-            if (std::stoi(value)==1){
+            if (std::stoi(value)==1) {
                 settings.lua = true;
             }
         } else if (name=="users_to_table") {
