@@ -3,28 +3,30 @@
 
 #include "llsscli/core/client_interface.h"
 #include "llsscli/filesystem/filesystem.h"
-#include "llsscli/network/mp_client.h"
+#include "llsscli/network/network_client.h"
 
 namespace failless {
 namespace client {
 namespace core {
 
+using namespace failless::client::network;
+
 class Client : public ClientInterface {
  public:
-    Client() = default;
-    Client(network::MpClient *mp_client, filesystem::FileSystem *filesystem,
-           const std::string &config);
-    ~Client() = default;
-
-    size_t ReadQuery(std::string query) override;
-    size_t Send() override;
-    size_t Params(int argc, char **argv) override;
+    Client();
+    ~Client();
+    size_t Run() override;
 
  private:
-    size_t ParseQuery_(std::string query) override;
-    network::MpClient *mp_client_ = nullptr;
+    size_t SendRequestWithCB_(stringstream serialized_query, uintptr_t call_back) override;
+    size_t SerializeQuery_(string query) override;
+    size_t ExecQuery_(string tokens) override;
+    size_t ParseInput_(string raw_query) override;
+    size_t ReadInput_(int argc, char **argv) override;
+
+    network::NetworkClient *network_client_ = nullptr;
     filesystem::FileSystem *filesystem_ = nullptr;
-    std::string config_{};
+    string config_;
 };
 
 } // namespace core

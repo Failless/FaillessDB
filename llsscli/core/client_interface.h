@@ -8,20 +8,21 @@ namespace failless {
 namespace client {
 namespace core {
 
+using std::string;
+using std::stringstream;
+
 class ClientInterface : boost::noncopyable {
  public:
     ClientInterface() = default;
-    ~ClientInterface() = default;
-    virtual size_t ReadQuery(std::string query) = 0;
-    virtual size_t Send() = 0;
-    virtual size_t Params(int argc, char **argv) = 0;
-    int Test(std::string query) {
-        ReadQuery(std::move(query));
-        return EXIT_SUCCESS;
-    }
+    virtual ~ClientInterface() = default;
+    virtual size_t Run() = 0;
 
- private:
-    virtual size_t ParseQuery_(std::string query) = 0;
+private:
+    virtual size_t SendRequestWithCB_(stringstream serialized_query, uintptr_t call_back) = 0;
+    virtual size_t SerializeQuery_(string query) = 0;
+    virtual size_t ExecQuery_(string tokens) = 0;
+    virtual size_t ParseInput_(string raw_query) = 0;
+    virtual size_t ReadInput_(int argc, char **argv) = 0;
 };
 
 }  // namespace core
