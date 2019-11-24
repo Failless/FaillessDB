@@ -8,53 +8,53 @@
 #include <queue>
 #include <string>
 #include <map>
+#include <memory>
 
 #include "llssdb/common/task.h"
+#include "llssdb/folder/value_info.h"
 #include "llssdb/folder/file_system.h"
 
 namespace failless::db::folder {
 
-using std::string;
-
 class ITaskWorker : boost::noncopyable {
 public:
-    explicit ITaskWorker(const std::string& db_path) :
-        task_queue_(nullptr),
-        data_queue_(nullptr),
-        local_storage_(nullptr),
+    explicit ITaskWorker(const std::string& db_path)
+      : local_storage_(nullptr),
+        input_queue_(nullptr),
+        output_queue_(nullptr),
         fs_(db_path) {}
     virtual ~ITaskWorker() = default;
-
-    virtual int AddTask(const common::Task &task) = 0;
+    // TODO(EgorBedov): command should be parsed from task.query
+    virtual int AddTask(const common::Task &task, common::operators command) = 0;
 
 protected:
-    virtual int DoTask(const common::Task &task) = 0;
-    virtual bool Create(const common::Task &task) = 0;
-    virtual bool Read(const common::Task &task) = 0;
-    virtual bool Update(const common::Task &task) = 0;
-    virtual bool Delete(const common::Task &task) = 0;
+    virtual int DoTask(const common::Task &task, common::operators command) = 0;
+    virtual bool Set(const common::Task &task_in) = 0;
+    virtual bool Read(const common::Task &task_in) = 0;
+    virtual bool Update(const common::Task &task_in) = 0;
+    virtual bool Delete(const common::Task &task_in) = 0;
 
-    std::queue<common::Task> *task_queue_;
-    std::queue<int8_t> *data_queue_;
-    std::map<int, int8_t>* local_storage_;  // In-Memory data set
+    std::map<std::string, ValueInfo>* local_storage_;  // TODO(EgorBedov): string - type of key?
+    std::queue<common::Task> *input_queue_;
+    std::queue<common::Task> *output_queue_;
     FileSystem fs_;
 };
 
 class TaskWorker : public ITaskWorker {
 public:
-    explicit TaskWorker(const std::string& db_path) : ITaskWorker(db_path){};
+    explicit TaskWorker(const std::string& db_path);
     ~TaskWorker() override = default;
 
-    int AddTask(const common::Task &task) override;
+    int AddTask(const common::Task &task, common::operators command) override;
 
 protected:
-    int DoTask(const common::Task &task) override;
+    int DoTask(const common::Task &task, common::operators command) override;
 
     /// These functions will handle the "cache"
-    bool Create(const common::Task &task) override;
-    bool Read(const common::Task &task) override;
-    bool Update(const common::Task &task) override;
-    bool Delete(const common::Task &task) override;
+    bool Set(const common::Task &task_in) override;
+    bool Read(const common::Task &task_in) override;
+    bool Update(const common::Task &task_in) override;
+    bool Delete(const common::Task &task_in) override;
 };
 
 }  // namespace failless::db::folder

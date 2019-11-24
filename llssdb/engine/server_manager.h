@@ -16,8 +16,8 @@ namespace engine {
 class ServerManager : public IServerManager {
  public:
     ServerManager() = delete;
-    explicit ServerManager(boost::lockfree::queue<common::Task>& task_queue)
-        : task_queue_(task_queue),
+    explicit ServerManager(boost::lockfree::queue<common::Task>& input_queue_)
+        : input_queue_(input_queue_),
           //          folders_(0),  // I don't think that it's necessary but...
           is_run_(false){};
     ~ServerManager() override = default;
@@ -37,7 +37,7 @@ class ServerManager : public IServerManager {
     bool RedirectTask_(common::Task& task);
     common::operators HandleRequest_(common::Task& Task);
 
-    boost::lockfree::queue<common::Task>& task_queue_;
+    boost::lockfree::queue<common::Task>& input_queue_;
     std::vector<std::unique_ptr<folder::ITaskWorker>> folders_;
     bool is_run_ = false;
 };

@@ -5,13 +5,8 @@ namespace db {
 namespace common {
 
 bool Task::operator==(const Task &r) const {
-    if (data_size != r.data_size) {
+    if ( !(payload == r.payload) ) {
         return false;
-    }
-    for (size_t i = 0; i < data_size; ++i) {
-        if (data[i] != r.data[i]) {
-            return false;
-        }
     }
     if (query != r.query) {
         return false;
@@ -20,6 +15,23 @@ bool Task::operator==(const Task &r) const {
         return false;
     }
     return !(time != r.time);
+}
+
+bool Data::operator==(const failless::db::common::Data &r) const {
+    if ( size != r.size ) {
+        return false;
+    }
+    for ( size_t i = 0; i < size; ++i ) {
+        if ( value[i] != r.value[i] ) {
+            return false;
+        }
+    }
+    if ( folder_id != r.folder_id ) {
+        return false;
+    }
+    if ( key != r.key ) {
+        return false;
+    }
 }
 
 }  // namespace common
