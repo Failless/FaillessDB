@@ -49,6 +49,8 @@ target_link_libraries(failless-server ${ROCKSDB_LIBRARY})
 # compile client
 add_executable(failless-cli ${CLIENT_SRC_LIST})
 target_link_libraries(failless-cli llsscli)
+target_link_libraries(failless-cli ${Boost_LIBRARIES})
+target_link_libraries(failless-cli ${msgpack_LIBRARIES})
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
@@ -88,6 +90,6 @@ target_link_libraries(run-db-tests ${Boost_LIBRARIES})
 target_link_libraries(run-db-tests ${msgpack_LIBRARIES})
 target_link_libraries(run-db-tests ${ROCKSDB_LIBRARY})
 
-message("Boost version ${Boost_VERSION} found at ${Boost_DIR}")
+message("Boost version ${Boost_VERSION} found at ${Boost_LIBRARY_DIRS}")
 message("Msgpack version ${msgpack_VERSION} found at ${msgpack_DIR}")
 message("RocksDB version ${RocksDB_VERSION} found at ${RocksDB_DIR} and RocksDB library at ${ROCKSDB_LIBRARY}")

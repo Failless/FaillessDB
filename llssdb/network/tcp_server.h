@@ -14,6 +14,15 @@ namespace network {
 
 namespace ip = boost::asio::ip;
 
+struct ConnectionAdapter {
+    ConnectionAdapter() : conn(nullptr) {}
+    explicit ConnectionAdapter(boost::asio::io_service &io_service) {
+        conn.reset(new Connection(io_service));
+    }
+    ~ConnectionAdapter() = default;
+    std::shared_ptr<Connection> conn;
+};
+
 class TcpServer : public ITcpServer {
  public:
     TcpServer() = delete;
@@ -31,13 +40,14 @@ class TcpServer : public ITcpServer {
 
  private:
     void Accept_();
-    static void AcceptHandler_(const boost::system::error_code &error);
+    void AcceptHandler_(ConnectionAdapter adaptor,
+                        const boost::system::error_code &error);
 
     boost::lockfree::queue<common::Task> *queue_ = nullptr;
     boost::asio::io_service io_service_;
-    ip::tcp::socket socket_;
+//    ip::tcp::socket *socket_;
     /// The acceptor object used to accept incoming socket connections.
-    ip::tcp::acceptor acceptor_;
+    std::unique_ptr<ip::tcp::acceptor> acceptor_;
     /// The data to be sent to each client.
     std::vector<common::Task> tasks_;
     std::vector<Connection> connections_;
