@@ -4,8 +4,8 @@ namespace failless {
 namespace client {
 namespace network {
 
-NetworkClient::NetworkClient(boost::asio::io_service& IO_Service, tcp::resolver::iterator end_point_iter)
-        : io_service_(IO_Service), socket_(IO_Service), send_buffer_("")
+NetworkClient::NetworkClient(boost::asio::io_service& io_service, tcp::resolver::iterator end_point_iter)
+        : io_service_(io_service), socket_(io_service), send_buffer_("")
 {
     tcp::endpoint end_point = *end_point_iter;
 
