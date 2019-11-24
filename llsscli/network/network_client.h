@@ -1,39 +1,36 @@
-#ifndef LLSSCLI_NETWORK_MP_CLIENT_H_
-#define LLSSCLI_NETWORK_MP_CLIENT_H_
+#ifndef LLSSCLI_NETWORK_CLIENT_H_
+#define LLSSCLI_NETWORK_CLIENT_H_
 
-//#include <msgpack.hpp>
-#include "llsscli/network/mp_client_interface.h"
+#include "llsscli/network/network_client_interface.h"
 
 namespace failless {
 namespace client {
 namespace network {
 
-using namespace boost::asio;
+class NetworkClient : public NetworkClientInterface {
+public:
+    NetworkClient() = default;
+    explicit NetworkClient(boost::asio::io_service& IO_Service, tcp::resolver::iterator end_point_iter);
+    ~NetworkClient();
 
-const int MAX_MSG = 1024;
+    void Close() override;
 
-class MpClient : public MpClientInterface {
- public:
-    MpClient() = default;
-    ~MpClient() override = default;
+private:
+    void OnConnect_(const boost::system::error_code& error_code, tcp::resolver::iterator end_point_iter) override;
+    void OnReceive_(const boost::system::error_code& error_code) override;
+    void OnSend_(const boost::system::error_code& error_code) override;
+    void DoClose_() override;
 
-    void Start(const ip::tcp::endpoint &ep) override;
-    ptr Start(const ip::tcp::endpoint &ep,
-              const std::string &username) override;
-    void Stop() override;
-    bool Started() override;
+    boost::asio::io_service& io_service_;
+    tcp::socket socket_;
 
- protected:
-    size_t ReadComplete_(const boost::system::error_code &err,
-                         size_t bytes) override;
-
- private:
-    char read_buffer_[MAX_MSG]{};
-    char write_buffer_[MAX_MSG]{};
+    string send_buffer_;
+    static const size_t buflen_ = 100;
+    char recieve_buffer_[buflen_*2];
 };
 
 }  // namespace network
 }  // namespace client
 }  // namespace failless
 
-#endif  // LLSSCLI_NETWORK_MP_CLIENT_H_
+#endif  // LLSSCLI_NETWORK_CLIENT_H_
