@@ -2,7 +2,6 @@
 #include <memory>
 #include <thread>
 #include "llssdb/engine/server_manager.h"
-#include "llssdb/folder/data_worker.h"
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/utils/config_manager.h"
 

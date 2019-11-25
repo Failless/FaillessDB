@@ -1,100 +1,62 @@
-#ifndef LLSSDB_FOLDER_TASK_WORKER_H_
-#define LLSSDB_FOLDER_TASK_WORKER_H_
+// TODO(EgorBedov): consider time when it's necessary to update in-memory storage
+// after every query, or later ?
+
+#ifndef FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
+#define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 
 #include <boost/noncopyable.hpp>
 #include <queue>
 #include <string>
+#include <map>
+#include <memory>
+
 #include "llssdb/common/task.h"
+#include "llssdb/folder/value_info.h"
 #include "llssdb/folder/file_system.h"
 
-namespace failless {
-namespace db {
-namespace folder {
-
-using std::string;
+namespace failless::db::folder {
 
 class ITaskWorker : boost::noncopyable {
- public:
-    explicit ITaskWorker(FileSystem *_fs) : task_queue_(nullptr), data_queue_(nullptr), fs(_fs) {}
+public:
+    explicit ITaskWorker(const std::string& db_path)
+      : local_storage_(nullptr),
+        input_queue_(nullptr),
+        output_queue_(nullptr),
+        fs_(db_path) {}
     virtual ~ITaskWorker() = default;
-
+    // TODO(EgorBedov): command should be parsed from task.query
     virtual int AddTask(const common::Task &task) = 0;
 
- protected:
-    virtual bool IsEmpty() = 0;
+protected:
     virtual int DoTask(const common::Task &task) = 0;
-    virtual bool Create(const int8_t *value) = 0;
-    virtual bool Read(const int8_t *value) = 0;
-    virtual bool Update(const int8_t *value) = 0;
-    virtual bool Delete(const int8_t *value) = 0;
+    virtual bool Set(const common::Task &task_in) = 0;
+    virtual bool Read(const common::Task &task_in) = 0;
+    virtual bool Update(const common::Task &task_in) = 0;
+    virtual bool Delete(const common::Task &task_in) = 0;
 
-    std::queue<common::Task> *task_queue_;
-    std::queue<int8_t> *data_queue_;
-    FileSystem *fs;
+    std::map<std::string, ValueInfo>* local_storage_;  // TODO(EgorBedov): string - type of key?
+    std::queue<common::Task> *input_queue_;
+    std::queue<common::Task> *output_queue_;
+    FileSystem fs_;
 };
 
 class TaskWorker : public ITaskWorker {
- public:
-    explicit TaskWorker(FileSystem *_fs) : ITaskWorker(_fs){};
+public:
+    explicit TaskWorker(const std::string& db_path);
     ~TaskWorker() override = default;
 
-    int AddTask(const common::Task &task) override {
-        // Add async queue
-        DoTask(task);
-        return EXIT_SUCCESS;
-    };
+    int AddTask(const common::Task &task) override;
 
- protected:
-    int DoTask(const common::Task &task) override {
-        switch (task.command) {
-            // TODO: order them in most frequent
-            case common::operators::KILL:
-                break;
-            case common::operators::CREATE:
-                Create(task.data);
-                break;
-            case common::operators::GET:
-                Read(task.data);
-                break;
-            case common::operators::UPDATE:
-                Update(task.data);
-                break;
-            case common::operators::DELETE:
-                Delete(task.data);
-                break;
-            default:
-                return EXIT_FAILURE;
-        }
-        return EXIT_SUCCESS;
-    }
+protected:
+    int DoTask(const common::Task &task) override;
 
-    bool IsEmpty() override { return true; }
-
-    bool Create(const int8_t *value) override {
-        string key = "0";
-        // key is getting from value
-        return fs->Set(key, value);
-    }
-
-    bool Read(const int8_t *value) override {
-        string key = "0";
-        fs->Get(key);
-        return true;
-    }
-
-    bool Update(const int8_t *value) override {
-        string key = "0";
-        return fs->Set(key, value);
-    }
-
-    bool Delete(const int8_t *value) override {
-        string key = "0";
-        return fs->Remove(key);
-    }
+    /// These functions will handle the "cache"
+    bool Set(const common::Task &task_in) override;
+    bool Read(const common::Task &task_in) override;
+    bool Update(const common::Task &task_in) override;
+    bool Delete(const common::Task &task_in) override;
 };
 
-}  // namespace folder
-}  // namespace db
-}  // namespace failless
+}  // namespace failless::db::folder
 
-#endif  // LLSSDB_FOLDER_TASK_WORKER_H_
+#endif  // FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_

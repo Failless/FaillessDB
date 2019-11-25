@@ -6,13 +6,12 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "llssdb/folder/task.h"
+#include "llssdb/common/task.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
 
 
-namespace failless::db::tests {    int main(int argc, char **argv) {
-
+namespace failless::db::tests {
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -22,38 +21,46 @@ using std::string;
 class MockFileSystem : public FileSystem {
 public:
   explicit MockFileSystem(const string& db_path) : FileSystem(db_path) {};
-  MOCK_METHOD1(Get, bool(const string& key));
-  MOCK_METHOD2(Set, bool(const string& key, const int8_t* value));
-  MOCK_METHOD1(GetRange, bool(const string& key));
-  MOCK_METHOD1(Remove, bool( const string& key));
+  MOCK_METHOD3(Get, bool(const string &key, int8_t*& value_out, size_t size_out));
+  MOCK_METHOD3(Set, bool(const string &key, int8_t* value_in, size_t size_in));
+//  MOCK_METHOD1(GetRange, bool(const string& key));
+  MOCK_METHOD1(Remove, bool(const string& key));
 };
 
-string test_db_path = "/storage/test_user/test_file";
+//string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
 
-TEST(FileSystem, Set_and_Get) {
+TEST(FileSystem, Set_And_Get) {
     FileSystem fs(test_db_path);
     string key = "test_key";
-    int8_t value[3] = {1, 2, 3};
+    size_t size = 3;
+    auto value = new int8_t[size];
+    for ( size_t iii = 0; iii < size; ++iii ) {
+        value[iii] = iii;
+    }
 
-    EXPECT_EQ(fs.Set(key, value), true);
-    EXPECT_EQ(fs.Get(key), true);
+    fs.Set(key, value, size);
+    EXPECT_EQ(fs.Get(key, value, size), true);
+    fs.EraseAll(test_db_path);
+    EXPECT_EQ(fs.Get(key, value, size), false);
 }
 
-TEST(FileSystem, GetRange) {
+TEST(FileSystem, Full_Functionality_Test) {
     FileSystem fs(test_db_path);
     string key = "test_key";
+    size_t size = 3;
+    auto value = new int8_t[size];
+    for ( size_t iii = 0; iii < size; ++iii ) {
+        value[iii] = iii;
+    }
 
-//    EXPECT_CALL(fs, GetRange(key)).Times(1);
-//    fs.GetRange(key);
+    // it's important to keep them together
+    // so the db won't be filled with same pairs
+    EXPECT_EQ(fs.Set(key, value, size), true);
+    EXPECT_EQ(fs.Get(key, value, size), true);
+    EXPECT_EQ(fs.Remove(key), true);
+    fs.EraseAll(test_db_path);
 }
 
-TEST(FileSystem, Remove) {
-    FileSystem fs(test_db_path);
-    string key = "test_key";
-
-//    EXPECT_CALL(fs, Remove(key)).Times(1);
-//    fs.Remove(key);
-}
 
 }
 

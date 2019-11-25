@@ -27,7 +27,7 @@ void ServerManager::Run() {
                 break;
             }
             case common::operators::KILL: {
-                KillFolder_(task.folder_id);
+                KillFolder_(task.payload.folder_id);
                 break;
             }
             case common::operators::CONNECT: {

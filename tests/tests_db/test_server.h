@@ -6,6 +6,7 @@
 #include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
+#include "llssdb/common/task.h"
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/network/tcp_server_interface.h"
 #include "tests/tests_db/tcp_server_mock.h"
@@ -42,14 +43,22 @@ TEST(ServerTest, PushTask) {
     //                   has to. May be I made a mistake when I deleted default constructor for the
     //                   parent of this class
     MockTcpServer mock_tcp_server("0.0.0.0", 11556);
-    std::string query("SET key1 ");
+    auto *query = new std::string("SET key1 ");
     boost::uuids::random_generator generator;
     boost::uuids::uuid client_id = generator();
     auto now = boost::chrono::system_clock::now();
     auto ms = boost::chrono::time_point_cast<boost::chrono::milliseconds>(now);
-    int8_t val[3] = {1, 2, 3};
-    common::Task task(0, 3, val, &query, client_id,
+    short folder_id = 0;
+    auto *key = new std::string("key1");
+    size_t size = 3;
+    auto value = new int8_t[size];
+    for ( size_t iii = 0; iii < size; ++iii ) {
+        value[iii] = iii;
+    }
+    common::Task task(folder_id, size, key, value, query,
+                      common::operators::SET, client_id,
                       boost::chrono::microseconds(ms.time_since_epoch().count()));
+
     EXPECT_CALL(mock_tcp_server, PushTask_(task)).Times(AtLeast(1));
 }
 
