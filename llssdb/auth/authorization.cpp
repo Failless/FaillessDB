@@ -3,22 +3,22 @@
 #include <openssl/sha.h>
 // #include <cstring>
 
-bool simpleSHA256(void* input, unsigned long length, unsigned char* md) {
+bool simpleSHA256(void *input, unsigned long length, unsigned char *md) {
     SHA256_CTX context;
-    if(!SHA256_Init(&context)) {
+    if (!SHA256_Init(&context)) {
         return false;
     }
-    if(!SHA256_Update(&context, (unsigned char*)input, length)) {
+    if (!SHA256_Update(&context, (unsigned char *) input, length)) {
         return false;
     }
     return SHA256_Final(md, &context) != 0;
 
 }
 
-unsigned char * Authorization::Hasher_(std::string login, std::string pass) {
+unsigned char *Authorization::Hasher_(std::string login, std::string pass) {
     std::string salt = login;
     int j = 0;
-    for (int i = login.size()-1; i >= 0; --i)
+    for (int i = login.size() - 1; i >= 0; --i)
         salt[j++] = login[i];  // salt - reversed login - unique
 
     pass += salt;  // правильно было бы хешировать, а потом солить и снова хешировать,
@@ -69,7 +69,7 @@ bool Authorization::Registration(std::string login, std::string pass) {
 }
 
 bool Authorization::CheckCollisions_(std::string login) {
-    if (Users_.count(login)){
+    if (Users_.count(login)) {
         return true;
     } else {
         return false;

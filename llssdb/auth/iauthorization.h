@@ -14,8 +14,11 @@
 class IAuthorization : boost::noncopyable {
 public:
     virtual bool Registration(std::string login, std::string pass) = 0;
+
     virtual bool IsAuth(std::string login, std::string pass, int table_id) = 0;
+
     virtual bool RemoveUser(std::string login, std::string pass) = 0;
+
     virtual ~IAuthorization() = default;
 };
 
