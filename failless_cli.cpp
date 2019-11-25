@@ -1,11 +1,14 @@
 #include "llsscli/core/client.h"
+#include "llsscli/config/config.h"
 
 using namespace failless::client::core;
+using namespace failless::client::config;
 
 int main(int argc, char **argv) {
     ClientConfig test_interface_data;
     test_interface_data.user_name = "user";
-    test_interface_data.user_request = "SEND my.txt";
+    test_interface_data.user_request = "SEND my.txt FROM .";
+//    test_interface_data.user_request = "GET my.txt FROM .";
 
     test_interface_data.payload_dest_id = 0;
     test_interface_data.payload_key = "key";
