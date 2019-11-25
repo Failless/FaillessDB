@@ -7,11 +7,6 @@ namespace failless {
 namespace client {
 namespace network {
 
-struct NetworkConfig {
-    string db_host = "";
-    string db_port = "";
-};
-
 class NetworkClient : public NetworkClientInterface {
 public:
     NetworkClient() = default;

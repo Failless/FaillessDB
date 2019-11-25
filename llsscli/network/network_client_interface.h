@@ -14,6 +14,7 @@
 #include <boost/asio.hpp>
 #include <thread>
 #include <exception>
+#include "llsscli/config/config.h"
 
 namespace failless {
 namespace client {
@@ -27,6 +28,8 @@ using std::cerr;
 using std::endl;
 using std::exception;
 using namespace boost;
+
+using namespace failless::client::config;
 
 class NetworkClientInterface : boost::noncopyable {
 public:
