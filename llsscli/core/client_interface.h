@@ -4,12 +4,22 @@
 #include <boost/noncopyable.hpp>
 #include <string>
 
+#include "llsscli/filesystem/filesystem.h"
+#include "llsscli/serialization/serializer.h"
+#include "llsscli/network/network_client.h"
+#include "llsscli/config/config.h"
+
 namespace failless {
 namespace client {
 namespace core {
 
 using std::string;
 using std::stringstream;
+
+using namespace failless::client::network;
+using namespace failless::client::filesystem;
+using namespace failless::client::serializer;
+using namespace failless::client::config;
 
 class ClientInterface : boost::noncopyable {
  public:
@@ -20,7 +30,7 @@ class ClientInterface : boost::noncopyable {
 private:
     virtual size_t SendRequestWithCB_(stringstream serialized_query, uintptr_t call_back) = 0;
     virtual size_t SerializeQuery_(string query) = 0;
-    virtual size_t ExecQuery_(string tokens) = 0;
+    virtual size_t ExecQuery_() = 0;
     virtual size_t ParseInput_(string raw_query) = 0;
     virtual size_t ReadInput_(int argc, char **argv) = 0;
 };
