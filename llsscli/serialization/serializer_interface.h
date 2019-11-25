@@ -7,11 +7,16 @@
 #include <iostream>
 #include <sstream>
 
+#include "llsscli/config/config.h"
+
 namespace failless {
 namespace client {
 namespace serializer {
 
 using std::stringstream;
+using std::string;
+
+using namespace failless::client::config;
 
 class SerializerInterface : boost::noncopyable {
 public:
