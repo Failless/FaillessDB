@@ -2,7 +2,6 @@
 #define LLSSDB_AUTH_AUTHORIZATION_H_
 
 #include "llssdb/auth/iauthorization.h"
-// #include "llssdb/auth/user_info.h"
 
 #include <algorithm>
 #include <string>

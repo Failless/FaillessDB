@@ -1,7 +1,7 @@
 #include "llssdb/auth/authorization.h"
 #include <iostream>
 #include <openssl/sha.h>
-#include <cstring>
+// #include <cstring>
 
 bool simpleSHA256(void* input, unsigned long length, unsigned char* md) {
     SHA256_CTX context;
@@ -21,14 +21,20 @@ unsigned char * Authorization::Hasher_(std::string login, std::string pass) {
     for (int i = login.size()-1; i >= 0; --i)
         salt[j++] = login[i];  // salt - reversed login - unique
 
+    pass += salt;  // правильно было бы хешировать, а потом солить и снова хешировать,
+    // но даже если солить таким способом, как у нас - нельзя получить доступ к аккаунтам с одинаковыми паролями,
+    // ломав лишь один, т.к. итоговые хэши все равно различны
+
     unsigned char md[SHA256_DIGEST_LENGTH]; // 32 bytes
-    const char * str_c = pass.c_str();  // TODO remove c-style 
-    char * copy = new char[strlen(str_c)];
-    strcpy(copy, str_c);
-    if (!simpleSHA256(copy, pass.size(), md)) {
+
+    // const char * str_c = pass.c_str(); 
+    // char * copy = new char[strlen(str_c)];
+    // strcpy(copy, str_c);
+
+    if (!simpleSHA256(&pass, pass.size(), md)) {
         std::cerr << "error in hasher" << std::endl;
     }
-    delete str_c;
+    // delete str_c;
     return md;
 }
 
@@ -74,3 +80,7 @@ Authorization::Authorization(std::string login) {
 
 }
 
+int main() {
+    Authorization A;
+    A.Registration("fuck", "dick");
+}

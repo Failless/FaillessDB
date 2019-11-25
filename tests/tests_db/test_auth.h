@@ -16,7 +16,6 @@ public:
     std::string pass;
     MOCK_METHOD1(CheckCollisions_, bool(std::string login));
     MOCK_METHOD2(Hasher_, unsigned char *(std::string login, std::string pass));
-    // MOCK_METHOD3(IsAuth, bool(std::string login, std::string pass, int table_id));
     MockAuth() {
         login = "login";
         pass = "pass";
