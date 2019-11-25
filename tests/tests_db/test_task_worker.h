@@ -7,10 +7,22 @@
 #include "llssdb/common/task.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
+///////////////////////////////////////////////////////////////////////////////////
+/// README:                                                                     ///
+/// If you build this project via CLion:                                        ///
+///      1. Choose first path                                                   ///
+///      2. Comment second one                                                  ///
+///      3. Create next empty folders manually:                                 ///
+///          cmake-build-debug/llssdb/CMakeFiles/llssdb.dir/storage             ///
+///          cmake-build-debug/llssdb/CMakeFiles/llssdb.dir/storage/test_user   ///
+///                                                                             ///
+/// If you build this project via "cmake . && make":                            ///
+///      1. Choose second path                                                  ///
+///      2. Comment first one                                                   ///
+///////////////////////////////////////////////////////////////////////////////////
 
-// If tests doesnt work and the message is "failed to open a database"
-// go to directory in "cmake-build-debug" down below and create it
-const std::string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
+//const std::string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
+const std::string test_db_path = "./llssdb/storage/test_user";
 
 namespace failless::db::tests {
 
