@@ -4,38 +4,14 @@ namespace failless {
 namespace client {
 namespace core {
 
-Client::Client() {
-    try {
-        cout << "Client is starting..." << endl;
-        boost::asio::io_service IO_Service;
-
-        tcp::resolver Resolver(IO_Service);
-
-        tcp::resolver::query Query("127.0.0.1", "11564");
-
-        tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
-
-        network_client_ = new NetworkClient(IO_Service, EndPointIterator);
-
-        cout << "Client is started!" << endl;
-
-        cout << "Enter a query string " << endl;
-
-        std::thread ClientThread(boost::bind(&boost::asio::io_service::run, &
-                IO_Service));
-
-//        network_client_->Close();
-        ClientThread.join();
-    }
-    catch (std::exception &e) {
-        cerr << e.what() << endl;
-    }
-
-    cout << "\nClosing";
+Client::Client(ClientConfig test_data) {
+    config_ = test_data;
+    Run();
 }
 
 Client::~Client() {
     delete network_client_;
+    delete filesystem_;
 }
 
 size_t Client::Run() {
@@ -46,6 +22,14 @@ size_t Client::Run() {
     //запустить сетевой клиент (передать host port)
 
     //вернуть статус запуска
+
+    boost::asio::io_service io_service;
+    NetworkConfig net_config;
+    net_config.db_host = config_.db_host;
+    net_config.db_port = config_.db_port;
+
+    network_client_ = new NetworkClient(io_service, net_config);
+
     return 0;
 }
 

@@ -3,6 +3,7 @@
 
 #include "llsscli/core/client_interface.h"
 #include "llsscli/filesystem/filesystem.h"
+#include "llsscli/serialization/serializer.h"
 #include "llsscli/network/network_client.h"
 
 namespace failless {
@@ -10,11 +11,24 @@ namespace client {
 namespace core {
 
 using namespace failless::client::network;
+using namespace failless::client::filesystem;
+using namespace failless::client::serializer;
+
+struct ClientConfig {
+    string user_name = "";
+    string user_request = "";
+
+    int payload_dest_id = 0;
+    string payload_key = "";
+
+    string db_host = "";
+    string db_port = "";
+};
 
 class Client : public ClientInterface {
  public:
-    Client();
-    ~Client();
+    explicit Client(ClientConfig test_data);
+    ~Client() override;
     size_t Run() override;
 
  private:
@@ -24,9 +38,9 @@ class Client : public ClientInterface {
     size_t ParseInput_(string raw_query) override;
     size_t ReadInput_(int argc, char **argv) override;
 
-    network::NetworkClient *network_client_ = nullptr;
-    filesystem::FileSystem *filesystem_ = nullptr;
-    string config_;
+    NetworkClient *network_client_ = nullptr;
+    FileSystem *filesystem_ = nullptr;
+    ClientConfig config_;
 };
 
 } // namespace core
