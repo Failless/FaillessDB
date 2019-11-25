@@ -4,13 +4,36 @@ namespace failless {
 namespace client {
 namespace network {
 
-NetworkClient::NetworkClient(boost::asio::io_service& io_service, tcp::resolver::iterator end_point_iter)
-        : io_service_(io_service), socket_(io_service), send_buffer_("")
+NetworkClient::NetworkClient(boost::asio::io_service& io_service, NetworkConfig config)
+        : io_service_(io_service), socket_(io_service), send_buffer_(""), config_(config)
 {
-    tcp::endpoint end_point = *end_point_iter;
+    try {
+        cout << "Client is starting..." << endl;
 
-    socket_.async_connect(end_point,
-                          boost::bind(&NetworkClient::OnConnect_, this, boost::asio::placeholders::error, ++end_point_iter));
+        tcp::resolver Resolver(io_service_);
+
+        tcp::resolver::query Query(config_.db_host, config_.db_port);
+
+        tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
+        tcp::endpoint end_point = *EndPointIterator;
+
+        socket_.async_connect(end_point,
+                              boost::bind(&NetworkClient::OnConnect_, this, boost::asio::placeholders::error, ++EndPointIterator));
+
+        cout << "Client is started!" << endl;
+
+        cout << "Enter a query string " << endl;
+
+        std::thread ClientThread(boost::bind(&boost::asio::io_service::run, &io_service_));
+
+//        network_client_->Close();
+        ClientThread.join();
+    }
+    catch (std::exception &e) {
+        cerr << e.what() << endl;
+    }
+
+    cout << "\nClosing";
 }
 
 NetworkClient::~NetworkClient(){}
@@ -26,6 +49,7 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode, tcp::
     if (ErrorCode.value() == boost::system::errc::success)
     {
         cin >> send_buffer_;
+        send_buffer_ += "\0";
         cout << "Entered: " << send_buffer_ << endl;
 
         socket_.async_write_some(

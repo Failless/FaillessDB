@@ -7,10 +7,15 @@ namespace failless {
 namespace client {
 namespace network {
 
+struct NetworkConfig {
+    string db_host = "";
+    string db_port = "";
+};
+
 class NetworkClient : public NetworkClientInterface {
 public:
     NetworkClient() = default;
-    NetworkClient(boost::asio::io_service& io_service, tcp::resolver::iterator end_point_iter);
+    NetworkClient(boost::asio::io_service& io_service, NetworkConfig config);
     ~NetworkClient();
 
     void Close() override;
@@ -27,6 +32,8 @@ private:
     string send_buffer_;
     static const size_t buflen_ = 100;
     char recieve_buffer_[buflen_*2];
+
+    NetworkConfig config_;
 };
 
 }  // namespace network
