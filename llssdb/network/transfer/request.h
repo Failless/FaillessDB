@@ -6,12 +6,11 @@
 #include <boost/uuid/uuid.hpp>
 #include <cstdint>
 #include <string>
-#include "llssdb/engine/task.h"
+#include "llssdb/common/task.h"
 
 namespace failless {
 namespace db {
 namespace network {
-namespace transfer {
 
 enum request_type {
     SELECT = 0,
@@ -30,13 +29,13 @@ class Request : boost::noncopyable {
         data_ = data;
         size_ = size;
     }
-    engine::Task GetData() {
+    common::Task GetData() {
         boost::uuids::random_generator generator;
         boost::uuids::uuid client_id = generator();
         auto now = boost::chrono::system_clock::now();
         auto ms = boost::chrono::time_point_cast<boost::chrono::milliseconds>(now);
-        return engine::Task{0, nullptr, "query", client_id,
-                            boost::chrono::microseconds(ms.time_since_epoch().count())};
+        return common::Task(); //common::Task(0, nullptr, "query", client_id,
+                 //           boost::chrono::microseconds(ms.time_since_epoch().count()));
     }
 
  protected:
@@ -45,7 +44,6 @@ class Request : boost::noncopyable {
     request_type type_{};
 };
 
-}  // namespace transfer
 }  // namespace network
 }  // namespace db
 }  // namespace failless

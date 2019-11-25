@@ -1,8 +1,8 @@
-#include "llssdb/engine/task.h"
+#include "llssdb/common/task.h"
 
 namespace failless {
 namespace db {
-namespace engine {
+namespace common {
 
 bool Task::operator==(const Task &r) const {
     if (data_size != r.data_size) {
@@ -22,6 +22,6 @@ bool Task::operator==(const Task &r) const {
     return !(time != r.time);
 }
 
-}  // namespace engine
+}  // namespace common
 }  // namespace db
 }  // namespace failless

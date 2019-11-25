@@ -3,31 +3,113 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include "llssdb/folder/task.h"
+#include "llssdb/common/task.h"
+#include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
 
 namespace failless::db::tests {
 
 using ::testing::_;
-using ::testing::AtLeast;
+using folder::TaskWorker;
 
-class MockTaskWorker : public ITaskWorker {
- public:
-    explicit MockTaskWorker(DataWorker *_data_worker) : ITaskWorker(_data_worker){};
+class MockTaskWorker : public TaskWorker {
+public:
+    explicit MockTaskWorker(folder::FileSystem* _fs) : TaskWorker(_fs) {};
     MOCK_METHOD0(IsEmpty, bool());
-    MOCK_METHOD0(CompleteTask, int());
+    MOCK_METHOD1(Create, bool( const int8_t *value));
+    MOCK_METHOD1(Read, bool(const int8_t* value));
+    MOCK_METHOD1(Update, bool( const int8_t *value));
+    MOCK_METHOD1(Delete, bool( const int8_t* value));
 };
 
-TEST(ITaskManager, AddTask) {
-    auto *dw = new DataWorker;
-    MockTaskWorker mockTaskWorker(dw);
-    EXPECT_CALL(mockTaskWorker, IsEmpty()).Times(AtLeast(1));
-    EXPECT_CALL(mockTaskWorker, CompleteTask()).Times(AtLeast(1));
-    Task temp_task(Task::CREATE, "trash");
+TEST(TaskManager, Create) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    int8_t value[3] = {1, 2, 3};
+    common::Task temp_task(common::operators::CREATE, value, 3);
+
+    EXPECT_CALL(mockTaskWorker, Create(value)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
 }
 
-}  // namespace failless::db::tests
 
-#endif  // TESTS_DB_TEST_TASK_WORKER_H_
+TEST(TaskManager, Read) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    int8_t value[3] = {1, 2, 3};
+    common::Task temp_task(common::operators::GET, value, 3);
+
+//    EXPECT_CALL(mockTaskWorker, Read(value)).Times(1);
+    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+}
+
+TEST(TaskManager, Update) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    int8_t value[3] = {1, 2, 3};
+    common::Task temp_task(common::operators::UPDATE, value, 3);
+
+    EXPECT_CALL(mockTaskWorker, Update(value)).Times(1);
+    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+}
+
+TEST(TaskManager, Delete) {
+    MockTaskWorker mockTaskWorker(nullptr);
+    int8_t value[3] = {1, 2, 3};
+    common::Task temp_task(common::operators::DELETE, value, 3);
+
+//    EXPECT_CALL(mockTaskWorker, Delete(value)).Times(1);
+    EXPECT_EQ(mockTaskWorker.AddTask(temp_task), EXIT_SUCCESS);
+}
+/*
+TEST(TaskManager, CREATE_Calling_Set) {
+    MockFileSystem mockFileSystem(test_db_path);
+    int8_t value[3] = {1, 2, 3};
+    std::string key = "0";
+    common::Task temp_task(common::operators::CREATE, value[1]);
+
+    EXPECT_CALL(mockFileSystem, Set(key, value)).Times(1);
+
+    TaskWorker taskWorker(&mockFileSystem);
+    taskWorker.AddTask(temp_task);
+}
+
+TEST(TaskManager, READ_Calling_Get) {
+    MockFileSystem mockFileSystem(test_db_path);
+    int8_t value = 0;
+    string key = 0;
+    common::Task temp_task(common::operators::READ, value);
+
+    EXPECT_CALL(mockFileSystem, Get(key)).Times(1);
+
+    TaskWorker taskWorker(&mockFileSystem);
+    taskWorker.AddTask(temp_task);
+}
+
+
+TEST(TaskManager, UPDATE_Calling_Set) {
+    MockFileSystem mockFileSystem(test_db_path);
+    int8_t value[3] = {1, 2, 3};
+    std::string key = "0";
+    common::Task temp_task(common::operators::UPDATE, value[1]);
+
+    EXPECT_CALL(mockFileSystem, Set(key, value)).Times(1);
+
+    TaskWorker taskWorker(&mockFileSystem);
+    taskWorker.AddTask(temp_task);
+}
+
+TEST(TaskManager, DELETE_Calling_Remove) {
+    MockFileSystem mockFileSystem(test_db_path);
+    int8_t value = 0;
+    string key = "0";
+    common::Task temp_task(common::operators::DELETE, value);
+
+    EXPECT_CALL(mockFileSystem, Remove(key)).Times(1);
+
+    TaskWorker taskWorker(&mockFileSystem);
+    taskWorker.AddTask(temp_task);
+}
+
+ */
+
+} // namespace failless::db::tests
+
+#endif // LLSSDB_TESTS_TEST_TASK_WORKER_H

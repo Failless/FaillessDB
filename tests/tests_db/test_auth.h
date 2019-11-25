@@ -25,4 +25,4 @@ TEST(IAuthorization, Reg) {
     EXPECT_EQ(mockTaskWorker.Test(login, pass), EXIT_SUCCESS);
 }
 
-#endif
+#endif  // TESTS_DB_TEST_AUTH_H_

@@ -6,15 +6,14 @@
 namespace failless {
 namespace db {
 namespace network {
-namespace transfer {
 
 class Response {
  public:
     Response() = default;
     explicit Response(const Request &request);
-    explicit Response(const engine::Task &task) {
-        data_ = task.data;
-        size_ = task.data_size;
+    explicit Response(const common::Task &task) {
+//        data_ = task.data;
+//        size_ = task.data_size;
     }
 
  protected:
@@ -23,7 +22,6 @@ class Response {
     boost::uuids::uuid uuid{};
 };
 
-}  // namespace transfer
 }  // namespace network
 }  // namespace db
 }  // namespace failless
