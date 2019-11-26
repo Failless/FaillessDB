@@ -4,7 +4,7 @@ namespace failless {
 namespace client {
 namespace serializer {
 
-void Serializer::Serialize(Task data) {
+void Serializer::Serialize(Task& data) {
 
 }
 

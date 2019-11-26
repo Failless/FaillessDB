@@ -9,7 +9,7 @@ public:
     Serializer() = default;
     ~Serializer() = default;
 
-    void Serialize(Task data) override;
+    void Serialize(Task& data) override;
     size_t Deserialize(uintptr_t data) override;
 
     stringstream GetSS() const override;
