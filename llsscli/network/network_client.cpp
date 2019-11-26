@@ -4,8 +4,7 @@ namespace failless {
 namespace client {
 namespace network {
 
-NetworkClient::NetworkClient(boost::asio::io_service& io_service, NetworkConfig config)
-        : io_service_(io_service), socket_(io_service), send_buffer_(""), config_(config)
+NetworkClient::NetworkClient(boost::asio::io_service& io_service, NetworkConfig config) : io_service_(io_service), socket_(io_service), send_buffer_(""), config_(config)
 {
     try {
         cout << "Client is starting..." << endl;
