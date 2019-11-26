@@ -1,5 +1,5 @@
-#ifndef FAILLESS_CONFIG_H
-#define FAILLESS_CONFIG_H
+#ifndef FAILLESS_CONFIG_CONFIG_H_
+#define FAILLESS_CONFIG_CONFIG_H_
 
 #include <string>
 #include <vector>
@@ -49,4 +49,4 @@ struct NetworkConfig {
 } // namespace llsscli
 } // namespace failless
 
-#endif //FAILLESS_CONFIG_H
+#endif //FAILLESS_CONFIG_CONFIG_H_
