@@ -5,6 +5,7 @@
 #include <fstream>
 #include <vector>
 #include <iostream>
+#include <boost/noncopyable.hpp>
 
 #include "llsscli/config/config.h"
 
@@ -21,10 +22,10 @@ using std::streampos;
 
 using namespace failless::client::config;
 
-class FileSystemInterface {
+class FileSystemInterface : boost::noncopyable {
 public:
     FileSystemInterface() = default;
-    ~FileSystemInterface() = default;
+    virtual ~FileSystemInterface() = default;
 
     virtual size_t ReadFile(string file_path, unique_ptr< uint8_t[] >& payload) = 0;
     virtual size_t WriteFile(string file_path, size_t file_size, unique_ptr< uint8_t[] >& payload) = 0;
