@@ -34,6 +34,8 @@ struct ClientConfig {
 
     string db_host = "";
     string db_port = "";
+
+    ClientConfig(string user_n, string user_r, int payload_d, string payload_k, string db_h, string db_p) : user_name(user_n), user_request(user_r), payload_dest_id(payload_d), payload_key(payload_k), db_host(db_h), db_port(db_p) {}
 };
 
 struct NetworkConfig {
