@@ -1,6 +1,11 @@
 #ifndef LLSSCLIENT_CORE_CLIENT_H_
 #define LLSSCLIENT_CORE_CLIENT_H_
 
+#include "llsscli/filesystem/filesystem.h"
+#include "llsscli/serialization/serializer.h"
+#include "llsscli/network/network_client.h"
+#include "llsscli/config/config.h"
+
 #include "llsscli/core/client_interface.h"
 
 namespace failless {

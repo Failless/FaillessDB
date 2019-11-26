@@ -1,4 +1,7 @@
+#include <iostream>
 #include "llsscli/core/client.h"
+
+// https://www.modernescpp.com/index.php/c-core-guidelines-passing-smart-pointer#h2-get-your-e-book-at-leanpub - про unique_ptr
 
 namespace failless {
 namespace client {
