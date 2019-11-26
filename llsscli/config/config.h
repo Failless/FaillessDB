@@ -12,9 +12,9 @@ using std::string;
 using std::vector;
 
 struct Data {
-    std::vector<uint8_t> value;
+    std::vector<uint8_t>* value;
     size_t size = 0;
-    int folder_id = 0;
+    size_t folder_id = 0;
     string key = "";
 };
 
