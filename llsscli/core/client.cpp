@@ -23,12 +23,14 @@ size_t Client::Run() {
     serializer_.reset(new Serializer());
 
     parse_input_status_ = ParseInput_(config_.user_request);
-    if (parse_input_status_)
+    if (parse_input_status_) {
         return -1;
+    }
 
     exec_query_status_ = ExecQuery_();
-    if (exec_query_status_)
+    if (exec_query_status_) {
         return -1;
+    }
 
     boost::asio::io_service io_service;
     NetworkConfig net_config;
