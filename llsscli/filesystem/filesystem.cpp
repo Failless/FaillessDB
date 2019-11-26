@@ -1,12 +1,9 @@
+#include <fstream>
 #include "llsscli/filesystem/filesystem.h"
 
 namespace failless {
 namespace client {
 namespace filesystem {
-
-FileSystem::FileSystem() {
-
-}
 
 // to vector https://gist.github.com/looopTools/64edd6f0be3067971e0595e1e4328cbc
 // to vector https://stackoverflow.com/questions/15138353/how-to-read-a-binary-file-into-a-vector-of-unsigned-chars

@@ -9,8 +9,8 @@ namespace filesystem {
 
 class FileSystem : public FileSystemInterface {
 public:
-    FileSystem();
-    ~FileSystem();
+    FileSystem() = default;
+    ~FileSystem() override;
 
     size_t ReadFile(std::string file_path, std::unique_ptr< uint8_t[] >& payload) override;
     size_t WriteFile(std::string file_path, size_t file_size, std::unique_ptr< uint8_t[] >& payload) override;

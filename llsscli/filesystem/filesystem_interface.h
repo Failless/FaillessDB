@@ -2,12 +2,7 @@
 #define FAILLESS_FILESYSTEM_INTERFACE_H
 
 #include <string>
-#include <fstream>
-#include <vector>
-#include <iostream>
 #include <boost/noncopyable.hpp>
-
-#include "llsscli/config/config.h"
 
 namespace failless {
 namespace client {
