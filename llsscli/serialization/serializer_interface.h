@@ -2,9 +2,6 @@
 #define FAILLESS_SERIALIZER_INTERFACE_H
 
 #include <boost/noncopyable.hpp>
-#include <msgpack.hpp>
-#include <string>
-#include <iostream>
 #include <sstream>
 
 #include "llsscli/config/config.h"

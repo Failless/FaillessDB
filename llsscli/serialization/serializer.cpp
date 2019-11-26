@@ -1,3 +1,5 @@
+#include <msgpack.hpp>
+
 #include "llsscli/serialization/serializer.h"
 
 namespace failless {
