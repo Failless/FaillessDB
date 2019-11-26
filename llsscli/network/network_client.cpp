@@ -1,3 +1,5 @@
+#include <boost/bind.hpp>
+#include <iostream>
 #include "llsscli/network/network_client.h"
 
 namespace failless {
@@ -43,8 +45,7 @@ void NetworkClient::Close()
 void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode, tcp::resolver::iterator EndPointIter)
 {
     std::cout << "OnConnect..." << std::endl;
-    if (ErrorCode.value() == boost::system::errc::success)
-    {
+    if (ErrorCode.value() == boost::system::errc::success) {
         std::cin >> send_buffer_;
         send_buffer_ += "\0";
         std::cout << "Entered: " << send_buffer_ << std::endl;
@@ -54,8 +55,7 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode, tcp::
                 boost::bind(&NetworkClient::OnSend_, this,
                             boost::asio::placeholders::error));
     }
-    else if (EndPointIter != tcp::resolver::iterator())
-    {
+    else if (EndPointIter != tcp::resolver::iterator()) {
         socket_.close();
         tcp::endpoint EndPoint = *EndPointIter;
 
@@ -67,15 +67,13 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode, tcp::
 void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode)
 {
     std::cout << "receiving..." << std::endl;
-    if (ErrorCode.value() == boost::system::errc::success)
-    {
+    if (ErrorCode.value() == boost::system::errc::success) {
         std::cout << recieve_buffer_ << std::endl;
 
 //        socket_.async_read_some(boost::asio::buffer(recieve_buffer_, buflen_),
 //                               boost::bind(&NetworkClient::OnReceive_, this, boost::asio::placeholders::error));
     }
-    else
-    {
+    else {
         std::cout << "ERROR! OnReceive..." << std::endl;
         DoClose_();
     }
@@ -84,16 +82,14 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode)
 void NetworkClient::OnSend_(const boost::system::error_code& error_code)
 {
     std::cout << "sending..." << std::endl;
-    if (!error_code)
-    {
+    if (!error_code) {
         std::cout << "\""<< send_buffer_ <<"\" has been sent" << std::endl;
         send_buffer_ = "";
 
         socket_.async_receive(boost::asio::buffer(recieve_buffer_, buflen_),
                               boost::bind(&NetworkClient::OnReceive_, this, boost::asio::placeholders::error));
     }
-    else
-    {
+    else {
         std::cout << "OnSend closing" << std::endl;
         DoClose_();
     }

@@ -5,11 +5,7 @@
 //https://www.codeproject.com/Articles/1264257/Socket-Programming-in-Cplusplus-using-boost-asio-T
 
 #include <boost/core/noncopyable.hpp>
-#include <iostream>
-#include <string>
-#include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include "llsscli/config/config.h"
 
 namespace failless {
 namespace client {

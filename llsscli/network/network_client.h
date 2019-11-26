@@ -1,6 +1,9 @@
 #ifndef LLSSCLI_NETWORK_CLIENT_H_
 #define LLSSCLI_NETWORK_CLIENT_H_
 
+#include <string>
+#include "llsscli/config/config.h"
+
 #include "llsscli/network/network_client_interface.h"
 
 namespace failless {
