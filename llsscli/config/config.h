@@ -9,7 +9,6 @@ namespace client {
 namespace config {
 
 using std::string;
-using std::vector;
 using std::unique_ptr;
 
 struct Data {
