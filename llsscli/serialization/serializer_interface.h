@@ -23,7 +23,7 @@ public:
     SerializerInterface() = default;
     ~SerializerInterface() = default;
 
-    virtual void Serialize(uintptr_t data) = 0;
+    virtual void Serialize(Task data) = 0;
     virtual size_t Deserialize(uintptr_t data) = 0;
 
     virtual stringstream GetSS() const = 0;
