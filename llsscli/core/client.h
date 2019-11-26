@@ -9,7 +9,7 @@ namespace core {
 
 class Client : public ClientInterface {
  public:
-    explicit Client(ClientConfig test_data);
+    explicit Client(ClientConfig& test_data);
     ~Client() override;
     size_t Run() override;
 
@@ -20,9 +20,9 @@ class Client : public ClientInterface {
     size_t ParseInput_(string raw_query) override;
     size_t ReadInput_(int argc, char **argv) override;
 
-    NetworkClient *network_client_ = nullptr;
-    FileSystem *filesystem_ = nullptr;
-    Serializer *serializer_ = nullptr;
+    unique_ptr< NetworkClient > network_client_;
+    unique_ptr< FileSystem > filesystem_;
+    unique_ptr< Serializer > serializer_;
     ClientConfig config_;
 
     string query_tokens_[4];

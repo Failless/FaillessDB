@@ -4,15 +4,11 @@ namespace failless {
 namespace client {
 namespace core {
 
-Client::Client(ClientConfig test_data) {
-    config_ = test_data;
-    Run();
+Client::Client(ClientConfig& test_data) : config_(std::move(test_data)) {
+//    config_ = test_data;
 }
 
-Client::~Client() {
-    delete network_client_;
-    delete filesystem_;
-}
+Client::~Client() {}
 
 size_t Client::Run() {
     //открыть файл настроек
@@ -23,8 +19,8 @@ size_t Client::Run() {
 
     //вернуть статус запуска
 
-    filesystem_ = new FileSystem();
-    serializer_ = new Serializer();
+    filesystem_.reset(new FileSystem());
+    serializer_.reset(new Serializer());
 
     parse_input_status_ = ParseInput_(config_.user_request);
     if (parse_input_status_)
@@ -39,7 +35,7 @@ size_t Client::Run() {
     net_config.db_host = config_.db_host;
     net_config.db_port = config_.db_port;
 
-    network_client_ = new NetworkClient(io_service, net_config);
+    network_client_.reset(new NetworkClient(io_service, net_config));
 
     return 0;
 }
@@ -54,15 +50,15 @@ size_t Client::SerializeQuery_(string query) {
 
 size_t Client::ExecQuery_() {
     if (query_tokens_[0] == "SEND") {
-        filesystem_->ReadFile(query_tokens_[1]);
-        std::vector<uint8_t>* payload = filesystem_->GetPayload();
+        unique_ptr< uint8_t[] > payload;
+        filesystem_->ReadFile(query_tokens_[1], payload);
 
-        current_task_.client_id = config_.user_name;
-        current_task_.query = config_.user_request;
-        current_task_.payload.value = payload;
+        current_task_.client_id.reset( new string(config_.user_name));
+        current_task_.query.reset( new string(config_.user_request));
+        current_task_.payload.value.swap(payload);
         current_task_.payload.size = 0;
         current_task_.payload.folder_id = 0;
-        current_task_.payload.key = "";
+        current_task_.payload.key.reset( new string(""));
 
         serializer_->Serialize(current_task_);
     } else if (query_tokens_[0] == "GET") {
@@ -80,7 +76,7 @@ size_t Client::ParseInput_(string raw_query) {
         query_tokens_[i] = raw_query.substr(0, pos);
         std::cout << query_tokens_[i] << std::endl;
         raw_query.erase(0, pos + delimiter.length());
-        i++;
+        ++i;
     }
     std::cout << raw_query << std::endl;
     return 0;

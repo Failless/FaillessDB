@@ -15,6 +15,7 @@ namespace core {
 
 using std::string;
 using std::stringstream;
+using std::unique_ptr;
 
 using namespace failless::client::network;
 using namespace failless::client::filesystem;
