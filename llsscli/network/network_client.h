@@ -10,7 +10,7 @@ namespace network {
 class NetworkClient : public NetworkClientInterface {
 public:
     NetworkClient() = default;
-    NetworkClient(boost::asio::io_service& io_service, NetworkConfig config);
+    NetworkClient(boost::asio::io_service& io_service, config::NetworkConfig config);
     ~NetworkClient() = default;
 
     void Close() override;
@@ -24,11 +24,11 @@ private:
     boost::asio::io_service& io_service_;
     tcp::socket socket_;
 
-    string send_buffer_;
+    std::string send_buffer_;
     static const size_t buflen_ = 100;
     char recieve_buffer_[buflen_*2];
 
-    NetworkConfig config_;
+    config::NetworkConfig config_;
 };
 
 }  // namespace network

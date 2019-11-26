@@ -13,21 +13,12 @@ namespace failless {
 namespace client {
 namespace filesystem {
 
-using std::string;
-using std::vector;
-using std::ios;
-using std::ifstream;
-using std::unique_ptr;
-using std::streampos;
-
-using namespace failless::client::config;
-
 class FileSystemInterface : boost::noncopyable {
 public:
     virtual ~FileSystemInterface() = default;
 
-    virtual size_t ReadFile(string file_path, unique_ptr< uint8_t[] >& payload) = 0;
-    virtual size_t WriteFile(string file_path, size_t file_size, unique_ptr< uint8_t[] >& payload) = 0;
+    virtual size_t ReadFile(std::string file_path, std::unique_ptr< uint8_t[] >& payload) = 0;
+    virtual size_t WriteFile(std::string file_path, size_t file_size, std::unique_ptr< uint8_t[] >& payload) = 0;
 
 };
 

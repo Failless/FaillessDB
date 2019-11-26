@@ -13,22 +13,17 @@ namespace failless {
 namespace client {
 namespace serializer {
 
-using std::stringstream;
-using std::string;
-
-using namespace failless::client::config;
-
 class SerializerInterface : boost::noncopyable {
 public:
     virtual ~SerializerInterface() = default;
 
-    virtual void Serialize(Task& data) = 0;
+    virtual void Serialize(config::Task& data) = 0;
     virtual size_t Deserialize(uintptr_t data) = 0;
 
-    virtual stringstream GetSS() const = 0;
+    virtual std::stringstream GetSS() const = 0;
 
 private:
-    stringstream out_buffer_;
+    std::stringstream out_buffer_;
 };
 
 } // namespace serializer

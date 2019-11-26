@@ -4,7 +4,7 @@ namespace failless {
 namespace client {
 namespace serializer {
 
-void Serializer::Serialize(Task& data) {
+void Serializer::Serialize(config::Task& data) {
 
 }
 
@@ -12,7 +12,7 @@ size_t Serializer::Deserialize(uintptr_t data) {
     return 0;
 }
 
-stringstream Serializer::GetSS() const {
+std::stringstream Serializer::GetSS() const {
     return std::stringstream();
 }
 

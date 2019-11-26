@@ -4,7 +4,7 @@ namespace failless {
 namespace client {
 namespace core {
 
-Client::Client(ClientConfig& test_data) : config_(std::move(test_data)) {
+Client::Client(config::ClientConfig& test_data) : config_(std::move(test_data)) {
 //    config_ = test_data;
 }
 
@@ -19,8 +19,8 @@ size_t Client::Run() {
 
     //вернуть статус запуска
 
-    filesystem_.reset(new FileSystem());
-    serializer_.reset(new Serializer());
+    filesystem_.reset(new filesystem::FileSystem());
+    serializer_.reset(new serializer::Serializer());
 
     parse_input_status_ = ParseInput_(config_.user_request);
     if (parse_input_status_) {
@@ -33,32 +33,32 @@ size_t Client::Run() {
     }
 
     boost::asio::io_service io_service;
-    NetworkConfig net_config(config_.db_host, config_.db_port);
+    config::NetworkConfig net_config(config_.db_host, config_.db_port);
 
-    network_client_.reset(new NetworkClient(io_service, net_config));
+    network_client_.reset(new network::NetworkClient(io_service, net_config));
 
     return 0;
 }
 
-size_t Client::SendRequestWithCB_(stringstream serialized_query, uintptr_t call_back) {
+size_t Client::SendRequestWithCB_(std::stringstream serialized_query, std::uintptr_t call_back) {
     return 0;
 }
 
-size_t Client::SerializeQuery_(string query) {
+size_t Client::SerializeQuery_(std::string query) {
     return 0;
 }
 
 size_t Client::ExecQuery_() {
     if (query_tokens_[0] == "SEND") {
-        unique_ptr< uint8_t[] > payload;
+        std::unique_ptr< uint8_t[] > payload;
         filesystem_->ReadFile(query_tokens_[1], payload);
 
-        current_task_.client_id.reset( new string(config_.user_name));
-        current_task_.query.reset( new string(config_.user_request));
+        current_task_.client_id.reset( new std::string(config_.user_name));
+        current_task_.query.reset( new std::string(config_.user_request));
         current_task_.payload.value.swap(payload);
         current_task_.payload.size = 0;
         current_task_.payload.folder_id = 0;
-        current_task_.payload.key.reset( new string(""));
+        current_task_.payload.key.reset( new std::string(""));
 
         serializer_->Serialize(current_task_);
     } else if (query_tokens_[0] == "GET") {
@@ -67,8 +67,8 @@ size_t Client::ExecQuery_() {
     return 0;
 }
 
-size_t Client::ParseInput_(string raw_query) {
-    string delimiter = " ";
+size_t Client::ParseInput_(std::string raw_query) {
+    std::string delimiter = " ";
 
     size_t pos = 0;
     int i = 0;

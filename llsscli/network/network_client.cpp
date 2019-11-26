@@ -4,10 +4,10 @@ namespace failless {
 namespace client {
 namespace network {
 
-NetworkClient::NetworkClient(boost::asio::io_service& io_service, NetworkConfig config) : io_service_(io_service), socket_(io_service), send_buffer_(""), config_(std::move(config))
+NetworkClient::NetworkClient(boost::asio::io_service& io_service, config::NetworkConfig config) : io_service_(io_service), socket_(io_service), send_buffer_(""), config_(std::move(config))
 {
     try {
-        cout << "Client is starting..." << endl;
+        std::cout << "Client is starting..." << std::endl;
 
         tcp::resolver Resolver(io_service_);
 
@@ -19,9 +19,9 @@ NetworkClient::NetworkClient(boost::asio::io_service& io_service, NetworkConfig 
         socket_.async_connect(end_point,
                               boost::bind(&NetworkClient::OnConnect_, this, boost::asio::placeholders::error, ++EndPointIterator));
 
-        cout << "Client is started!" << endl;
+        std::cout << "Client is started!" << std::endl;
 
-        cout << "Enter a query string " << endl;
+        std::cout << "Enter a query string " << std::endl;
 
         std::thread ClientThread(boost::bind(&boost::asio::io_service::run, &io_service_));
 
@@ -29,10 +29,10 @@ NetworkClient::NetworkClient(boost::asio::io_service& io_service, NetworkConfig 
         ClientThread.join();
     }
     catch (std::exception &e) {
-        cerr << e.what() << endl;
+        std::cerr << e.what() << std::endl;
     }
 
-    cout << "\nClosing";
+    std::cout << "\nClosing";
 }
 
 void NetworkClient::Close()
@@ -42,12 +42,12 @@ void NetworkClient::Close()
 }
 void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode, tcp::resolver::iterator EndPointIter)
 {
-    cout << "OnConnect..." << endl;
+    std::cout << "OnConnect..." << std::endl;
     if (ErrorCode.value() == boost::system::errc::success)
     {
-        cin >> send_buffer_;
+        std::cin >> send_buffer_;
         send_buffer_ += "\0";
-        cout << "Entered: " << send_buffer_ << endl;
+        std::cout << "Entered: " << send_buffer_ << std::endl;
 
         socket_.async_write_some(
                 boost::asio::buffer(send_buffer_, send_buffer_.length()+1),
@@ -66,27 +66,27 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode, tcp::
 
 void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode)
 {
-    cout << "receiving..." << endl;
+    std::cout << "receiving..." << std::endl;
     if (ErrorCode.value() == boost::system::errc::success)
     {
-        cout << recieve_buffer_ << endl;
+        std::cout << recieve_buffer_ << std::endl;
 
 //        socket_.async_read_some(boost::asio::buffer(recieve_buffer_, buflen_),
 //                               boost::bind(&NetworkClient::OnReceive_, this, boost::asio::placeholders::error));
     }
     else
     {
-        cout << "ERROR! OnReceive..." << endl;
+        std::cout << "ERROR! OnReceive..." << std::endl;
         DoClose_();
     }
 }
 
 void NetworkClient::OnSend_(const boost::system::error_code& error_code)
 {
-    cout << "sending..." << endl;
+    std::cout << "sending..." << std::endl;
     if (!error_code)
     {
-        cout << "\""<< send_buffer_ <<"\" has been sent" << endl;
+        std::cout << "\""<< send_buffer_ <<"\" has been sent" << std::endl;
         send_buffer_ = "";
 
         socket_.async_receive(boost::asio::buffer(recieve_buffer_, buflen_),
@@ -94,7 +94,7 @@ void NetworkClient::OnSend_(const boost::system::error_code& error_code)
     }
     else
     {
-        cout << "OnSend closing" << endl;
+        std::cout << "OnSend closing" << std::endl;
         DoClose_();
     }
 

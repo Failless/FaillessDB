@@ -21,15 +21,6 @@ namespace client {
 namespace network {
 
 using boost::asio::ip::tcp;
-using std::string;
-using std::cin;
-using std::cout;
-using std::cerr;
-using std::endl;
-using std::exception;
-using namespace boost;
-
-using namespace failless::client::config;
 
 class NetworkClientInterface : boost::noncopyable {
 public:

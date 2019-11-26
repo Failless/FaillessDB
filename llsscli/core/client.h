@@ -9,24 +9,24 @@ namespace core {
 
 class Client : public ClientInterface {
  public:
-    explicit Client(ClientConfig& test_data);
+    explicit Client(config::ClientConfig& test_data);
     ~Client() override;
     size_t Run() override;
 
  private:
-    size_t SendRequestWithCB_(stringstream serialized_query, uintptr_t call_back) override;
-    size_t SerializeQuery_(string query) override;
+    size_t SendRequestWithCB_(std::stringstream serialized_query, std::uintptr_t call_back) override;
+    size_t SerializeQuery_(std::string query) override;
     size_t ExecQuery_() override;
-    size_t ParseInput_(string raw_query) override;
+    size_t ParseInput_(std::string raw_query) override;
     size_t ReadInput_(int argc, char **argv) override;
 
-    unique_ptr< NetworkClient > network_client_;
-    unique_ptr< FileSystem > filesystem_;
-    unique_ptr< Serializer > serializer_;
-    ClientConfig config_;
+    std::unique_ptr< network::NetworkClient > network_client_;
+    std::unique_ptr< filesystem::FileSystem > filesystem_;
+    std::unique_ptr< serializer::Serializer > serializer_;
+    config::ClientConfig config_;
 
-    string query_tokens_[4];
-    Task current_task_;
+    std::string query_tokens_[4];
+    config::Task current_task_;
 
     bool parse_input_status_;
     bool exec_query_status_;

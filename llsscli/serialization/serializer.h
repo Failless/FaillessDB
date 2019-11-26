@@ -9,13 +9,13 @@ public:
     Serializer() = default;
     ~Serializer() = default;
 
-    void Serialize(Task& data) override;
+    void Serialize(config::Task& data) override;
     size_t Deserialize(uintptr_t data) override;
 
-    stringstream GetSS() const override;
+    std::stringstream GetSS() const override;
 
 private:
-    stringstream out_buffer_;
+    std::stringstream out_buffer_;
 
 };
 
