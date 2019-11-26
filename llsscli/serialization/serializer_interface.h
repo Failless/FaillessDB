@@ -20,7 +20,7 @@ using namespace failless::client::config;
 
 class SerializerInterface : boost::noncopyable {
 public:
-    ~SerializerInterface() = default;
+    virtual ~SerializerInterface() = default;
 
     virtual void Serialize(Task& data) = 0;
     virtual size_t Deserialize(uintptr_t data) = 0;
