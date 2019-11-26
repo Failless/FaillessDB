@@ -12,15 +12,11 @@ public:
     FileSystem();
     ~FileSystem();
 
-    size_t ReadFile(string file_path) override;
-    size_t WriteFile(uintptr_t data) override;
-
-    vector<uint8_t>* GetPayload();
-    size_t CleanPayload() override;
+    size_t ReadFile(string file_path, unique_ptr< uint8_t[] >& payload) override;
+    size_t WriteFile(string file_path, size_t file_size, unique_ptr< uint8_t[] >& payload) override;
 
 private:
     string file_name_ = "";
-    vector<uint8_t>* payload_ = nullptr;
 };
 
 } // namespace filesystem
