@@ -11,7 +11,7 @@ class NetworkClient : public NetworkClientInterface {
 public:
     NetworkClient() = default;
     NetworkClient(boost::asio::io_service& io_service, NetworkConfig config);
-    ~NetworkClient();
+    ~NetworkClient() = default;
 
     void Close() override;
 

@@ -35,8 +35,6 @@ NetworkClient::NetworkClient(boost::asio::io_service& io_service, NetworkConfig 
     cout << "\nClosing";
 }
 
-NetworkClient::~NetworkClient(){}
-
 void NetworkClient::Close()
 {
     io_service_.post(
