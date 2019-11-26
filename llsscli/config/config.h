@@ -39,6 +39,8 @@ struct ClientConfig {
 struct NetworkConfig {
     string db_host = "";
     string db_port = "";
+
+    NetworkConfig(string db_h, string db_p) : db_host(db_h), db_port(db_p) {}
 };
 
 } // namespace core

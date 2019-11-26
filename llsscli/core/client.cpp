@@ -33,9 +33,7 @@ size_t Client::Run() {
     }
 
     boost::asio::io_service io_service;
-    NetworkConfig net_config;
-    net_config.db_host = config_.db_host;
-    net_config.db_port = config_.db_port;
+    NetworkConfig net_config(config_.db_host, config_.db_port);
 
     network_client_.reset(new NetworkClient(io_service, net_config));
 
