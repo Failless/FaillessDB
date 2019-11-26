@@ -56,6 +56,15 @@ size_t Client::ExecQuery_() {
     if (query_tokens_[0] == "SEND") {
         filesystem_->ReadFile(query_tokens_[1]);
         std::vector<uint8_t>* payload = filesystem_->GetPayload();
+
+        current_task_.client_id = config_.user_name;
+        current_task_.query = config_.user_request;
+        current_task_.payload.value = payload;
+        current_task_.payload.size = 0;
+        current_task_.payload.folder_id = 0;
+        current_task_.payload.key = "";
+
+        serializer_->Serialize(current_task_);
     } else if (query_tokens_[0] == "GET") {
         // TODO
     }

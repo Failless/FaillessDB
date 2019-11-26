@@ -26,6 +26,7 @@ class Client : public ClientInterface {
     ClientConfig config_;
 
     string query_tokens_[4];
+    Task current_task_;
 
     bool parse_input_status_;
     bool exec_query_status_;
