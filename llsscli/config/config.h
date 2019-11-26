@@ -10,17 +10,18 @@ namespace config {
 
 using std::string;
 using std::vector;
+using std::unique_ptr;
 
 struct Data {
-    std::vector<uint8_t>* value;
+    unique_ptr< uint8_t[] > value;
     size_t size = 0;
     size_t folder_id = 0;
-    string key = "";
+    unique_ptr< string > key;
 };
 
 struct Task {
-    string client_id = "";
-    string query = "";
+    unique_ptr< string > client_id;
+    unique_ptr< string > query;
     Data payload;
 };
 
