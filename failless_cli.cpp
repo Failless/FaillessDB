@@ -16,4 +16,5 @@ int main(int argc, char **argv) {
     test_interface_data.db_host = "127.0.0.1";
     test_interface_data.db_port = "11564";
     Client user = Client(test_interface_data);
+    user.Run();
 }
