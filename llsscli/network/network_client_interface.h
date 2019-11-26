@@ -6,14 +6,9 @@
 
 #include <boost/core/noncopyable.hpp>
 #include <iostream>
-#include <boost/asio/ip/tcp.hpp>
 #include <string>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/io_context.hpp>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
-#include <thread>
-#include <exception>
 #include "llsscli/config/config.h"
 
 namespace failless {
