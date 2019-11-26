@@ -23,7 +23,7 @@ using namespace failless::client::serializer;
 using namespace failless::client::config;
 
 class ClientInterface : boost::noncopyable {
- public:
+public:
     virtual ~ClientInterface() = default;
     virtual size_t Run() = 0;
 
