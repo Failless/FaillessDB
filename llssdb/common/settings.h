@@ -3,6 +3,7 @@
 
 #include <string>
 
+
 namespace failless {
     namespace db {
         namespace common {
@@ -24,10 +25,23 @@ namespace failless {
                 int users_to_table;
                 int port;
 
-                Settings() : bind("localhost"), data_path("/data"), logfile("log.txt"), email(""), using_email(false),
-                             threads(8), tcp_keepalive(0), save(0), max_bytes(0), query_max(0), setonly(false),
-                             readonly(false),
-                             lua(false), users_to_table(1), port(8888) {}
+
+                Settings()
+                            : bind("localhost"),
+                              data_path("/data"),
+                              logfile("log.txt"),
+                              email(""),
+                              using_email(false),
+                              threads(8),
+                              tcp_keepalive(0),
+                              save(0),
+                              max_bytes(0),
+                              query_max(0),
+                              setonly(false),
+                              readonly(false),
+                              lua(false),
+                              users_to_table(1),
+                              port(8888) {}
             };
 
         }  // namespace common

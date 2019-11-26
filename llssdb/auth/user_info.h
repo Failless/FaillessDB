@@ -6,8 +6,8 @@
 #define FAILLESS_USER_INFO_H
 
 #include <string>
-#include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid.hpp>
 // #include <boost/uuid/uuid_io.hpp>
 
 
@@ -18,7 +18,11 @@ struct UserInfo {
     bool is_conn;
     int table_id;
 
-    UserInfo() : client_id(boost::uuids::random_generator()()), is_conn(false), table_id(-1) {}
+    UserInfo()
+                : pass_hash(nullptr),
+                  client_id(boost::uuids::random_generator()()),
+                  is_conn(false),
+                  table_id(-1) {}
 };
 
 #endif //FAILLESS_USER_INFO_H

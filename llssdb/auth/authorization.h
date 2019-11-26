@@ -1,15 +1,16 @@
 #ifndef LLSSDB_AUTH_AUTHORIZATION_H_
 #define LLSSDB_AUTH_AUTHORIZATION_H_
 
-#include "llssdb/auth/iauthorization.h"
+
 
 #include <algorithm>
 #include <string>
-
-#include <boost/uuid/detail/md5.hpp>
 #include <boost/algorithm/hex.hpp>
+#include <boost/uuid/detail/md5.hpp>
+#include "llssdb/auth/iauthorization.h"
 
-bool simpleSHA256(void *input, unsigned long length, unsigned char *md);
+
+bool SimpleSHA256(void *input, unsigned long length, unsigned char *md);
 
 class Authorization : public IAuthorization {
 public:
@@ -17,20 +18,20 @@ public:
 
     explicit Authorization(std::string login);
 
-    bool Registration(std::string login, std::string pass) override;
+    bool Registration(const std::string &login, const std::string &pass) override;
 
-    bool RemoveUser(std::string login, std::string pass) override;
+    bool RemoveUser(const std::string &login, const std::string &pass) override;
 
-    bool IsAuth(std::string login, std::string pass, int table_id) override;
+    bool IsAuth(const std::string &login, const std::string &pass, int table_id) override;
 
     ~Authorization() override = default;
 
 private:
     std::map<std::string, UserInfo> Users_;
 
-    virtual bool CheckCollisions_(std::string login);
+    virtual bool CheckCollisions_(const std::string &login);
 
-    virtual unsigned char *Hasher_(std::string login, std::string pass);
+    virtual unsigned char *Hasher_(const std::string &login, std::string pass);
 };
 
 #endif // LLSSDB_AUTH_AUTHORIZATION_H_

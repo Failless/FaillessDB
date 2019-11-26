@@ -1,44 +1,48 @@
-#include "llssdb/auth/authorization.h"
-#include <iostream>
 #include <openssl/sha.h>
+#include <iostream>
 // #include <cstring>
+#include "llssdb/auth/authorization.h"
 
-bool simpleSHA256(void *input, unsigned long length, unsigned char *md) {
+
+bool SimpleSHA256(void *input, unsigned long length, unsigned char *md) {
     SHA256_CTX context;
     if (!SHA256_Init(&context)) {
+        std::cerr << "Can't initialize hash (wrong context format)" << std::endl;
         return false;
     }
     if (!SHA256_Update(&context, (unsigned char *) input, length)) {
+        std::cerr << "Can't update context to password" << std::endl;
         return false;
     }
     return SHA256_Final(md, &context) != 0;
 
 }
 
-unsigned char *Authorization::Hasher_(std::string login, std::string pass) {
-    std::string salt = login;
-    int j = 0;
-    for (int i = login.size() - 1; i >= 0; --i)
+unsigned char *Authorization::Hasher_(const std::string &login, std::string pass) {
+    std::string salt;
+    for (int i = login.size() - 1, j = 0; i >= 0; --i) {
         salt[j++] = login[i];  // salt - reversed login - unique
+    }
 
     pass += salt;  // правильно было бы хешировать, а потом солить и снова хешировать,
     // но даже если солить таким способом, как у нас - нельзя получить доступ к аккаунтам с одинаковыми паролями,
-    // ломав лишь один, т.к. итоговые хэши все равно различны
+    // взломав лишь один, т.к. итоговые хэши все равно различны
 
-    unsigned char md[SHA256_DIGEST_LENGTH]; // 32 bytes
+    auto *md = new unsigned char[SHA256_DIGEST_LENGTH]; // 32 bytes
 
-    // const char * str_c = pass.c_str(); 
-    // char * copy = new char[strlen(str_c)];
-    // strcpy(copy, str_c);
+//     const char * str_c = pass.c_str();
+//     char * copy = new char[strlen(str_c)];
+//     strcpy(copy, str_c);
 
-    if (!simpleSHA256(&pass, pass.size(), md)) {
+    if (!SimpleSHA256(&pass, pass.size(), md)) {
         std::cerr << "error in hasher" << std::endl;
     }
+
     // delete str_c;
     return md;
 }
 
-bool Authorization::RemoveUser(std::string login, std::string pass) {
+bool Authorization::RemoveUser(const std::string &login, const std::string &pass) {
     if (!Users_.count(login)) {
         return false;
     }
@@ -50,25 +54,29 @@ bool Authorization::RemoveUser(std::string login, std::string pass) {
     return false;
 }
 
-bool Authorization::IsAuth(std::string login, std::string pass, int table_id) {
+bool Authorization::IsAuth(const std::string &login, const std::string &pass, int table_id) {
     unsigned char *pass_hash = Hasher_(login, pass);
-    int u_id = Users_[login].table_id;
     unsigned char *u_hash = Users_[login].pass_hash;
-    return u_id == table_id && u_hash == pass_hash;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        if (u_hash[i] != pass_hash[i]) {
+            return false;
+        }
+    }
+    return Users_[login].table_id == table_id;
 }
 
-bool Authorization::Registration(std::string login, std::string pass) {
+bool Authorization::Registration(const std::string &login, const std::string &pass) {
     if (CheckCollisions_(login)) {
         return false;
     }
-    UserInfo *User = new UserInfo;
-    User->login = login;
-    User->pass_hash = Hasher_(login, pass);
-    Users_[login] = *User;
+    UserInfo User;
+    User.login = login;
+    User.pass_hash = Hasher_(login, pass);
+    Users_[login] = User;
     return true;
 }
 
-bool Authorization::CheckCollisions_(std::string login) {
+bool Authorization::CheckCollisions_(const std::string &login) {
     if (Users_.count(login)) {
         return true;
     } else {
@@ -78,9 +86,4 @@ bool Authorization::CheckCollisions_(std::string login) {
 
 Authorization::Authorization(std::string login) {
 
-}
-
-int main() {
-    Authorization A;
-    A.Registration("fuck", "dick");
 }

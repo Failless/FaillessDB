@@ -5,19 +5,19 @@
 #ifndef FAILLESS_IAUTHORIZATION_H
 #define FAILLESS_IAUTHORIZATION_H
 
-#include "llssdb/auth/user_info.h"
-#include <string>
 #include <boost/noncopyable.hpp>
+#include <string>
 #include <map>
+#include "llssdb/auth/user_info.h"
 
 
 class IAuthorization : boost::noncopyable {
 public:
-    virtual bool Registration(std::string login, std::string pass) = 0;
+    virtual bool Registration(const std::string &login, const std::string &pass) = 0;
 
-    virtual bool IsAuth(std::string login, std::string pass, int table_id) = 0;
+    virtual bool IsAuth(const std::string &login, const std::string &pass, int table_id) = 0;
 
-    virtual bool RemoveUser(std::string login, std::string pass) = 0;
+    virtual bool RemoveUser(const std::string &login, const std::string &pass) = 0;
 
     virtual ~IAuthorization() = default;
 };

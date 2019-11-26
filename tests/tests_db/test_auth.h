@@ -1,9 +1,8 @@
-#ifndef LLSSDB_TESTS_TEST_AUTH_H_
-#define LLSSDB_TESTS_TEST_AUTH_H_
+#ifndef LLSSDB_TESTS_TESTS_DB_AUTH_H_
+#define LLSSDB_TESTS_TESTS_DB_AUTH_H_
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
 #include "llssdb/auth/authorization.h"
 
 using ::testing::_;
