@@ -33,7 +33,6 @@ using namespace failless::client::config;
 
 class NetworkClientInterface : boost::noncopyable {
 public:
-    NetworkClientInterface() = default;
     virtual ~NetworkClientInterface() = default;
 
     virtual void Close() = 0;

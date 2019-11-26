@@ -24,7 +24,6 @@ using namespace failless::client::config;
 
 class FileSystemInterface : boost::noncopyable {
 public:
-    FileSystemInterface() = default;
     virtual ~FileSystemInterface() = default;
 
     virtual size_t ReadFile(string file_path, unique_ptr< uint8_t[] >& payload) = 0;

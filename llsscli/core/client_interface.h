@@ -24,7 +24,6 @@ using namespace failless::client::config;
 
 class ClientInterface : boost::noncopyable {
  public:
-    ClientInterface() = default;
     virtual ~ClientInterface() = default;
     virtual size_t Run() = 0;
 
