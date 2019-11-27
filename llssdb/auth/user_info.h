@@ -22,6 +22,7 @@ struct UserInfo {
 
     explicit UserInfo(std::string user_login)
             : login(std::move(user_login)),
+              pass_hash(""),
               client_id(boost::uuids::random_generator()()),
               is_conn(false),
               table_id(-1) {}

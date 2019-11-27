@@ -1,13 +1,16 @@
+#include <algorithm>
+#include <fstream>
+#include <iostream>
+#include <boost/filesystem.hpp>
 #include "llssdb/utils/config_manager.h"
 
 
 bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settings &settings) {
-    // no need to call close for std::ifstream
-    const char *config_path = "../../failless.conf";
-    if (access(config_path, R_OK) == -1) {
+    if (!boost::filesystem::exists(config_path)) {
         std::cerr << "No such file";
         return false;
     }
+    // no need to call close for std::ifstream
     std::ifstream cFile(config_path);
     if (cFile.is_open()) {
         WriteToSettings_(settings, cFile);
@@ -20,7 +23,7 @@ bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settin
 
 void  // auto-formatting is so strange sometimes..
 failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::Settings &settings, std::ifstream &cFile) {
-    std::string line;
+    std::string line{};
     while (getline(cFile, line)) {
         line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
         if (line[0] == '#' || line.empty()) {
@@ -62,4 +65,8 @@ failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::Setti
             settings.email = value;
         }
     }
+}
+
+failless::db::utils::ConfigManager::ConfigManager(const char *path) {
+    this->config_path = path;
 }

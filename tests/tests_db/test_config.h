@@ -16,11 +16,20 @@ using ::testing::AtLeast;
 
 class MockConfig : public failless::db::utils::ConfigManager {
 public:
-    MOCK_METHOD2(WriteToSettings_, void(std::string settings, std::string stream));
+    explicit MockConfig(const char *path);
+
+    const char *fake_path;
+    MOCK_METHOD2(WriteToSettings_, void(std::string
+            settings, std::string
+            stream));
 };
 
+MockConfig::MockConfig(const char *path) : ConfigManager(path) {
+    this->fake_path = path;
+}
+
 TEST(WriteToSettings_, Parser) {
-    MockConfig conf;
+    MockConfig conf("path");
     failless::db::common::Settings settings;
     std::string settings_fake;
     std::string fake_stream;

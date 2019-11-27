@@ -13,11 +13,13 @@ class MockAuth : public Authorization {
 public:
     std::string login;
     std::string pass;
+    unsigned char pass_hash[32];
     MOCK_METHOD1(CheckCollisions_, bool(std::string login));
-    MOCK_METHOD2(Hasher_, unsigned char *(std::string login, std::string pass));
+    MOCK_METHOD3(Hasher_, unsigned char *(std::string login, std::string pass, unsigned char *md));
     MockAuth() {
         login = "login";
         pass = "pass";
+        // pass_hash = "pass_hash";
     }
 };
 
@@ -30,13 +32,13 @@ TEST(Registration, Registration) {
 
 TEST(Hasher, Registration) {
     MockAuth auth;
-    EXPECT_CALL(auth, Hasher_(auth.login, auth.pass)).Times(AtLeast(1));
+    EXPECT_CALL(auth, Hasher_(auth.login, auth.pass, auth.pass_hash)).Times(AtLeast(1));
     EXPECT_EQ(auth.Registration(auth.login, auth.pass), true);
 }
 
 TEST(Hasher, RemoveUser) {
     MockAuth auth;
-    EXPECT_CALL(auth, Hasher_(auth.login, auth.pass)).Times(AtLeast(1));
+    EXPECT_CALL(auth, Hasher_(auth.login, auth.pass, auth.pass_hash)).Times(AtLeast(1));
     EXPECT_EQ(auth.RemoveUser(auth.login, auth.pass), false);
 }
 

@@ -2,11 +2,7 @@
 #define LLSSDB_AUTH_AUTHORIZATION_H_
 
 
-
-#include <algorithm>
 #include <string>
-#include <boost/algorithm/hex.hpp>
-#include <boost/uuid/detail/md5.hpp>
 #include "llssdb/auth/iauthorization.h"
 
 
@@ -31,7 +27,7 @@ private:
 
     virtual bool CheckCollisions_(const std::string &login);
 
-    virtual unsigned char *Hasher_(const std::string &login, std::string pass);
+    virtual unsigned char *Hasher_(const std::string &login, std::string pass, unsigned char *pass_hash);
 };
 
 #endif // LLSSDB_AUTH_AUTHORIZATION_H_
