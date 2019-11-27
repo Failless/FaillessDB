@@ -4,13 +4,13 @@
 #include "llssdb/auth/authorization.h"
 
 
-bool SimpleSHA256(void *input, unsigned long length, unsigned char *md) {
+bool SimpleSHA256(unsigned char *input, unsigned long length, unsigned char *md) {
     SHA256_CTX context;
     if (!SHA256_Init(&context)) {
         std::cerr << "Can't initialize hash (wrong context format)" << std::endl;
         return false;
     }
-    if (!SHA256_Update(&context, (unsigned char *) input, length)) {
+    if (!SHA256_Update(&context, input, length)) {
         std::cerr << "Can't update context to password" << std::endl;
         return false;
     }
@@ -21,7 +21,7 @@ bool SimpleSHA256(void *input, unsigned long length, unsigned char *md) {
 unsigned char *
 Authorization::Hasher_(const std::string &login, std::string pass, unsigned char *md) {
     std::string salt;
-    for (int i = login.size() - 1, j = 0; i >= 0; --i) {
+    for (size_t i = login.size() - 1, j = 0; i >= 0; --i) {
         salt[j++] = login[i];  // salt - reversed login - unique
     }
 
@@ -35,7 +35,7 @@ Authorization::Hasher_(const std::string &login, std::string pass, unsigned char
 //     char * copy = new char[strlen(str_c)];
 //     strcpy(copy, str_c);
 
-    if (!SimpleSHA256(&pass, pass.size(), md)) {
+    if (!SimpleSHA256(reinterpret_cast<unsigned char *>(&pass), pass.size(), md)) {
         std::cerr << "error in hasher" << std::endl;
     }
 

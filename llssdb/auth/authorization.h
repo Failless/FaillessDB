@@ -6,7 +6,7 @@
 #include "llssdb/auth/iauthorization.h"
 
 
-bool SimpleSHA256(void *input, unsigned long length, unsigned char *md);
+bool SimpleSHA256(unsigned char *input, unsigned long length, unsigned char *md);
 
 class Authorization : public IAuthorization {
 public:
