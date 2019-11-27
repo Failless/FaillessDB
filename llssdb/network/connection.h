@@ -14,7 +14,7 @@ const size_t kMaxSize = 1024;
 
 class Connection {
  public:
-    typedef boost::shared_ptr<Connection> pointer;
+//    typedef boost::shared_ptr<Connection> pointer;
 
     Connection() = delete;
     explicit Connection(boost::asio::io_service& io_service);

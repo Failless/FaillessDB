@@ -5,8 +5,8 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -fPIC -no-pie -phtread -lpthread")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lbz2 -lz")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -phtread -lpthread")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -pthread -lpthread -lbz2 -lz")
 #remove -lboost-system, -lrocksdb, -lsnappy and -lrt
 
 set(DATABSE_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_db.cpp)
