@@ -1,4 +1,5 @@
 #include <fstream>
+#include <vector>
 #include "llsscli/filesystem/filesystem.h"
 
 namespace failless {
@@ -10,22 +11,26 @@ namespace filesystem {
 // to vector with write http://www.cplusplus.com/forum/beginner/197490/
 // about unique_ptr https://www.daniweb.com/programming/software-development/threads/456747/reading-binary-files-in-c
 
-size_t FileSystem::ReadFile(std::string file_path, std::unique_ptr< uint8_t[] >& payload) {
+size_t FileSystem::ReadFile(std::string file_path, std::unique_ptr< std::vector<unsigned char> >& payload, std::streampos& len) {
     std::ifstream r_file(file_path, std::ios::binary);
     r_file.unsetf(std::ios::skipws);
     r_file.seekg( 0, std::ios::end );
-    std::streampos len = r_file.tellg();
-    payload.reset( new uint8_t [len] ) ;
+    len = r_file.tellg();
+    payload.reset( new std::vector<unsigned char>() ) ;
+    payload.get()->reserve(len);
     r_file.seekg(0, std::ios::beg);
-    r_file.read(reinterpret_cast<char *>(payload.get()), len);
+//    r_file.read(reinterpret_cast<char *>(payload->data()), len); // for unique_ptr< uint8_t >
+    payload.get()->insert(payload.get()->begin(),
+               std::istream_iterator<unsigned char>(r_file),
+               std::istream_iterator<unsigned char>());
     r_file.close();
     return 0;
 }
 
-size_t FileSystem::WriteFile(std::string file_path, size_t file_size, std::unique_ptr< uint8_t[] >& payload) {
-    payload.reset( new uint8_t [file_size] ) ;
+size_t FileSystem::WriteFile(std::string file_path, std::unique_ptr< std::vector<uint8_t> >& payload) {
     std::ofstream w_file(file_path, std::ios::binary);
-    w_file.write(reinterpret_cast<char *>(payload.get()), file_size);
+    size_t size = payload.get()->size();
+    w_file.write(reinterpret_cast<char *>(payload.get()), size);
     w_file.close();
     return 0;
 }
