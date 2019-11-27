@@ -31,7 +31,7 @@ class Client : public ClientInterface {
     config::ClientConfig config_;
 
     std::string query_tokens_[4];
-    config::Task current_task_;
+    std::unique_ptr< config::Task > current_task_;
 
     bool parse_input_status_;
     bool exec_query_status_;
