@@ -12,8 +12,8 @@ public:
     FileSystem() = default;
     ~FileSystem() override;
 
-    size_t ReadFile(std::string file_path, std::unique_ptr< uint8_t[] >& payload) override;
-    size_t WriteFile(std::string file_path, size_t file_size, std::unique_ptr< uint8_t[] >& payload) override;
+    size_t ReadFile(std::string file_path, std::unique_ptr< std::vector<unsigned char> >& payload, std::streampos& len) override;
+    size_t WriteFile(std::string file_path, std::unique_ptr< std::vector<unsigned char> >& payload) override;
 
 private:
     std::string file_name_ = "";
