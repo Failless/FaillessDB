@@ -14,13 +14,12 @@ class SerializerInterface : boost::noncopyable {
 public:
     virtual ~SerializerInterface() = default;
 
-    virtual void Serialize(config::Task& data) = 0;
-    virtual size_t Deserialize(uintptr_t data) = 0;
+    virtual size_t Serialize(std::unique_ptr< config::Task >& current_task) = 0;
+    virtual size_t Deserialize(std::unique_ptr< std::stringstream >& current_task) = 0;
 
-    virtual std::stringstream GetSS() const = 0;
+    virtual std::unique_ptr< std::stringstream >& GetOutStringStream() = 0;
+    virtual std::unique_ptr< config::Task >& GetInConfig() = 0;
 
-private:
-    std::stringstream out_buffer_;
 };
 
 } // namespace serializer
