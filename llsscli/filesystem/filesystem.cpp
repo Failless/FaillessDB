@@ -27,7 +27,7 @@ size_t FileSystem::ReadFile(std::string file_path, std::unique_ptr< std::vector<
     return 0;
 }
 
-size_t FileSystem::WriteFile(std::string file_path, std::unique_ptr< std::vector<uint8_t> >& payload) {
+size_t FileSystem::WriteFile(std::string file_path, std::unique_ptr< std::vector<unsigned char> >& payload) {
     std::ofstream w_file(file_path, std::ios::binary);
     size_t size = payload.get()->size();
     w_file.write(reinterpret_cast<char *>(payload.get()), size);
