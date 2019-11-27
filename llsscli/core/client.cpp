@@ -53,15 +53,22 @@ size_t Client::SerializeQuery_(std::string query) {
 
 size_t Client::ExecQuery_() {
     if (query_tokens_[0] == "SEND") {
-        std::unique_ptr< uint8_t[] > payload;
-        filesystem_->ReadFile(query_tokens_[1], payload);
+        std::unique_ptr< std::vector<unsigned char> > value;
+        std::streampos len;
 
-        current_task_.client_id.reset( new std::string(config_.user_name));
-        current_task_.query.reset( new std::string(config_.user_request));
-        current_task_.payload.value.swap(payload);
-        current_task_.payload.size = 0;
-        current_task_.payload.folder_id = 0;
-        current_task_.payload.key.reset( new std::string(""));
+        filesystem_->ReadFile(query_tokens_[1], value, len);
+
+        std::cout<<value.get()->data()<<std::endl;
+
+        std::unique_ptr< std::string > key(new std::string(""));
+        std::unique_ptr< config::Data > data(new config::Data(value, len, 0, key));
+
+        std::unique_ptr< std::string > user_name(new std::string(config_.user_name));
+        std::unique_ptr< std::string > query(new std::string(config_.user_request));
+
+        current_task_.reset(new config::Task(user_name, query, data));
+
+        std::cout<<current_task_.get()->payload.get()->value->data()<<std::endl;
 
         serializer_->Serialize(current_task_);
     } else if (query_tokens_[0] == "GET") {
