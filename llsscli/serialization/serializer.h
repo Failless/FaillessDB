@@ -9,14 +9,15 @@ public:
     Serializer() = default;
     ~Serializer() = default;
 
-    void Serialize(config::Task& data) override;
-    size_t Deserialize(uintptr_t data) override;
+    size_t Serialize(std::unique_ptr< config::Task >& current_task) override;
+    size_t Deserialize(std::unique_ptr< std::stringstream >& current_task) override;
 
-    std::stringstream GetSS() const override;
+    std::unique_ptr< std::stringstream >& GetOutStringStream() override;
+    std::unique_ptr< config::Task >& GetInConfig() override;
 
 private:
-    std::stringstream out_buffer_;
-
+    std::unique_ptr< std::stringstream > out_buf_;
+    std::unique_ptr< config::Task > in_buf_;
 };
 
 };
