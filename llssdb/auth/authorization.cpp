@@ -1,5 +1,5 @@
-#include <openssl/sha.h>
 #include <iostream>
+#include <utility>
 // #include <cstring>
 #include "llssdb/auth/authorization.h"
 
@@ -69,9 +69,8 @@ bool Authorization::Registration(const std::string &login, const std::string &pa
     if (CheckCollisions_(login)) {
         return false;
     }
-    UserInfo User;
-    User.login = login;
-    User.pass_hash = Hasher_(login, pass);
+    UserInfo User(login);
+    memmove(User.pass_hash, Hasher_(login, pass), SHA256_DIGEST_LENGTH);
     Users_[login] = User;
     return true;
 }
