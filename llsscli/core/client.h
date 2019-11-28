@@ -25,9 +25,9 @@ class Client : public ClientInterface {
     size_t ParseInput_(std::string raw_query) override;
     size_t ReadInput_(int argc, char **argv) override;
 
-    std::unique_ptr< network::NetworkClient > network_client_;
-    std::unique_ptr< filesystem::FileSystem > filesystem_;
-    std::unique_ptr< serializer::Serializer > serializer_;
+    std::unique_ptr< network::NetworkClientInterface > network_client_;
+    std::unique_ptr< filesystem::FileSystemInterface > filesystem_;
+    std::unique_ptr< serializer::SerializerInterface > serializer_;
     config::ClientConfig config_;
 
     std::string query_tokens_[4];
