@@ -9,6 +9,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -s
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lbz2 -lz")
 #remove -lboost-system, -lrocksdb, -lsnappy and -lrt
 
+set(Boost_LIBRARY_DIR /usr/local/lib)
+link_directories(${Boost_LIBRARY_DIR})
+
 set(DATABSE_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_db.cpp)
 set(CLIENT_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_cli.cpp)
 
