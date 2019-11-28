@@ -15,7 +15,7 @@ namespace core {
 class Client : public ClientInterface {
  public:
     explicit Client(config::ClientConfig& test_data);
-    ~Client() override;
+    ~Client() = default;
     size_t Run() override;
 
  private:

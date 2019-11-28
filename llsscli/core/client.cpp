@@ -7,11 +7,7 @@ namespace failless {
 namespace client {
 namespace core {
 
-Client::Client(config::ClientConfig& test_data) : config_(std::move(test_data)) {
-//    config_ = test_data;
-}
-
-Client::~Client() {}
+Client::Client(config::ClientConfig& test_data) : config_(std::move(test_data)) {}
 
 size_t Client::Run() {
     //открыть файл настроек
