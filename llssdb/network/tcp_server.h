@@ -14,15 +14,6 @@ namespace network {
 
 namespace ip = boost::asio::ip;
 
-struct ConnectionAdapter {
-    ConnectionAdapter() : conn(nullptr) {}
-    explicit ConnectionAdapter(boost::asio::io_service &io_service) {
-        conn.reset(new Connection(io_service));
-    }
-    ~ConnectionAdapter() = default;
-    std::shared_ptr<Connection> conn;
-};
-
 class TcpServer : public ITcpServer {
  public:
     TcpServer() = delete;

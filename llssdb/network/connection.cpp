@@ -35,8 +35,6 @@ void Connection::DoJob() {
                             boost::bind(&Connection::Read, this, boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred));
 
-    ///
-
     socket_.async_write_some(boost::asio::buffer(buffer_, message.size()),
                              boost::bind(&Connection::Write, this, boost::asio::placeholders::error,
                                          boost::asio::placeholders::bytes_transferred));

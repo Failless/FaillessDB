@@ -1,4 +1,5 @@
 #include "llssdb/engine/server_manager.h"
+#include <llssdb/network/tcp_server.h>
 #include <iostream>
 #include <thread>
 
@@ -13,33 +14,34 @@ void ServerManager::Reload() {}
 void ServerManager::Run() {
     is_run_ = true;
     const int kMsDelay = 100;  // it's temporary
-    common::Task task{};
+//    common::Task task{};
+    network::ConnectionAdapter connection;
     while (is_run_) {
         if (task_queue_.empty()) {
             std::this_thread::sleep_for(std::chrono::microseconds(kMsDelay));
-            continue;  // May by it will be better if I change if-body to all code below here
+            continue;  // May by it will be better   if I change if-body to all code below here
         }
-        task_queue_.pop(task);
-        switch (task.command) {
+        task_queue_.pop(connection);
+        switch (connection.command) {
             case common::operators::CREATE: {
-                int folder_num = CreateFolder_(task.client_id);
+                int folder_num = CreateFolder_(connection.client_id);
                 std::cout << "Created new folder with id " << folder_num << std::endl;
                 break;
             }
             case common::operators::KILL: {
-                KillFolder_(task.payload.folder_id);
+                KillFolder_(connection.payload.folder_id);
                 break;
             }
             case common::operators::CONNECT: {
-                // create task_worker for exist folder in the other thread
+                // create connection_worker for exist folder in the other thread
                 break;
             }
             case common::operators::DISCONNECT: {
-                // join tread with exist task_worker which have created data dump before
+                // join tread with exist connection_worker which have created data dump before
                 break;
             }
             default: {
-                Execute_(task);
+                Execute_(connection);
                 break;
             }
         }
