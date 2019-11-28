@@ -1,40 +1,62 @@
-/*
-TaskWorker (TW)
-    1. Принимает таски от SM добавляет в очередь.
-    2. Раздаёт из очереди своему DW
-*/
-#ifndef LLSSDB_FOLDER_TASK_WORKER_H_
-#define LLSSDB_FOLDER_TASK_WORKER_H_
+// TODO(EgorBedov): consider time when it's necessary to update in-memory storage
+// after every query, or later ?
 
+#ifndef FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
+#define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
+
+#include <boost/noncopyable.hpp>
 #include <queue>
 #include <string>
-#include "llssdb/folder/data_worker.h"
-#include "llssdb/folder/task.h"
+#include <map>
+#include <memory>
 
-class ITaskWorker {
- public:
-    explicit ITaskWorker(DataWorker* _data_worker) : data_worker_(_data_worker){};
-    //    TaskWorker() = default;
+#include "llssdb/common/task.h"
+#include "llssdb/folder/value_info.h"
+#include "llssdb/folder/file_system.h"
+
+namespace failless::db::folder {
+
+class ITaskWorker : boost::noncopyable {
+public:
+    explicit ITaskWorker(const std::string& db_path)
+      : local_storage_(nullptr),
+        input_queue_(nullptr),
+        output_queue_(nullptr),
+        fs_(db_path) {}
     virtual ~ITaskWorker() = default;
+    // TODO(EgorBedov): command should be parsed from task.query
+    virtual int AddTask(const common::Task &task) = 0;
 
-    int AddTask(const Task& task) {
-        IsEmpty();
-        CompleteTask();
-        return EXIT_SUCCESS;
-    };
+protected:
+    virtual int DoTask(const common::Task &task) = 0;
+    virtual bool Set(const common::Task &task_in) = 0;
+    virtual bool Read(const common::Task &task_in) = 0;
+    virtual bool Update(const common::Task &task_in) = 0;
+    virtual bool Delete(const common::Task &task_in) = 0;
 
- private:
-    virtual bool IsEmpty() = 0;
-    virtual int CompleteTask() = 0;
-
-    std::queue<Task> task_queue_;
-    DataWorker* data_worker_;
+    std::map<std::string, ValueInfo>* local_storage_;  // TODO(EgorBedov): string - type of key?
+    std::queue<common::Task> *input_queue_;
+    std::queue<common::Task> *output_queue_;
+    FileSystem fs_;
 };
 
 class TaskWorker : public ITaskWorker {
+public:
+    explicit TaskWorker(const std::string& db_path);
     ~TaskWorker() override = default;
-    bool IsEmpty() override { return true; }
-    int CompleteTask() override { return EXIT_SUCCESS; }
+
+    int AddTask(const common::Task &task) override;
+
+protected:
+    int DoTask(const common::Task &task) override;
+
+    /// These functions will handle the "cache"
+    bool Set(const common::Task &task_in) override;
+    bool Read(const common::Task &task_in) override;
+    bool Update(const common::Task &task_in) override;
+    bool Delete(const common::Task &task_in) override;
 };
 
-#endif  // LLSSDB_FOLDER_TASK_WORKER_H_
+}  // namespace failless::db::folder
+
+#endif  // FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_

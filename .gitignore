@@ -37,7 +37,6 @@
 *.swo
 
 # other
-.clang-format
 *.log
 
 

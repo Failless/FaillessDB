@@ -1,53 +1,65 @@
-
-#include "server_manager.h"
+#include "llssdb/engine/server_manager.h"
+#include <iostream>
+#include <thread>
 
 namespace failless {
 namespace db {
 namespace engine {
-ServerManager* ServerManager::sm_;
 
+void ServerManager::SetTask(common::Task task) {}
+
+void ServerManager::Reload() {}
+
+void ServerManager::Run() {
+    is_run_ = true;
+    const int kMsDelay = 100;  // it's temporary
+    common::Task task{};
+    while (is_run_) {
+        if (task_queue_.empty()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(kMsDelay));
+            continue;  // May by it will be better if I change if-body to all code below here
+        }
+        task_queue_.pop(task);
+        switch (task.command) {
+            case common::operators::CREATE: {
+                int folder_num = CreateFolder_(task.client_id);
+                std::cout << "Created new folder with id " << folder_num << std::endl;
+                break;
+            }
+            case common::operators::KILL: {
+                KillFolder_(task.payload.folder_id);
+                break;
+            }
+            case common::operators::CONNECT: {
+                // create task_worker for exist folder in the other thread
+                break;
+            }
+            case common::operators::DISCONNECT: {
+                // join tread with exist task_worker which have created data dump before
+                break;
+            }
+            default: {
+                Execute_(task);
+                break;
+            }
+        }
+    }
 }
+
+void ServerManager::Stop() { is_run_ = false; }
+
+bool ServerManager::Execute_(common::Task& task) { return false; }
+
+int ServerManager::CreateFolder_(boost::uuids::uuid& client_id) { return false; }
+
+bool ServerManager::KillFolder_(int folder_id) { return false; }
+
+bool ServerManager::RedirectTask_(common::Task& task) { return false; }
+
+common::operators ServerManager::HandleRequest_(common::Task& Task) { return common::DELETE; }
+
+void ServerManager::SetSettings(common::Settings& settings) {}
+
+}  // namespace engine
 }  // namespace db
 }  // namespace failless
-
-// ServerManager::~ServerManager() {
-//    for ( auto & active_node : active_nodes_ ) {
-//        delete(active_node.second);
-//    }
-//}
-//
-// int ServerManager::GetRequest(const std::string& request) {
-//    request_queue_.push(request);
-//    // TODO: just for the sake of tests_cli
-//    Task task(Task::CREATE, request);
-//    SendTask(task);
-//    // should delete that later cuz i wanna sleep so bad
-//    return EXIT_SUCCESS;
-//}
-//
-// int ServerManager::SendResponse(const std::string& response) {
-//    return EXIT_SUCCESS;
-//}
-//
-// int ServerManager::HandleRequest() {
-//    string current_request = request_queue_.front();
-//    Task current_task = ParseRequest(current_request);
-//    switch ( current_task.command ) {
-//        case Task::NEW:     CreateNode();   break;
-//        case Task::KILL:    KillNode();     break;
-//        case Task::CREATE:
-//        case Task::READ:
-//        case Task::UPDATE:
-//        case Task::DELETE:  SendTask(current_task);     break;
-//        default:            return EXIT_FAILURE;
-//    }
-//    request_queue_.pop();
-//    return EXIT_SUCCESS;
-//}
-//
-// Task ServerManager::ParseRequest(const string& request) {}
-//
-// void ServerManager::SendTask(const Task& task) {
-////    int pos = 0;
-////    active_nodes_[pos]->task_worker_.Add_Task(task);
-//}

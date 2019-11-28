@@ -5,8 +5,12 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -std=c++17 -fPIC -no-pie -phtread -lpthread -lboost_system")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -std=c++17 -fPIC -no-pie -pthread -lpthread -lboost_system")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -fPIC -no-pie -phtread -lpthread")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lbz2 -lz")
+#remove -lboost-system, -lrocksdb, -lsnappy and -lrt
+
+set(Boost_LIBRARY_DIR /usr/local/lib)
+link_directories(${Boost_LIBRARY_DIR})
 
 set(Boost_LIBRARY_DIR /usr/local/lib)
 link_directories(${Boost_LIBRARY_DIR})
@@ -20,22 +24,24 @@ set(FAILLESS_DB_LIB "${CMAKE_CURRENT_SOURCE_DIR}/llssdb")
 find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(msgpack REQUIRED)
+find_library(ROCKSDB_LIBRARY rocksdb REQUIRED)
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
-if(EXISTS "/usr/local/lib/libgmock.a")
+if (EXISTS "/usr/local/lib/libgmock.a")
     set(GMock_LIBRARY "/usr/local/lib/libgmock.a")
     set(GMock_LIBRARY_MAIN "/usr/local/lib/libgmock_main.a")
     message("Gmock is a static build")
-else()
+else ()
     set(GMock_LIBRARY "/usr/local/lib/libgmock.so")
     set(GMock_LIBRARY "/usr/local/lib/libgmock.so")
     message("Gmock is a dynamic build")
-endif()
+endif ()
 set(GMock_BOTH_LIBRARIES ${GMock_LIBRARY} ${GMock_LIBRARY_MAIN})
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(${GMock_INCLUDE_DIR})
+include_directories(${ROCKSDB_INCLUDE_DIRS})
 
 add_subdirectory(${FAILLESS_DB_LIB})
 add_subdirectory(${FAILLESS_CLIENT_LIB})
@@ -43,14 +49,19 @@ add_subdirectory(${FAILLESS_CLIENT_LIB})
 # compile server
 add_executable(failless-server ${DATABSE_SRC_LIST})
 target_link_libraries(failless-server llssdb)
+target_link_libraries(failless-server ${Boost_LIBRARIES})
+target_link_libraries(failless-server ${msgpack_LIBRARIES})
+target_link_libraries(failless-server ${ROCKSDB_LIBRARY})
 
 # compile client
 add_executable(failless-cli ${CLIENT_SRC_LIST})
 target_link_libraries(failless-cli llsscli)
+target_link_libraries(failless-cli ${Boost_LIBRARIES})
+target_link_libraries(failless-cli ${msgpack_LIBRARIES})
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
-######llsscli test sources#######
+######llssdb test sources#######
 file(GLOB TEST_DB_SOURCES ${TESTS_DIR}/tests_db/*.cpp
         ${TESTS_DIR}/tests_db/simple/*.cpp
         ${TESTS_DIR}/tests_db/run_tests.cpp)
@@ -60,7 +71,7 @@ file(GLOB TEST_DB_HEADERS ${TESTS_DIR}/tests_db/*.h
         ${TESTS_DIR}/tests_db/simple/*.h
         ${TESTS_DIR}/tests_db/*.hpp)
 
-######llssdb test sources########
+######llsscli test sources########
 file(GLOB TEST_CLI_SOURCES ${TESTS_DIR}/tests_cli/test_client.cpp
         ${TESTS_DIR}/tests_cli/run_tests.cpp)
 
@@ -75,6 +86,7 @@ target_link_libraries(run-cli-tests ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(run-cli-tests ${Boost_LIBRARIES})
 target_link_libraries(run-cli-tests ${msgpack_LIBRARIES})
 target_link_libraries(run-cli-tests llsscli)
+target_link_libraries(run-cli-tests ${ROCKSDB_LIBRARY})
 
 add_executable(run-db-tests ${TEST_DB_SOURCES} ${TEST_DB_HEADERS})
 target_link_libraries(run-db-tests ${GTEST_BOTH_LIBRARIES})
@@ -83,6 +95,8 @@ target_link_libraries(run-db-tests ${CMAKE_THREAD_LIBS_INIT})
 target_link_libraries(run-db-tests llssdb)
 target_link_libraries(run-db-tests ${Boost_LIBRARIES})
 target_link_libraries(run-db-tests ${msgpack_LIBRARIES})
+target_link_libraries(run-db-tests ${ROCKSDB_LIBRARY})
 
-message("Boost version ${Boost_VERSION} found at ${Boost_DIR}")
+message("Boost version ${Boost_VERSION} found at ${Boost_LIBRARY_DIRS}")
 message("Msgpack version ${msgpack_VERSION} found at ${msgpack_DIR}")
+message("RocksDB version ${RocksDB_VERSION} found at ${RocksDB_DIR} and RocksDB library at ${ROCKSDB_LIBRARY}")
