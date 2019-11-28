@@ -9,12 +9,12 @@ namespace client {
 namespace core {
 
 class ClientInterface : boost::noncopyable {
-public:
+ public:
     virtual ~ClientInterface() = default;
     virtual size_t Run() = 0;
 
-private:
-    virtual size_t SendRequestWithCB_(std::stringstream serialized_query, std::uintptr_t call_back) = 0;
+    virtual size_t SendRequestWithCB_(std::stringstream serialized_query,
+                                      std::uintptr_t call_back) = 0;
     virtual size_t SerializeQuery_(std::string query) = 0;
     virtual size_t ExecQuery_() = 0;
     virtual size_t ParseInput_(std::string raw_query) = 0;
