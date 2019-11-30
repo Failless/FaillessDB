@@ -4,7 +4,6 @@
 #include <boost/noncopyable.hpp>
 #include <map>
 #include <string>
-#include "llssdb/auth/user_info.h"
 
 class IAuthorization : boost::noncopyable {
  public:

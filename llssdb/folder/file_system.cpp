@@ -61,9 +61,13 @@ bool FileSystem::Get(const std::string& key, int8_t*& value_out, size_t size_out
 
 bool FileSystem::Set(const std::string& key, int8_t* value_in, size_t size_in) {
     std::string string_value = std::to_string(*(value_in));
-    Status s = db_->Put(WriteOptions(), key, string_value);
-    if (!s.ok()) {
-        std::cerr << "Failed to put a value\n";
+    if (db_ != nullptr) {
+        Status s = db_->Put(WriteOptions(), key, string_value);
+        if (!s.ok()) {
+            std::cerr << "Failed to put a value\n";
+            return false;
+        }
+    } else {
         return false;
     }
     return true;

@@ -19,8 +19,9 @@ bool SimpleSHA256(unsigned char *input, unsigned long length, unsigned char *md)
 
 unsigned char *Authorization::Hasher_(const std::string &login, std::string pass,
                                       unsigned char *md) {
-    std::string salt;
-    for (size_t i = login.size() - 1, j = 0; i >= 0; --i) {
+    std::string salt(pass);
+    int j = 0;
+    for (int i = login.length() - 1; i >= 0; i--) {
         salt[j++] = login[i];  // salt - reversed login - unique
     }
 
@@ -50,7 +51,7 @@ bool Authorization::RemoveUser(const std::string &login, const std::string &pass
 
 bool Authorization::IsAuth(const std::string &login, const std::string &pass, int table_id) {
     unsigned char pass_hash[SHA256_DIGEST_LENGTH];
-    Hasher_(login, pass, pass_hash);
+    //    Hasher_(login, pass, pass_hash);
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         if (Users_[login].pass_hash[i] != pass_hash[i]) {
             return false;
@@ -64,18 +65,13 @@ bool Authorization::Registration(const std::string &login, const std::string &pa
         return false;
     }
     UserInfo User(login);
-    unsigned char pass_hash[SHA256_DIGEST_LENGTH];
+    unsigned char pass_hash[SHA256_DIGEST_LENGTH]{};
     Hasher_(login, pass, pass_hash);
     memcpy(User.pass_hash, pass_hash, SHA256_DIGEST_LENGTH);
     Users_[login] = User;
     return true;
 }
 
-bool Authorization::CheckCollisions_(const std::string &login) {
-    if (Users_.count(login)) {
-        return true;
-    }
-    return false;
-}
+bool Authorization::CheckCollisions_(const std::string &login) { return Users_.count(login) != 0; }
 
 Authorization::Authorization(std::string login) {}
