@@ -1,4 +1,3 @@
-#include <algorithm>
 #include <iostream>
 #include <memory>
 #include <rocksdb/db.h>
@@ -57,7 +56,7 @@ bool FileSystem::Get(const string &key, std::shared_ptr<int8_t>& value_out, size
 
     /// Copy to output arguments
     size_out = pinnable_value.size();
-    memcpy(value_out.get(), pinnable_value.data(), size_out * sizeof(int8_t));  //TODO: fix
+    memcpy(value_out.get(), pinnable_value.data(), size_out * sizeof(int8_t));
 
     return s.ok();
 }

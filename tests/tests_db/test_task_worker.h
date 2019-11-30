@@ -4,44 +4,17 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string>
+
 #include "llssdb/common/task.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
-///////////////////////////////////////////////////////////////////////////////////
-/// README:                                                                     ///
-/// If you build this project via CLion:                                        ///
-///      1. Choose first path                                                   ///
-///      2. Comment second one                                                  ///
-///      3. Create next empty folders manually:                                 ///
-///          cmake-build-debug/llssdb/CMakeFiles/llssdb.dir/storage             ///
-///          cmake-build-debug/llssdb/CMakeFiles/llssdb.dir/storage/test_user   ///
-///                                                                             ///
-/// If you build this project via "cmake . && make":                            ///
-///      1. Choose second path                                                  ///
-///      2. Comment first one                                                   ///
-///////////////////////////////////////////////////////////////////////////////////
-
-const std::string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
-//const std::string test_db_path = "./llssdb/storage/test_user";
+#include "tests/tests_db/mocks.h"
+#include "tests/tests_db/test_file_system.h"
 
 namespace failless::db::tests {
 
-using ::testing::_;
-using folder::TaskWorker;
-
-class MockTaskWorker : public TaskWorker {
-public:
-    explicit MockTaskWorker(const std::string& db_path = test_db_path) : TaskWorker(db_path) {};
-    MOCK_METHOD1(Set, bool(const common::Task &task_in));
-    MOCK_METHOD1(Read, bool(const common::Task &task_in));
-    MOCK_METHOD1(Update, bool(const common::Task &task_in));
-    MOCK_METHOD1(Delete, bool(const common::Task &task_in));
-    MOCK_METHOD0(LoadInMemory, void());
-    MOCK_METHOD0(UnloadFromMemory, void());
-};
-
 TEST(TaskManager, Get_and_Set) {
-    TaskWorker tw(test_db_path);
+    folder::TaskWorker tw(test_db_path);
 
     size_t size = 3;
     auto key = std::make_shared<std::string>("test_key");
@@ -59,7 +32,7 @@ TEST(TaskManager, Get_and_Set) {
     tw.AddTask(test_task3);
 }
 
-TEST(TaskManager, Calling_Set) {
+TEST(TaskManager, Calling_Self_Set) {
     MockTaskWorker mockTaskWorker(test_db_path);
 
     size_t size = 3;
@@ -73,7 +46,7 @@ TEST(TaskManager, Calling_Set) {
 }
 
 
-TEST(TaskManager, Calling_Read) {
+TEST(TaskManager, Calling_Self_Read) {
     MockTaskWorker mockTaskWorker(test_db_path);
 
     size_t size = 0;
@@ -85,7 +58,7 @@ TEST(TaskManager, Calling_Read) {
     EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
 }
 
-TEST(TaskManager, Calling_Update) {
+TEST(TaskManager, Calling_Self_Update) {
     MockTaskWorker mockTaskWorker(test_db_path);
 
     size_t size = 3;
@@ -98,7 +71,7 @@ TEST(TaskManager, Calling_Update) {
     EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
 }
 
-TEST(TaskManager, Calling_Delete) {
+TEST(TaskManager, Calling_Self_Delete) {
     MockTaskWorker mockTaskWorker(test_db_path);
 
     size_t size = 3;
@@ -110,8 +83,6 @@ TEST(TaskManager, Calling_Delete) {
     EXPECT_CALL(mockTaskWorker, Delete(test_task)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
 }
-
-//TEST(TaskManager, Calling_)
 
 } // namespace failless::db::tests
 

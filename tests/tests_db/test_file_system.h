@@ -8,28 +8,17 @@
 #include "llssdb/common/task.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
+#include "tests/tests_db/mocks.h"
 
 namespace failless::db::tests {
 
 using ::testing::_;
 using ::testing::AtLeast;
 using folder::FileSystem;
-using std::string;
-
-class MockFileSystem : public FileSystem {
-public:
-  explicit MockFileSystem(const string& db_path) : FileSystem(db_path) {};
-  MOCK_METHOD3(Get, bool(const string &key, std::shared_ptr<int8_t>& value_out, size_t size_out));
-  MOCK_METHOD3(Set, bool(const string &key, std::shared_ptr<int8_t> value_in, size_t size_in));
-//  MOCK_METHOD1(GetRange, bool(const string& key));
-  MOCK_METHOD1(Remove, bool(const string& key));
-};
-
-// string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
 
 TEST(FileSystem, Set_And_Get) {
     FileSystem fs(test_db_path);
-    string key = "test_key";
+    std::string key = "test_key";
     size_t size = 3;
     std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
 
@@ -41,7 +30,7 @@ TEST(FileSystem, Set_And_Get) {
 
 TEST(FileSystem, Full_Functionality_Test) {
     FileSystem fs(test_db_path);
-    string key = "test_key";
+    std::string key = "test_key";
     size_t size = 3;
     std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
 
