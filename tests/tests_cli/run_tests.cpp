@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include "tests/tests_cli/test_serializer_mock.h"
 #include "tests/tests_cli/test_serializer_unit.h"
+#include "tests/tests_cli/test_client_serializer_integration.h"
 
 namespace failless {
 namespace client {
