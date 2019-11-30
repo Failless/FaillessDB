@@ -6,8 +6,8 @@
 
 bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settings &settings) {
     if (!boost::filesystem::exists(config_path)) {
-        std::cerr << "No such file";
-        return false;
+        std::cerr << "No such config file :" << config_path << "- using default settings\n";
+        return true;
     }
     // no need to call close for std::ifstream
     std::ifstream cFile(config_path);
@@ -15,9 +15,10 @@ bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settin
     if (cFile.is_open()) {
         WriteToSettings_(settings, cFile);
     } else {
-        std::cerr << "Couldn't find file or open for reading\n";
+        std::cerr << "File exists, but couldn't  be open for reading\n";
         return false;
     }
+    std::cout << "Congratulations. Normally read config\n";
     return true;
 }
 

@@ -22,6 +22,7 @@ class MockAuth : public Authorization {
     }
 };
 
+
 TEST(Registration, Registration) {
     MockAuth auth;
     EXPECT_CALL(auth, CheckCollisions_(auth.login)).Times(AtLeast(1));
