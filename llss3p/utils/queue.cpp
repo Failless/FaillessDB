@@ -1,8 +1,8 @@
-#include "llssdb/common/queue.h"
+#include "queue.h"
 
 namespace failless {
-namespace db {
 namespace common {
+namespace utils {
 
 template <class T>
 void Queue<T>::Push(const T &item) {
@@ -24,9 +24,10 @@ template <class T>
 bool Queue<T>::IsEmpty() const {
     return queue_.empty();
 }
+
 template <class T>
 Queue<T>::Queue(size_t size) : queue_(size) {}
 
+}  // namespace utils
 }  // namespace common
-}  // namespace db
 }  // namespace failless

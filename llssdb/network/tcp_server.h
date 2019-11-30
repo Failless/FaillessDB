@@ -4,9 +4,9 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/lockfree/queue.hpp>
-#include "llssdb/common/task.h"
 #include "llssdb/network/connection.h"
 #include "llssdb/network/tcp_server_interface.h"
+#include "llssdb/utils/task.h"
 
 namespace failless {
 namespace db {
@@ -26,21 +26,20 @@ class TcpServer : public ITcpServer {
     void SetResponseFunction(std::function<Response(Request &)> &generate_response) override;
 
  protected:
-    void PushTask_(common::Task task);
+    void PushTask_(utils::Task task);
     Host host_{};
 
  private:
     void Accept_();
-    void AcceptHandler_(ConnectionAdapter adaptor,
-                        const boost::system::error_code &error);
+    void AcceptHandler_(ConnectionAdapter adaptor, const boost::system::error_code &error);
 
-    boost::lockfree::queue<common::Task> *queue_ = nullptr;
+    boost::lockfree::queue<utils::Task> *queue_ = nullptr;
     boost::asio::io_service io_service_;
-//    ip::tcp::socket *socket_;
+    //    ip::tcp::socket *socket_;
     /// The acceptor object used to accept incoming socket connections.
     std::unique_ptr<ip::tcp::acceptor> acceptor_;
     /// The data to be sent to each client.
-    std::vector<common::Task> tasks_;
+    std::vector<utils::Task> tasks_;
     std::vector<Connection> connections_;
     bool is_run_ = false;
 };

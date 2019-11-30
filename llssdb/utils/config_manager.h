@@ -1,7 +1,8 @@
 #ifndef FAILLESS_LLSSDB_UTILS_CONFIG_MANAGER_H_
 #define FAILLESS_LLSSDB_UTILS_CONFIG_MANAGER_H_
 
-#include <llssdb/common/settings.h>
+#include "llssdb/utils/settings.h"
+
 namespace failless {
 namespace db {
 namespace utils {
@@ -12,7 +13,7 @@ class ConfigManager {
  public:
     ConfigManager() = default;
     ~ConfigManager() = default;
-    void Initialize(common::Settings& settings);
+    void Initialize(Settings& settings);
 };
 
 }  // namespace utils

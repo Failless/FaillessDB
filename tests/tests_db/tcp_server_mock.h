@@ -2,7 +2,6 @@
 #define TESTS_DB_TCP_SERVER_MOCK_H_
 
 #include <gmock/gmock.h>
-
 #include <utility>
 #include "llssdb/network/tcp_server.h"
 
@@ -13,7 +12,7 @@ namespace tests {
 class MockTcpServer : public network::TcpServer {
  public:
     MockTcpServer(const std::string& ip, unsigned short port) : network::TcpServer(ip, port) {}
-    MOCK_METHOD1(PushTask_, void(common::Task task));
+    MOCK_METHOD1(PushTask_, void(utils::Task task));
 };
 
 }  // namespace tests

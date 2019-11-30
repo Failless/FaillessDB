@@ -8,8 +8,8 @@
 #include <queue>
 
 namespace failless {
-namespace db {
 namespace common {
+namespace utils {
 
 template <class T>
 class Queue : boost::noncopyable {
@@ -29,7 +29,7 @@ class Queue : boost::noncopyable {
     std::queue<T> queue_;
 };
 
-}  // namespace common
+}  // namespace utils
 }  // namespace db
 }  // namespace failless
 

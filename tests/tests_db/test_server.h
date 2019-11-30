@@ -6,9 +6,10 @@
 #include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
-#include "llssdb/common/task.h"
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/network/tcp_server_interface.h"
+#include "llssdb/utils/task.h"
+#include "tcp_server_mock.h"
 #include "tests/tests_db/tcp_server_mock.h"
 #include "tests/tests_db/test_tcp_server.h"
 
@@ -52,11 +53,10 @@ TEST(ServerTest, PushTask) {
     auto *key = new std::string("key1");
     size_t size = 3;
     auto value = new int8_t[size];
-    for ( size_t iii = 0; iii < size; ++iii ) {
+    for (size_t iii = 0; iii < size; ++iii) {
         value[iii] = iii;
     }
-    common::Task task(folder_id, size, key, value, query,
-                      common::operators::SET, client_id,
+    utils::Task task(folder_id, size, key, value, query, common::enums::operators::SET, client_id,
                       boost::chrono::microseconds(ms.time_since_epoch().count()));
 
     EXPECT_CALL(mock_tcp_server, PushTask_(task)).Times(AtLeast(1));

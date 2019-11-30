@@ -3,7 +3,6 @@
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 namespace failless {
 namespace db {

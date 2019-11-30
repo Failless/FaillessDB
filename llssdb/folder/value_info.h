@@ -1,21 +1,22 @@
-#ifndef FAILLESS_VALUE_INFO_H
-#define FAILLESS_VALUE_INFO_H
+#ifndef FAILLESS_LLSSDB_FOLDER_VALUE_INFO_H_
+#define FAILLESS_LLSSDB_FOLDER_VALUE_INFO_H_
 
-//#include <utility>
-
-namespace failless::db::folder {
+namespace failless {
+namespace db {
+namespace folder {
 
 struct ValueInfo {
     int8_t* value;
     size_t size;
     bool in_memory;
-//    int16_t calls;    // counts how many times this value was called
+    //    int16_t calls;    // counts how many times this value was called
 
-    explicit ValueInfo(int8_t* _value = nullptr, bool flag = false) :
-        value(_value),
-        in_memory(flag) {};
+    explicit ValueInfo(int8_t* _value = nullptr, bool flag = false)
+        : value(_value), size(0), in_memory(flag) {};
 };
 
-}
+}  // namespace folder
+}  // namespace db
+}  // namespace failless
 
-#endif //FAILLESS_VALUE_INFO_H
+#endif  // FAILLESS_LLSSDB_FOLDER_VALUE_INFO_H_
