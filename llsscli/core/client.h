@@ -30,6 +30,9 @@ class Client : public ClientInterface {
     std::unique_ptr<filesystem::FileSystemInterface> filesystem_;
     std::unique_ptr<serializer::SerializerInterface> serializer_;
 
+    std::shared_ptr<boost::asio::io_service> io_service_;
+    std::shared_ptr<config::NetworkConfig> net_config_;
+
     std::shared_ptr<std::stringstream> serialized_query_;
 
     config::ClientConfig config_;

@@ -31,10 +31,11 @@ size_t Client::Run() {
         return -1;
     }
 
-    boost::asio::io_service io_service;
-    config::NetworkConfig net_config(config_.db_host, config_.db_port);
+    io_service_.reset(new boost::asio::io_service());
+    net_config_.reset(new config::NetworkConfig(config_.db_host, config_.db_port));
+//    config::NetworkConfig net_config(config_.db_host, config_.db_port);
 
-    network_client_.reset(new network::NetworkClient(io_service, net_config));
+    network_client_.reset(new network::NetworkClient(io_service_, net_config_));
 
     return 0;
 }
@@ -67,8 +68,15 @@ size_t Client::ExecQuery_() {
         std::cout<<current_task_.get()->payload.get()->value->data()<<std::endl;
 
         serializer_->Serialize(current_task_);
+        serialized_query_ = serializer_->GetOutStringStream();
+
+
     } else if (query_tokens_[0] == "GET") {
         // TODO
+
+
+//        serializer_->Deserialize();
+
     }
     return 0;
 }
