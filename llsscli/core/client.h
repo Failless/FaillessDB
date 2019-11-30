@@ -29,10 +29,13 @@ class Client : public ClientInterface {
     std::unique_ptr<network::NetworkClientInterface> network_client_;
     std::unique_ptr<filesystem::FileSystemInterface> filesystem_;
     std::unique_ptr<serializer::SerializerInterface> serializer_;
+
+    std::shared_ptr<std::stringstream> serialized_query_;
+
     config::ClientConfig config_;
 
     std::string query_tokens_[4];
-    std::unique_ptr<config::Task> current_task_;
+    std::shared_ptr<config::Task> current_task_;
 
     bool parse_input_status_;
     bool exec_query_status_;
