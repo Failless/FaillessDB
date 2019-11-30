@@ -16,13 +16,12 @@ public:
     FileSystemInterface() = default;
     virtual ~FileSystemInterface() = default;
 
-    virtual bool Get(const string &key, std::shared_ptr<int8_t>& value_out, size_t size_out) = 0;
-    virtual bool Set(const string &key, std::shared_ptr<int8_t> value_in, size_t size_in) = 0;
+    virtual bool Get(const string &key, std::shared_ptr<int8_t>& value_out, size_t& size_out) = 0;
+    virtual bool Set(const string &key, const std::shared_ptr<int8_t>& value_in, size_t size_in) = 0;
 //    virtual bool GetRange(const string &key, std::shared_ptr<int8_t> value) = 0;
     virtual bool Remove(const string &key) = 0;
     virtual void EraseAll(const string& db_path) = 0;
 
-protected:
     virtual void LoadInMemory_(std::map<string, ValueInfo>& local_storage) = 0;
 };
 
@@ -31,17 +30,20 @@ public:
     explicit FileSystem(const string &db_path);
     ~FileSystem() override;
 
-    bool Get(const string &key, std::shared_ptr<int8_t>& value_out, size_t size_out) override;
-    bool Set(const string &key, std::shared_ptr<int8_t> value_in, size_t size_in) override;
+    bool Get(const string &key, std::shared_ptr<int8_t>& value_out, size_t& size_out) override;
+    bool Set(const string &key, const std::shared_ptr<int8_t>& value_in, size_t size_in) override;
 //    bool GetRange(const string &key, int8_t* value) override;
     bool Remove(const string &key) override;
     void EraseAll(const string& db_path) override;
 
     uint64_t AmountOfKeys();
     void LoadInMemory_(std::map<string, ValueInfo>& local_storage) override;
-private:
+
+ private:
     bool OpenDB_(const string &db_path);
     void CloseDB_();
+    bool DBIsOpen_();
+
     rocksdb::DB *db_;
 };
 

@@ -39,8 +39,8 @@ using ::testing::_;
 class MockFileSystem : public folder::FileSystem {
 public:
   explicit MockFileSystem(const std::string& db_path) : folder::FileSystem(db_path) {};
-  MOCK_METHOD3(Get, bool(const std::string &key, std::shared_ptr<int8_t>& value_out, size_t size_out));
-  MOCK_METHOD3(Set, bool(const std::string &key, std::shared_ptr<int8_t> value_in, size_t size_in));
+  MOCK_METHOD3(Get, bool(const std::string &key, std::shared_ptr<int8_t>& value_out, size_t& size_out));
+  MOCK_METHOD3(Set, bool(const std::string &key, const std::shared_ptr<int8_t>& value_in, size_t size_in));
 //  MOCK_METHOD1(GetRange, bool(const std::string& key));
   MOCK_METHOD1(Remove, bool(const std::string& key));
 };
