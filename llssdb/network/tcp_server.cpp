@@ -66,8 +66,8 @@ TcpServer::TcpServer(std::string ip, unsigned short port) : host_(std::move(ip),
 void TcpServer::Accept_() {
     ConnectionAdapter adapter(io_service_);
     acceptor_->async_accept( adapter.conn->GetSocket(),
-                            boost::bind(&TcpServer::AcceptHandler_, this, adapter,
-                                        boost::asio::placeholders::error));
+                             boost::bind(&TcpServer::AcceptHandler_, this, adapter,
+                                         boost::asio::placeholders::error));
 }
 
 void TcpServer::AcceptHandler_(ConnectionAdapter adaptor,

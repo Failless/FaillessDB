@@ -3,6 +3,7 @@
 
 #include <boost/chrono/system_clocks.hpp>
 //#include <utility>
+
 #include <boost/uuid/uuid.hpp>
 #include <string>
 #include "llssdb/common/operators.h"
@@ -10,6 +11,7 @@
 namespace failless {
 namespace db {
 namespace common {
+
 
 class Data {
 public:
@@ -96,3 +98,4 @@ public:
 }  // namespace failless
 
 #endif  // FAILLESS_LLSSDB_COMMON_TASK_H_
+

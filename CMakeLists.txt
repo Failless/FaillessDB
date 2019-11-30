@@ -1,13 +1,15 @@
 cmake_minimum_required(VERSION 3.14)
+
 project(failless C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
 find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -fPIC -no-pie -phtread -lpthread")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lbz2 -lz")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -fPIC -no-pie -phtread -lpthread -lssl -lcrypto")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lbz2 -lz -lssl -lcrypto")
 #remove -lboost-system, -lrocksdb, -lsnappy and -lrt
+#serjio2888 added -lssl -lcrypto for good work of OpenSSL hashing
 
 set(Boost_LIBRARY_DIR /usr/local/lib)
 link_directories(${Boost_LIBRARY_DIR})
@@ -22,6 +24,7 @@ find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(msgpack REQUIRED)
 find_library(ROCKSDB_LIBRARY rocksdb REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
 if (EXISTS "/usr/local/lib/libgmock.a")
@@ -39,6 +42,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${GTEST_INCLUDE_DIRS})
 include_directories(${GMock_INCLUDE_DIR})
 include_directories(${ROCKSDB_INCLUDE_DIRS})
+include_directories(${OPENSSL_INCLUDE_DIRS})
 
 add_subdirectory(${FAILLESS_DB_LIB})
 add_subdirectory(${FAILLESS_CLIENT_LIB})
@@ -49,6 +53,7 @@ target_link_libraries(failless-server llssdb)
 target_link_libraries(failless-server ${Boost_LIBRARIES})
 target_link_libraries(failless-server ${msgpack_LIBRARIES})
 target_link_libraries(failless-server ${ROCKSDB_LIBRARY})
+# maybe we need to add ${OPENSSL_LIBRARY} ??? (Serjio2888)
 
 # compile client
 add_executable(failless-cli ${CLIENT_SRC_LIST})
@@ -93,7 +98,10 @@ target_link_libraries(run-db-tests llssdb)
 target_link_libraries(run-db-tests ${Boost_LIBRARIES})
 target_link_libraries(run-db-tests ${msgpack_LIBRARIES})
 target_link_libraries(run-db-tests ${ROCKSDB_LIBRARY})
+target_link_libraries(run-db-tests ${OPENSSL_LIBRARIES})
+
 
 message("Boost version ${Boost_VERSION} found at ${Boost_LIBRARY_DIRS}")
 message("Msgpack version ${msgpack_VERSION} found at ${msgpack_DIR}")
 message("RocksDB version ${RocksDB_VERSION} found at ${RocksDB_DIR} and RocksDB library at ${ROCKSDB_LIBRARY}")
+message("OpenSSL version ${OPENSSL_VERSION} found at ${OPENSSL_LIBRARIES}")

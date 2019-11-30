@@ -5,7 +5,7 @@ namespace db {
 namespace common {
 
 bool Task::operator==(const Task &r) const {
-    if ( payload != r.payload ) {
+    if (payload != r.payload) {
         return false;
     }
     if (query != r.query) {
@@ -18,15 +18,15 @@ bool Task::operator==(const Task &r) const {
 }
 
 bool Data::operator!=(const failless::db::common::Data &r) const {
-    if ( size != r.size ) {
+    if (size != r.size) {
         return true;
     }
-    for ( size_t i = 0; i < size; ++i ) {
-        if ( value[i] != r.value[i] ) {
+    for (size_t i = 0; i < size; ++i) {
+        if (value[i] != r.value[i]) {
             return true;
         }
     }
-    if ( folder_id != r.folder_id ) {
+    if (folder_id != r.folder_id) {
         return true;
     }
     return key != r.key;

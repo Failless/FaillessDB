@@ -21,8 +21,8 @@
 ///      2. Comment first one                                                   ///
 ///////////////////////////////////////////////////////////////////////////////////
 
-//const std::string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
-const std::string test_db_path = "./llssdb/storage/test_user";
+const std::string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
+// std::string test_db_path = "./llssdb/storage/test_user";
 
 namespace failless::db::tests {
 
@@ -30,7 +30,7 @@ using ::testing::_;
 using folder::TaskWorker;
 
 class MockTaskWorker : public TaskWorker {
-public:
+ public:
     explicit MockTaskWorker(const std::string& db_path = test_db_path) : TaskWorker(db_path) {};
     MOCK_METHOD1(Set, bool(const common::Task &task_in));
     MOCK_METHOD1(Read, bool(const common::Task &task_in));

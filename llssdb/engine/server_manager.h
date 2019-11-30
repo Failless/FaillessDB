@@ -18,7 +18,7 @@ class ServerManager : public IServerManager {
     ServerManager() = delete;
     explicit ServerManager(boost::lockfree::queue<common::Task>& task_queue)
         : task_queue_(task_queue),
-          //          folders_(0),  // I don't think that it's necessary but...
+        //          folders_(0),  // I don't think that it's necessary but...
           is_run_(false){};
     ~ServerManager() override = default;
 

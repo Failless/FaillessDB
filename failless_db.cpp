@@ -9,7 +9,7 @@ void StartManager(std::shared_ptr<failless::db::engine::IServerManager> manager)
 
 int main(/*int argc, char **argv*/) {
     failless::db::common::Settings settings;
-    failless::db::utils::ConfigManager config_manager;
+    failless::db::utils::ConfigManager config_manager("../failless.conf");
     config_manager.Initialize(settings);
     // it is queue capacity. I don't like that and may be, because it is necessary for
     // lockfree::queue, we should write our custom thread safe queue

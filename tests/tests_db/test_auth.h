@@ -1,28 +1,43 @@
-#ifndef TESTS_DB_TEST_AUTH_H_
-#define TESTS_DB_TEST_AUTH_H_
+#ifndef TESTS_DB_AUTH_H_
+#define TESTS_DB_AUTH_H_
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
 #include "llssdb/auth/authorization.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
 
-class MockTaskWorker : public Authorization {
+class MockAuth : public Authorization {
  public:
-    //    explicit MockTaskWorker() : IAuthorization() {};
-    MOCK_METHOD2(Reg, bool(std::string login, std::string pass));
-    // MOCK_METHOD2(Login, bool(std::string login, std::string pass));
-    // MOCK_METHOD2(Disconnect, bool(std::string login, std::string pass));
+    std::string login;
+    std::string pass;
+    unsigned char pass_hash[32];
+    MOCK_METHOD1(CheckCollisions_, bool(std::string login));
+    MOCK_METHOD3(Hasher_, unsigned char *(const std::string &login, std::string pass, unsigned char *md));
+    MockAuth() {
+        login = "login";
+        pass = "pass";
+        // pass_hash = "pass_hash";
+    }
 };
 
-TEST(IAuthorization, Reg) {
-    MockTaskWorker mockTaskWorker;
-    std::string login = "login";
-    std::string pass = "pass";
-    EXPECT_CALL(mockTaskWorker, Reg(login, pass)).Times(AtLeast(1));
-    EXPECT_EQ(mockTaskWorker.Test(login, pass), EXIT_SUCCESS);
+TEST(Registration, Registration) {
+    MockAuth auth;
+    EXPECT_CALL(auth, CheckCollisions_(auth.login)).Times(AtLeast(1));
+    EXPECT_EQ(auth.Registration(auth.login, auth.pass), true);
 }
 
-#endif  // TESTS_DB_TEST_AUTH_H_
+TEST(Hasher, Registration) {
+    MockAuth auth;
+    EXPECT_CALL(auth, Hasher_(auth.login, auth.pass, auth.pass_hash)).Times(AtLeast(1));
+    EXPECT_EQ(auth.Registration(auth.login, auth.pass), true);
+}
+
+TEST(Hasher, RemoveUser) {
+    MockAuth auth;
+    EXPECT_CALL(auth, Hasher_(auth.login, auth.pass, auth.pass_hash)).Times(AtLeast(1));
+    EXPECT_EQ(auth.RemoveUser(auth.login, auth.pass), false);
+}
+
+#endif

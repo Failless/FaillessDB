@@ -30,7 +30,7 @@ TEST(ServerTest, SetConnection) {
     server->SetConfig(ip, port);
     network::Request request{};
     std::function<network::Response(network::Request &)> foo = [&](network::Request &) {
-        return testFunction(request);
+      return testFunction(request);
     };
     server->SetResponseFunction(foo);
     auto host = server->GetSettings();
@@ -68,7 +68,7 @@ TEST_F(TestTcpServerImpl, SendData) {
     int8_t bin_data[3] = {1, 2, 3};
     request.SetData(bin_data, 3);
     std::function<network::Response(network::Request &)> func = [&](network::Request &) {
-        return testFunction(request);
+      return testFunction(request);
     };
     tcp_server->SetResponseFunction(func);
     auto data = test_client.Ping();

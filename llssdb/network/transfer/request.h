@@ -35,7 +35,7 @@ class Request : boost::noncopyable {
         auto now = boost::chrono::system_clock::now();
         auto ms = boost::chrono::time_point_cast<boost::chrono::milliseconds>(now);
         return common::Task(); //common::Task(0, nullptr, "query", client_id,
-                 //           boost::chrono::microseconds(ms.time_since_epoch().count()));
+        //           boost::chrono::microseconds(ms.time_since_epoch().count()));
     }
 
  protected:

@@ -1,4 +1,4 @@
-#include "llssdb/network/transfer/response.h"
+#include "response.h"
 
 namespace failless {
 namespace db {
@@ -9,3 +9,4 @@ Response::Response(const Request &request) {}
 }  // namespace network
 }  // namespace db
 }  // namespace failless
+
