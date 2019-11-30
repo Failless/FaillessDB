@@ -1,5 +1,5 @@
 // TODO(EgorBedov): consider time when it's necessary to update in-memory storage
-// after every query, or later ?
+//   after every query, or later ?
 
 #ifndef FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 #define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
@@ -19,12 +19,10 @@ namespace failless::db::folder {
 class ITaskWorker : boost::noncopyable {
 public:
     explicit ITaskWorker(const std::string& db_path)
-      : local_storage_(nullptr),
-        input_queue_(nullptr),
+      : input_queue_(nullptr),
         output_queue_(nullptr),
         fs_(db_path) {}
     virtual ~ITaskWorker() = default;
-    // TODO(EgorBedov): command should be parsed from task.query
     virtual int AddTask(const common::Task &task) = 0;
 
 protected:
@@ -33,17 +31,19 @@ protected:
     virtual bool Read(const common::Task &task_in) = 0;
     virtual bool Update(const common::Task &task_in) = 0;
     virtual bool Delete(const common::Task &task_in) = 0;
+    virtual void LoadInMemory() = 0;
+    virtual void UnloadFromMemory() = 0;
 
-    std::map<std::string, ValueInfo>* local_storage_;  // TODO(EgorBedov): string - type of key?
-    std::queue<common::Task> *input_queue_;
-    std::queue<common::Task> *output_queue_;
+    std::map<std::string, ValueInfo> local_storage_;
+    std::queue<common::Task> *input_queue_;     // TODO: replace these two
+    std::queue<common::Task> *output_queue_;    //  with our own queues
     FileSystem fs_;
 };
 
 class TaskWorker : public ITaskWorker {
 public:
-    explicit TaskWorker(const std::string& db_path);
-    ~TaskWorker() override = default;
+    explicit TaskWorker(const std::string& db_path) : ITaskWorker(db_path) {};
+    ~TaskWorker() override;
 
     int AddTask(const common::Task &task) override;
 
@@ -55,6 +55,8 @@ protected:
     bool Read(const common::Task &task_in) override;
     bool Update(const common::Task &task_in) override;
     bool Delete(const common::Task &task_in) override;
+    void LoadInMemory() override;
+    void UnloadFromMemory() override;
 };
 
 }  // namespace failless::db::folder

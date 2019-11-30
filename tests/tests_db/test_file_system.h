@@ -1,6 +1,5 @@
-#ifndef FAILLESS_TEST_FILE_SYSTEM_H
-#define FAILLESS_TEST_FILE_SYSTEM_H
-
+#ifndef TESTS_TESTS_DB_TEST_FILE_SYSTEM_H
+#define TESTS_TESTS_DB_TEST_FILE_SYSTEM_H
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -9,7 +8,6 @@
 #include "llssdb/common/task.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
-
 
 namespace failless::db::tests {
 
@@ -21,22 +19,19 @@ using std::string;
 class MockFileSystem : public FileSystem {
 public:
   explicit MockFileSystem(const string& db_path) : FileSystem(db_path) {};
-  MOCK_METHOD3(Get, bool(const string &key, int8_t*& value_out, size_t size_out));
-  MOCK_METHOD3(Set, bool(const string &key, int8_t* value_in, size_t size_in));
+  MOCK_METHOD3(Get, bool(const string &key, std::shared_ptr<int8_t>& value_out, size_t size_out));
+  MOCK_METHOD3(Set, bool(const string &key, std::shared_ptr<int8_t> value_in, size_t size_in));
 //  MOCK_METHOD1(GetRange, bool(const string& key));
   MOCK_METHOD1(Remove, bool(const string& key));
 };
 
-//string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
+// string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
 
 TEST(FileSystem, Set_And_Get) {
     FileSystem fs(test_db_path);
     string key = "test_key";
     size_t size = 3;
-    auto value = new int8_t[size];
-    for ( size_t iii = 0; iii < size; ++iii ) {
-        value[iii] = iii;
-    }
+    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
 
     fs.Set(key, value, size);
     EXPECT_EQ(fs.Get(key, value, size), true);
@@ -48,10 +43,7 @@ TEST(FileSystem, Full_Functionality_Test) {
     FileSystem fs(test_db_path);
     string key = "test_key";
     size_t size = 3;
-    auto value = new int8_t[size];
-    for ( size_t iii = 0; iii < size; ++iii ) {
-        value[iii] = iii;
-    }
+    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
 
     // it's important to keep them together
     // so the db won't be filled with same pairs
@@ -65,4 +57,4 @@ TEST(FileSystem, Full_Functionality_Test) {
 }
 
 
-#endif // FAILLESS_TEST_FILE_SYSTEM_H
+#endif // TESTS_TESTS_DB_TEST_FILE_SYSTEM_H

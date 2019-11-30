@@ -22,7 +22,7 @@ bool Data::operator!=(const failless::db::common::Data &r) const {
         return true;
     }
     for ( size_t i = 0; i < size; ++i ) {
-        if ( value[i] != r.value[i] ) {
+        if ( value.get()[i] != r.value.get()[i] ) {
             return true;
         }
     }

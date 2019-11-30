@@ -8,16 +8,14 @@
 
 namespace failless::db::folder {
 
-TaskWorker::TaskWorker(const std::string &db_path) : ITaskWorker(db_path) {
-    /// Retrieve all k-v pairs from hdd in local_storage_
-//    fs_.LoadInMemory(local_storage_);
+TaskWorker::~TaskWorker() {
+    UnloadFromMemory();
 }
 
 // TODO(EgorBedov): this func is endless so make it void
 int TaskWorker::AddTask(const common::Task &task) {
     /// Check input_queue_ for emptiness
 
-    /// If not empty then do task
     DoTask(task);
     return EXIT_SUCCESS;
 };
@@ -52,10 +50,19 @@ bool TaskWorker::Set(const common::Task &task_in) {
     bool result = fs_.Set(*task_in.payload.key, task_in.payload.value, task_in.payload.size);
 
     /// Send answer to output_queue_
-    /// Update in-memory storage
 
+    if ( task_in.payload.value.get() == nullptr ) {
+        std::cout << "value is null!" << std::endl;
+    }
+    /// Update in-memory storage
     if ( result ) {
-        std::cout << "{" << *task_in.payload.key << ": " << task_in.payload.size << "} was set\n";
+        // TODO(EgorBedov): check for memory condition first
+        //  if it's odd - emplace empty
+        local_storage_.emplace(*task_in.payload.key,
+            ValueInfo(task_in.payload.value, task_in.payload.size, true));
+        std::cout << "{" << *task_in.payload.key << ": " <<
+            local_storage_[*task_in.payload.key].size <<
+            "(size)} was set both in HDD and in memory\n" << std::endl;
     }
     return result;
 }
@@ -64,21 +71,30 @@ bool TaskWorker::Set(const common::Task &task_in) {
 bool TaskWorker::Read(const common::Task &task_in) {
     common::Task task_out;
     task_out.client_id = task_in.client_id;
-    task_out.payload.key = new std::string(*task_in.payload.key);
+    task_out.payload.key = task_in.payload.key;
     task_out.command = task_in.command;
 
-    bool result;
+    bool result = false;
 
-    if ( local_storage_ && (local_storage_->at(*task_in.payload.key).in_memory) ) {
-        task_out.payload.value = local_storage_->at(*task_in.payload.key).value;
-        result = true;
-        std::cout << "In-Memory ";
-    } else {
-        result = fs_.Get(*task_in.payload.key, task_out.payload.value, task_out.payload.size);
-        std::cout << "On HDD ";
+    std::cout << "Inside of map" << std::endl;
+    std::map<std::string, ValueInfo>::iterator it;
+    for ( it = local_storage_.begin(); it != local_storage_.end(); ++it ) {
+        std::cout << "{" << it->first << ": " << it->second.size << "(size)} and it's " <<
+            ( it->second.value == nullptr ? "" : "not " ) << "a nullptr" << std::endl;
     }
 
-    std::cout << task_out.payload.value << std::endl;
+    std::cout << "Found it ";
+    /// Grab file from memory if it's in there
+    if ( local_storage_.at(*task_in.payload.key).in_memory ) {
+        task_out.payload.value = local_storage_.at(*task_in.payload.key).value;
+        result = true;
+        std::cout << "in-memory" << std::endl;
+    } else {
+        result = fs_.Get(*task_in.payload.key, task_out.payload.value, task_out.payload.size);
+        // TODO(EgorBedov): load in memory?
+        std::cout << "on HDD" << std::endl;
+    }
+
 
     /// Send answer to output_queue_
 //    output_queue_->push(task_out);
@@ -106,10 +122,22 @@ bool TaskWorker::Delete(const common::Task &task_in) {
     /// Send answer
 
     /// Update in-memory storage
-    if ( local_storage_ )
-        local_storage_->erase(*task_in.payload.key);
+    if ( local_storage_.at(*task_in.payload.key).in_memory )
+        local_storage_.erase(*task_in.payload.key);
 
     return result;
 }
+
+void TaskWorker::LoadInMemory() {
+     fs_.LoadInMemory_(local_storage_);
+}
+
+void TaskWorker::UnloadFromMemory() {
+    for ( auto & it : local_storage_ ) {
+        it.second.value.reset();
+        it.second.in_memory = false;
+    }
+}
+
 
 } // namespace failless::db::folder

@@ -1,4 +1,6 @@
+#include <algorithm>
 #include <iostream>
+#include <memory>
 #include <rocksdb/db.h>
 #include <rocksdb/iterator.h>
 #include <rocksdb/options.h>
@@ -12,9 +14,8 @@ using namespace rocksdb;
 using std::string;
 
 
-FileSystem::FileSystem(const string& db_path/*, std::map<string, ValueInfo>*& local_storage*/) {
+FileSystem::FileSystem(const string& db_path) : db_(nullptr) {
     OpenDB_(db_path);
-//    LoadInMemory(local_storage);
 }
 
 FileSystem::~FileSystem() {
@@ -50,20 +51,19 @@ void FileSystem::CloseDB_() {
     delete db_;
 }
 
-bool FileSystem::Get(const string &key, int8_t*& value_out, size_t size_out) {
+bool FileSystem::Get(const string &key, std::shared_ptr<int8_t>& value_out, size_t size_out) {
     PinnableSlice pinnable_value;
     Status s = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
     /// Copy to output arguments
     size_out = pinnable_value.size();
-    value_out = new int8_t[size_out];
-    memcpy(value_out, pinnable_value.data(), size_out * sizeof(int8_t));
+    memcpy(value_out.get(), pinnable_value.data(), size_out * sizeof(int8_t));  //TODO: fix
 
     return s.ok();
 }
 
-bool FileSystem::Set(const string &key, int8_t* value_in, size_t size_in) {
-    std::string string_value = std::to_string(*(value_in));
+bool FileSystem::Set(const string &key, std::shared_ptr<int8_t> value_in, size_t size_in) {
+    std::string string_value = std::to_string(*value_in);
     Status s = db_->Put(WriteOptions(), key, string_value);
     if ( !s.ok() ) {
         std::cerr << "Failed to put a value\n";
@@ -76,7 +76,7 @@ bool FileSystem::Remove(const string& key) {
     /// Remove key
     Status s = db_->Delete(WriteOptions(), key);
     if ( !s.ok() ) {
-        std::cerr << "Failed to delete a value\n"; // TODO(EgorBedov): fix that later
+        std::cerr << "Failed to delete a value" << std::endl;
         return false;
     }
     return true;
@@ -100,18 +100,16 @@ uint64_t FileSystem::AmountOfKeys() {
     return keys;
 }
 
-void FileSystem::LoadInMemory(std::map<string, ValueInfo>*& local_storage) {
+void FileSystem::LoadInMemory_(std::map<string, ValueInfo>& local_storage) {
     // TODO(EgorBedov): map will insert at-runtime-known amount of nodes
-    // but there's no way to allocate memory in advance (boost?)
+    //  but there's no way to allocate memory in advance (boost?)
     ReadOptions read_options;
     Iterator* it = db_->NewIterator(read_options);
-    ValueInfo temp;
     for ( it->SeekToFirst(); it->Valid(); it->Next() ) {
-        temp.in_memory = true;
-        temp.size = it->value().size();
-        // next thing is copying data from const char * to int8_t * (seems fine to me tho)
-        memcpy(temp.value, it->value().data(), temp.size * sizeof(int8_t));
-        local_storage->at(it->key().ToString()) = temp;
+        ValueInfo tmp(nullptr, it->value().size(), true);
+
+        memcpy(tmp.value.get(), it->value().data(), tmp.size * sizeof(int8_t));
+        local_storage.at(it->key().ToString()) = tmp;
     }
 }
 
