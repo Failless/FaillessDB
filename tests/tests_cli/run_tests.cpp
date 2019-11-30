@@ -2,7 +2,6 @@
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "llsscli/core/client.h"
-#include "llsscli/filesystem/filesystem.h"
 
 namespace failless::client::tests {
 
@@ -15,9 +14,9 @@ using std::string;
 
 using namespace failless::client::core;
 
-class MockClient : public ClientInterface {
+class MockClient : public Client {
  public:
-    MockClient() : ClientInterface(){};
+    explicit MockClient(config::ClientConfig &test_data) : Client(test_data){};
     MOCK_METHOD1(ReadQuery, size_t(string query));
     MOCK_METHOD0(Send, size_t());
     MOCK_METHOD2(Params, size_t(int argc, char **arg));
@@ -27,10 +26,11 @@ class MockClient : public ClientInterface {
 };
 
 TEST(client_test, can_read_query) {
-    MockClient mock_client;
+    config::ClientConfig config;
+    MockClient mock_client(config);
     string test_query = "test";
     EXPECT_CALL(mock_client, ReadQuery(test_query)).Times(AtLeast(1));
-    EXPECT_EQ(mock_client.Test("test"), EXIT_SUCCESS);
+    EXPECT_EQ(mock_client.ParseInput_("test"), EXIT_SUCCESS);
 }
 
 int main(int argc, char **argv) {

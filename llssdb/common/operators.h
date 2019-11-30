@@ -13,8 +13,7 @@ enum operators {
     CREATE,
     KILL,
     CONNECT,
-    DISCONNECT,
-    ANSWER
+    DISCONNECT
 };
 
 }  // namespace common

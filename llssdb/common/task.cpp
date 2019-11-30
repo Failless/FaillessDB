@@ -17,10 +17,6 @@ bool Task::operator==(const Task &r) const {
     return !(time != r.time);
 }
 
-Task::~Task() {
-    delete(query);
-}
-
 bool Data::operator!=(const failless::db::common::Data &r) const {
     if ( size != r.size ) {
         return true;
@@ -34,11 +30,6 @@ bool Data::operator!=(const failless::db::common::Data &r) const {
         return true;
     }
     return key != r.key;
-}
-
-Data::~Data() {
-    delete(value);
-    delete(key);
 }
 
 }  // namespace common

@@ -7,7 +7,10 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -fPIC -no-pie -phtread -lpthread")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -fPIC -no-pie -pthread -lpthread -lbz2 -lz")
-# removed -lrocksdb and -lsnappy and -lrt
+#remove -lboost-system, -lrocksdb, -lsnappy and -lrt
+
+set(Boost_LIBRARY_DIR /usr/local/lib)
+link_directories(${Boost_LIBRARY_DIR})
 
 set(DATABSE_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_db.cpp)
 set(CLIENT_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_cli.cpp)
@@ -50,6 +53,8 @@ target_link_libraries(failless-server ${ROCKSDB_LIBRARY})
 # compile client
 add_executable(failless-cli ${CLIENT_SRC_LIST})
 target_link_libraries(failless-cli llsscli)
+target_link_libraries(failless-cli ${Boost_LIBRARIES})
+target_link_libraries(failless-cli ${msgpack_LIBRARIES})
 
 set(TESTS_DIR ${CMAKE_CURRENT_SOURCE_DIR}/tests)
 
@@ -89,6 +94,6 @@ target_link_libraries(run-db-tests ${Boost_LIBRARIES})
 target_link_libraries(run-db-tests ${msgpack_LIBRARIES})
 target_link_libraries(run-db-tests ${ROCKSDB_LIBRARY})
 
-message("Boost version ${Boost_VERSION} found at ${Boost_DIR}")
+message("Boost version ${Boost_VERSION} found at ${Boost_LIBRARY_DIRS}")
 message("Msgpack version ${msgpack_VERSION} found at ${msgpack_DIR}")
-message("RocksDB library at ${ROCKSDB_LIBRARY}")
+message("RocksDB version ${RocksDB_VERSION} found at ${RocksDB_DIR} and RocksDB library at ${ROCKSDB_LIBRARY}")

@@ -26,8 +26,13 @@ public:
 
     Data(const Data& data) = default;
     Data& operator=(const Data&) = default;
-    ~Data();
+    ~Data() = default;
     bool operator!=(const Data& r) const;
+
+    void Destruct() {
+        delete(value);
+        delete(key);
+    }
 
     size_t size;
     int8_t* value;
@@ -50,14 +55,13 @@ public:
       : query(_query),
         payload(_id),
         command(_command) {}
-    Task(short _id, size_t _size, int8_t* _data, std::string* _query, operators _command, boost::uuids::uuid _client_id,
+    Task(short _id, size_t _size, std::string* _key, int8_t* _data, std::string* _query, operators _command, boost::uuids::uuid _client_id,
             boost::chrono::microseconds _time)
       : query(_query),
-        payload(_id, _size, _data),
+        payload(_id, _size, _data, _key),
         command(_command),
         client_id(_client_id),
         time(_time) {}
-
     explicit Task(std::string* _query, operators _command)
       : query(_query),
         command(_command) {}
@@ -72,8 +76,13 @@ public:
 
     Task(const Task& task) = default;
     Task& operator=(const Task&) = default;
-    ~Task();
+    ~Task() = default;
     bool operator==(const Task& r) const;
+
+    void Destruct() {
+        delete(query);
+        payload.Destruct();
+    }
 
     std::string* query;
     Data payload;

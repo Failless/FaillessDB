@@ -1,34 +1,26 @@
 #ifndef LLSSCLI_FILESYSTEM_FILESYSTEM_H_
 #define LLSSCLI_FILESYSTEM_FILESYSTEM_H_
 
-#include <string>
+#include "llsscli/filesystem/filesystem_interface.h"
 
-namespace failless::client::filesystem {
-
-class FileSystemInterface {
- public:
-    FileSystemInterface() = default;
-    ~FileSystemInterface() = default;
-
-    virtual size_t ReadFile(uintptr_t data) = 0;
-
-    virtual size_t WriteFile(uintptr_t data) = 0;
-};
+namespace failless {
+namespace client {
+namespace filesystem {
 
 class FileSystem : public FileSystemInterface {
- public:
+public:
     FileSystem() = default;
-    explicit FileSystem(std::string file_name);
-    ~FileSystem() = default;
+    ~FileSystem() override;
 
-    size_t ReadFile(uintptr_t data) override;
+    size_t ReadFile(std::string file_path, std::unique_ptr< std::vector<unsigned char> >& payload, std::streampos& len) override;
+    size_t WriteFile(std::string file_path, std::unique_ptr< std::vector<unsigned char> >& payload) override;
 
-    size_t WriteFile(uintptr_t data) override;
-
- private:
-    std::string file_name_;
+private:
+    std::string file_name_ = "";
 };
 
-}  // namespace failless::client::filesystem
+} // namespace filesystem
+} // namespace llsscli
+} // namespace failless
 
 #endif  // LLSSCLI_FILESYSTEM_FILESYSTEM_H_

@@ -65,7 +65,7 @@ bool TaskWorker::Read(const common::Task &task_in) {
     common::Task task_out;
     task_out.client_id = task_in.client_id;
     task_out.payload.key = new std::string(*task_in.payload.key);
-    task_out.command = common::operators::ANSWER;
+    task_out.command = task_in.command;
 
     bool result;
 

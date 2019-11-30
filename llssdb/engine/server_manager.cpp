@@ -10,41 +10,41 @@ void ServerManager::SetTask(common::Task task) {}
 
 void ServerManager::Reload() {}
 
-//void ServerManager::Run() {
-//    is_run_ = true;
-//    const int kMsDelay = 100;  // it's temporary
-//    common::Task task{};
-//    while (is_run_) {
-//        if (input_queue_.empty()) {
-//            std::this_thread::sleep_for(std::chrono::microseconds(kMsDelay));
-//            continue;  // May by it will be better if I change if-body to all code below here
-//        }
-//        input_queue_.pop(task);
-//        switch (task.command) {
-//            case common::operators::CREATE: {
-//                int folder_num = CreateFolder_(task.client_id);
-//                std::cout << "Created new folder with id " << folder_num << std::endl;
-//                break;
-//            }
-//            case common::operators::KILL: {
-//                KillFolder_(task.payload.folder_id);
-//                break;
-//            }
-//            case common::operators::CONNECT: {
-//                // create task_worker for exist folder in the other thread
-//                break;
-//            }
-//            case common::operators::DISCONNECT: {
-//                // join tread with exist task_worker which have created data dump before
-//                break;
-//            }
-//            default: {
-//                Execute_(task);
-//                break;
-//            }
-//        }
-//    }
-//}
+void ServerManager::Run() {
+    is_run_ = true;
+    const int kMsDelay = 100;  // it's temporary
+    common::Task task{};
+    while (is_run_) {
+        if (task_queue_.empty()) {
+            std::this_thread::sleep_for(std::chrono::microseconds(kMsDelay));
+            continue;  // May by it will be better if I change if-body to all code below here
+        }
+        task_queue_.pop(task);
+        switch (task.command) {
+            case common::operators::CREATE: {
+                int folder_num = CreateFolder_(task.client_id);
+                std::cout << "Created new folder with id " << folder_num << std::endl;
+                break;
+            }
+            case common::operators::KILL: {
+                KillFolder_(task.payload.folder_id);
+                break;
+            }
+            case common::operators::CONNECT: {
+                // create task_worker for exist folder in the other thread
+                break;
+            }
+            case common::operators::DISCONNECT: {
+                // join tread with exist task_worker which have created data dump before
+                break;
+            }
+            default: {
+                Execute_(task);
+                break;
+            }
+        }
+    }
+}
 
 void ServerManager::Stop() { is_run_ = false; }
 

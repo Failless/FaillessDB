@@ -1,6 +1,10 @@
 ---
 Language:        Cpp
+<<<<<<< HEAD
 # BasedOnStyle:  Google
+=======
+BasedOnStyle:  Google
+>>>>>>> develop
 AccessModifierOffset: -3
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: false
