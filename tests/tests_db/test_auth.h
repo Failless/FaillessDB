@@ -8,9 +8,8 @@
 using ::testing::_;
 using ::testing::AtLeast;
 
-
 class MockAuth : public Authorization {
-public:
+ public:
     std::string login;
     std::string pass;
     unsigned char pass_hash[32];
@@ -22,7 +21,6 @@ public:
         // pass_hash = "pass_hash";
     }
 };
-
 
 TEST(Registration, Registration) {
     MockAuth auth;
@@ -41,6 +39,5 @@ TEST(Hasher, RemoveUser) {
     EXPECT_CALL(auth, Hasher_(auth.login, auth.pass, auth.pass_hash)).Times(AtLeast(1));
     EXPECT_EQ(auth.RemoveUser(auth.login, auth.pass), false);
 }
-
 
 #endif

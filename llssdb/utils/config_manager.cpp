@@ -1,9 +1,8 @@
+#include "llssdb/utils/config_manager.h"
 #include <algorithm>
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <iostream>
-#include <boost/filesystem.hpp>
-#include "llssdb/utils/config_manager.h"
-
 
 bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settings &settings) {
     if (!boost::filesystem::exists(config_path)) {
@@ -22,7 +21,8 @@ bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settin
 }
 
 void  // auto-formatting is so strange sometimes..
-failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::Settings &settings, std::ifstream &cFile) {
+failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::Settings &settings,
+                                                     std::ifstream &cFile) {
     std::string line{};
     while (getline(cFile, line)) {
         line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
@@ -67,6 +67,4 @@ failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::Setti
     }
 }
 
-failless::db::utils::ConfigManager::ConfigManager(const char *path) {
-    this->config_path = path;
-}
+failless::db::utils::ConfigManager::ConfigManager(const char *path) { this->config_path = path; }
