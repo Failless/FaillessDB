@@ -2,8 +2,8 @@
 #define FAILLESS_LLSSDB_COMMON_OPERATORS_H_
 
 namespace failless {
-namespace db {
 namespace common {
+namespace enums {
 
 enum operators {
     SET = 0,
@@ -16,8 +16,8 @@ enum operators {
     DISCONNECT
 };
 
+}  // namespace enums
 }  // namespace common
-}  // namespace db
 }  // namespace failless
 
 #endif  // FAILLESS_LLSSDB_COMMON_OPERATORS_H_

@@ -2,9 +2,9 @@
 #define FAILLESS_LLSSDB_ENGINE_MANAGER_INTERFACE_H_
 
 #include <boost/noncopyable.hpp>
-#include "llssdb/common/operators.h"
-#include "llssdb/common/settings.h"
-#include "llssdb/common/task.h"
+#include "llss3p/enums/operators.h"
+#include "llssdb/utils/settings.h"
+#include "llssdb/utils/task.h"
 
 namespace failless {
 namespace db {
@@ -19,10 +19,10 @@ class IServerManager : boost::noncopyable {
     virtual ~IServerManager() = default;
 
     /**
-     * Set task to common queue for inside task handler
+     * Set task to utils queue for inside task handler
      * @param task
      */
-    virtual void SetTask(common::Task task) = 0;
+    virtual void SetTask(utils::Task task) = 0;
 
     /**
      * Reload server. This method create server restart and reinitialize its settings.
@@ -44,7 +44,7 @@ class IServerManager : boost::noncopyable {
      * It is the setter of this class. It set base settings of database
      * @param settings
      */
-    virtual void SetSettings(common::Settings& settings) = 0;
+    virtual void SetSettings(utils::Settings& settings) = 0;
 
  protected:
     /**
@@ -52,7 +52,7 @@ class IServerManager : boost::noncopyable {
      * @param task
      * @return
      */
-    virtual bool Execute_(common::Task& task) = 0;
+    virtual bool Execute_(utils::Task& task) = 0;
 };
 
 }  // namespace engine

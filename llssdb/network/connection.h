@@ -3,7 +3,6 @@
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 namespace failless {
 namespace db {
@@ -14,7 +13,7 @@ const size_t kMaxSize = 1024;
 
 class Connection {
  public:
-    typedef boost::shared_ptr<Connection> pointer;
+//    typedef boost::shared_ptr<Connection> pointer;
 
     Connection() = delete;
     explicit Connection(boost::asio::io_service& io_service);
@@ -31,7 +30,16 @@ class Connection {
     ip::tcp::socket socket_;
     //    std::vector<char> data_;
     std::string message = "Hello i can send you smth";
-    char buffer_[kMaxSize];
+    char buffer_[kMaxSize]{};
+};
+
+struct ConnectionAdapter {
+    ConnectionAdapter() : conn(nullptr) {}
+    explicit ConnectionAdapter(boost::asio::io_service &io_service) {
+        conn.reset(new Connection(io_service));
+    }
+    ~ConnectionAdapter() = default;
+    std::shared_ptr<Connection> conn;
 };
 
 }  // namespace network

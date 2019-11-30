@@ -6,9 +6,10 @@
 #include <boost/chrono.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/random_generator.hpp>
-#include "llssdb/common/task.h"
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/network/tcp_server_interface.h"
+#include "llssdb/utils/task.h"
+#include "tcp_server_mock.h"
 #include "tests/tests_db/tcp_server_mock.h"
 #include "tests/tests_db/test_tcp_server.h"
 
@@ -30,7 +31,7 @@ TEST(ServerTest, SetConnection) {
     server->SetConfig(ip, port);
     network::Request request{};
     std::function<network::Response(network::Request &)> foo = [&](network::Request &) {
-        return testFunction(request);
+      return testFunction(request);
     };
     server->SetResponseFunction(foo);
     auto host = server->GetSettings();
@@ -52,11 +53,10 @@ TEST(ServerTest, PushTask) {
     auto *key = new std::string("key1");
     size_t size = 3;
     auto value = new int8_t[size];
-    for ( size_t iii = 0; iii < size; ++iii ) {
+    for (size_t iii = 0; iii < size; ++iii) {
         value[iii] = iii;
     }
-    common::Task task(folder_id, size, key, value, query,
-                      common::operators::SET, client_id,
+    utils::Task task(folder_id, size, key, value, query, common::enums::operators::SET, client_id,
                       boost::chrono::microseconds(ms.time_since_epoch().count()));
 
     EXPECT_CALL(mock_tcp_server, PushTask_(task)).Times(AtLeast(1));
@@ -68,7 +68,7 @@ TEST_F(TestTcpServerImpl, SendData) {
     int8_t bin_data[3] = {1, 2, 3};
     request.SetData(bin_data, 3);
     std::function<network::Response(network::Request &)> func = [&](network::Request &) {
-        return testFunction(request);
+      return testFunction(request);
     };
     tcp_server->SetResponseFunction(func);
     auto data = test_client.Ping();
