@@ -26,7 +26,6 @@ TEST(ConfigManager, TestDefaultConfig) {
     EXPECT_EQ(settings.lua, false);
     EXPECT_EQ(settings.using_email, false);
     EXPECT_EQ(settings.port, 8888);
-
 }
 
 
