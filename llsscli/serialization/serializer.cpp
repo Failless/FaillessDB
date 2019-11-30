@@ -10,34 +10,35 @@ namespace failless {
 namespace client {
 namespace serializer {
 
-size_t Serializer::Serialize(std::unique_ptr< config::Task >& current_task) {
+size_t Serializer::Serialize(std::shared_ptr< config::Task >& current_task) {
     out_buf_.reset(new std::stringstream());
     msgpack::pack(*out_buf_.get(), *(current_task.get()));
+//    std::cout<<out_buf_.get()->str()<<std::endl;
     return 0;
 }
 
-size_t Serializer::Deserialize(std::unique_ptr< std::stringstream >& current_task) {
+size_t Serializer::Deserialize(std::shared_ptr< std::stringstream >& current_task) {
     // deserialize
-    msgpack::object_handle oh = msgpack::unpack( out_buf_.get()->str().data(), out_buf_.get()->str().size() );
+    msgpack::object_handle oh = msgpack::unpack( current_task.get()->str().data(), current_task.get()->str().size() );
     msgpack::object deserialized = oh.get();
     std::cout << deserialized << std::endl;
 
     in_buf_.reset(new config::Task());
     deserialized.convert( *( in_buf_.get() ) );
 
-    std::stringstream ss;
-    ss << deserialized;
-
-    std::cout<<in_buf_.get()->payload.get()->value.get()->data()<<std::endl;
-    std::cout<<ss.str().c_str()<<std::endl;
+//    std::stringstream ss;
+//    ss << deserialized;
+//
+//    std::cout<<in_buf_.get()->payload.get()->value.get()->data()<<std::endl;
+//    std::cout<<ss.str().c_str()<<std::endl;
     return 0;
 }
 
-std::unique_ptr< std::stringstream >& Serializer::GetOutStringStream() {
+std::shared_ptr< std::stringstream >& Serializer::GetOutStringStream() {
     return out_buf_;
 }
 
-std::unique_ptr< config::Task >& Serializer::GetInConfig() {
+std::shared_ptr< config::Task >& Serializer::GetInConfig() {
     return in_buf_;
 }
 
