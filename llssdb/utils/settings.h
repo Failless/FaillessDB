@@ -26,7 +26,7 @@ struct Settings {
 
     Settings()
         : bind("localhost"),
-          data_path("/data"),
+          data_path("/storage"),
           logfile("log.txt"),
           email(""),
           using_email(false),

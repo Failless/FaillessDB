@@ -4,11 +4,29 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "llssdb/common/settings.h"
+#include "llssdb/utils/settings.h"
 #include "llssdb/utils/config_manager.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
+
+/**
+ * This test simulating situation,
+ * when path to config is invalid
+ * (checking default config).
+ */
+TEST(ConfigManager, TestDefaultConfig) {
+    failless::db::utils::Settings settings;
+    failless::db::utils::ConfigManager conf("not a valid path");
+    conf.Initialize(settings);
+
+    EXPECT_EQ(settings.bind, "localhost");
+    EXPECT_EQ(settings.setonly, false);
+    EXPECT_EQ(settings.readonly, false);
+    EXPECT_EQ(settings.lua, false);
+    EXPECT_EQ(settings.using_email, false);
+    EXPECT_EQ(settings.port, 8888);
+}
 
 class MockConfig : public failless::db::utils::ConfigManager {
  public:
@@ -22,7 +40,7 @@ MockConfig::MockConfig(const char *path) : ConfigManager(path) { this->fake_path
 
 TEST(WriteToSettings_, Parser) {
     MockConfig conf("path");
-    failless::db::common::Settings settings;
+    failless::db::utils::Settings settings;
     std::string settings_fake;
     std::string fake_stream;
 
