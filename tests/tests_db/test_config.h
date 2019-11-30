@@ -3,7 +3,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
+#include <iostream>
 #include "llssdb/common/settings.h"
 #include "llssdb/utils/config_manager.h"
 
@@ -25,10 +25,10 @@ TEST(WriteToSettings_, Parser) {
     failless::db::common::Settings settings;
     std::string settings_fake;
     std::string fake_stream;
-
+    
     EXPECT_CALL(conf, WriteToSettings_(settings_fake, fake_stream)).Times(AtLeast(1));
 
-    EXPECT_EQ(conf.Initialize(settings), true);
+    EXPECT_EQ(conf.Initialize(settings), false);
 }
 
 #endif  // TESTS_DB_CONFIG_H
