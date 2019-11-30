@@ -4,7 +4,11 @@
 #include <fstream>
 #include <iostream>
 
-bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settings &settings) {
+namespace failless {
+namespace db {
+namespace utils {
+
+bool failless::db::utils::ConfigManager::Initialize(Settings &settings) {
     if (!boost::filesystem::exists(config_path)) {
         std::cerr << "No such file";
         return false;
@@ -21,12 +25,13 @@ bool failless::db::utils::ConfigManager::Initialize(failless::db::common::Settin
     return true;
 }
 
-void  // auto-formatting is so strange sometimes..
-failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::Settings &settings,
-                                                     std::ifstream &cFile) {
-    // gets string by string, skipping '#'
-    // when finds setting - parse it and push values to settings struct
-
+/**
+ * gets string by string, skipping '#' when finds setting - parse it and push values to settings
+ * struct
+ * @param settings
+ * @param cFile
+ */
+void ConfigManager::WriteToSettings_(Settings &settings, std::ifstream &cFile) {
     std::string line{};
     while (getline(cFile, line)) {
         line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
@@ -71,4 +76,9 @@ failless::db::utils::ConfigManager::WriteToSettings_(failless::db::common::Setti
     }
 }
 
-failless::db::utils::ConfigManager::ConfigManager(const char *path) { this->config_path = path; }
+ConfigManager::ConfigManager(const char *path) { this->config_path = path; }
+
+}  // namespace utils
+}  // namespace db
+}  // namespace failless
+

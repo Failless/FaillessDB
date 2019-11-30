@@ -6,7 +6,7 @@
 #include <boost/uuid/uuid.hpp>
 #include <cstdint>
 #include <string>
-#include "llssdb/common/task.h"
+#include "llssdb/utils/task.h"
 
 namespace failless {
 namespace db {
@@ -29,13 +29,13 @@ class Request : boost::noncopyable {
         data_ = data;
         size_ = size;
     }
-    common::Task GetData() {
+    utils::Task GetData() {
         boost::uuids::random_generator generator;
         boost::uuids::uuid client_id = generator();
         auto now = boost::chrono::system_clock::now();
         auto ms = boost::chrono::time_point_cast<boost::chrono::milliseconds>(now);
-        return common::Task(); //common::Task(0, nullptr, "query", client_id,
-        //           boost::chrono::microseconds(ms.time_since_epoch().count()));
+        return utils::Task();  // utils::Task(0, nullptr, "query", client_id,
+                     //           boost::chrono::microseconds(ms.time_since_epoch().count()));
     }
 
  protected:

@@ -1,11 +1,11 @@
-#ifndef FAILLESS_LLSSDB_COMMON_SETTINGS_H_
-#define FAILLESS_LLSSDB_COMMON_SETTINGS_H_
+#ifndef FAILLESS_LLSSDB_UTILS_SETTINGS_H_
+#define FAILLESS_LLSSDB_UTILS_SETTINGS_H_
 
 #include <string>
 
 namespace failless {
 namespace db {
-namespace common {
+namespace utils {
 
 struct Settings {
     std::string bind;
@@ -42,8 +42,8 @@ struct Settings {
           port(8888) {}
 };
 
-}  // namespace common
+}  // namespace utils
 }  // namespace db
 }  // namespace failless
 
-#endif  // FAILLESS_LLSSDB_COMMON_SETTINGS_H_
+#endif  // FAILLESS_LLSSDB_UTILS_SETTINGS_H_

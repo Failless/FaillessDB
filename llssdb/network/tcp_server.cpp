@@ -31,9 +31,9 @@ void TcpServer::SetConfig(std::string ip, int port) {
 
 void TcpServer::Listen() {
     is_run_ = true;
-//    boost::asio::io_context io_context(1);
-//    boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
-//    signals.async_wait([&](auto, auto) { io_context.stop(); });
+    //    boost::asio::io_context io_context(1);
+    //    boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
+    //    signals.async_wait([&](auto, auto) { io_context.stop(); });
     io_service_.run();
 }
 
@@ -50,7 +50,7 @@ void TcpServer::SetResponseFunction(std::function<Response(Request &)> &generate
     //                                     std::placeholders::_1));
 }
 
-void TcpServer::PushTask_(common::Task task) {}
+void TcpServer::PushTask_(utils::Task task) {}
 
 TcpServer::TcpServer(Host host) : host_(std::move(host)) {
     acceptor_ =
@@ -65,13 +65,12 @@ TcpServer::TcpServer(std::string ip, unsigned short port) : host_(std::move(ip),
 
 void TcpServer::Accept_() {
     ConnectionAdapter adapter(io_service_);
-    acceptor_->async_accept( adapter.conn->GetSocket(),
-                             boost::bind(&TcpServer::AcceptHandler_, this, adapter,
-                                         boost::asio::placeholders::error));
+    acceptor_->async_accept(
+        adapter.conn->GetSocket(),
+        boost::bind(&TcpServer::AcceptHandler_, this, adapter, boost::asio::placeholders::error));
 }
 
-void TcpServer::AcceptHandler_(ConnectionAdapter adaptor,
-                               const boost::system::error_code &error) {
+void TcpServer::AcceptHandler_(ConnectionAdapter adaptor, const boost::system::error_code &error) {
     if (!error) {
         adaptor.conn->DoJob();
     }

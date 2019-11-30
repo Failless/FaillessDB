@@ -1,8 +1,8 @@
-#include "llssdb/common/task.h"
+#include "llssdb/utils/task.h"
 
 namespace failless {
 namespace db {
-namespace common {
+namespace utils {
 
 bool Task::operator==(const Task &r) const {
     if (payload != r.payload) {
@@ -17,7 +17,7 @@ bool Task::operator==(const Task &r) const {
     return !(time != r.time);
 }
 
-bool Data::operator!=(const failless::db::common::Data &r) const {
+bool Data::operator!=(const Data &r) const {
     if (size != r.size) {
         return true;
     }
@@ -32,6 +32,6 @@ bool Data::operator!=(const failless::db::common::Data &r) const {
     return key != r.key;
 }
 
-}  // namespace common
+}  // namespace utils
 }  // namespace db
 }  // namespace failless
