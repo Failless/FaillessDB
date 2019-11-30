@@ -13,10 +13,11 @@ namespace network {
 class NetworkClient : public NetworkClientInterface {
 public:
     NetworkClient() = default;
-    NetworkClient(boost::asio::io_service& io_service, config::NetworkConfig config);
+    NetworkClient(std::shared_ptr<boost::asio::io_service>& io_service, std::shared_ptr<config::NetworkConfig>& config);
     ~NetworkClient() = default;
 
-    void Close() override;
+    size_t Open(std::shared_ptr<std::stringstream>& current_task) override;
+    size_t Close() override;
 
 private:
     void OnConnect_(const boost::system::error_code& error_code, tcp::resolver::iterator end_point_iter) override;

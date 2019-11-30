@@ -17,7 +17,8 @@ class NetworkClientInterface : boost::noncopyable {
 public:
     virtual ~NetworkClientInterface() = default;
 
-    virtual void Close() = 0;
+    virtual size_t Open(std::shared_ptr<std::stringstream>& current_task) = 0;
+    virtual size_t Close() = 0;
 
 private:
     virtual void OnConnect_(const boost::system::error_code& error_code, tcp::resolver::iterator end_point_iter) = 0;
