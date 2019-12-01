@@ -10,7 +10,7 @@
 bool SimpleSHA256(const std::string &input, unsigned char *md) {
     if (input.empty()) return false;
 //    auto hash = new uint8_t[SHA_DIGEST_LENGTH];
-    SHA1(reinterpret_cast<const uint8_t *>(input.data()), input.size(), md);
+    SHA256(reinterpret_cast<const uint8_t *>(input.data()), input.size(), md);
     return true;
 //    SHA256_CTX context;
 //    if (!SHA256_Init(&context)) {

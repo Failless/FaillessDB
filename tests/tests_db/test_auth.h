@@ -88,10 +88,6 @@ TEST(Registration, HashFunc) {
     }
 }
 
-//TEST(Registration, )
-
-
-
 TEST(Registration, Registration) {
     MockAuth auth;
     EXPECT_CALL(auth, CheckCollisions_(auth.login)).Times(AtLeast(1));
