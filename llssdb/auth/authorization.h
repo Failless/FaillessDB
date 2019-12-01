@@ -5,7 +5,7 @@
 #include "llssdb/auth/iauthorization.h"
 #include "llssdb/auth/user_info.h"
 
-bool SimpleSHA256(unsigned char *input, unsigned long length, unsigned char *md);
+bool SimpleSHA256(const std::string &input, unsigned char *md);
 
 class Authorization : public IAuthorization {
  public:

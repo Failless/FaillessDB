@@ -3,18 +3,29 @@
 // #include <cstring>
 #include <boost/lexical_cast.hpp>
 #include "llssdb/auth/authorization.h"
+#include <openssl/md5.h>
+#include <openssl/sha.h>
 
-bool SimpleSHA256(unsigned char *input, unsigned long length, unsigned char *md) {
-    SHA256_CTX context;
-    if (!SHA256_Init(&context)) {
-        std::cerr << "Can't initialize hash (wrong context format)" << std::endl;
-        return false;
-    }
-    if (!SHA256_Update(&context, input, length)) {
-        std::cerr << "Can't update context to password" << std::endl;
-        return false;
-    }
-    return SHA256_Final(md, &context) != 0;
+
+bool SimpleSHA256(const std::string &input, unsigned char *md) {
+    if (input.empty()) return false;
+//    auto hash = new uint8_t[SHA_DIGEST_LENGTH];
+    SHA1(reinterpret_cast<const uint8_t *>(input.data()), input.size(), md);
+    return true;
+//    SHA256_CTX context;
+//    if (!SHA256_Init(&context)) {
+//        std::cerr << "Can't initialize hash (wrong context format)" << std::endl;
+//        return false;
+//    }
+//    if (!SHA256_Update(&context, input.c_str(), length)) {
+//        std::cerr << "Can't update context to password" << std::endl;
+//        return false;
+//    }
+//    if (!SHA256_Update(&context, input.c_str(), length)) {
+//        std::cerr << "Can't update context to password" << std::endl;
+//        return false;
+//    }
+//    return SHA256_Final(md, &context) != 0;
 }
 
 unsigned char *Authorization::Hasher_(const std::string &login, std::string pass,
@@ -29,7 +40,7 @@ unsigned char *Authorization::Hasher_(const std::string &login, std::string pass
     // но даже если солить таким способом, как у нас - нельзя получить доступ к аккаунтам с
     // одинаковыми паролями, взломав лишь один, т.к. итоговые хэши все равно различны
 
-    if (!SimpleSHA256(reinterpret_cast<unsigned char *>(&pass), pass.size(), md)) {
+    if (!SimpleSHA256(pass, md)) {
         std::cerr << "error in hasher" << std::endl;
     }
 

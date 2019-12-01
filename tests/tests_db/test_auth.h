@@ -71,13 +71,15 @@ TEST_F(RegisterImpl, RemoveUser) {
 TEST(Registration, HashFunc) {
     std::string pass = "qwerty12345";
     unsigned char array[SHA256_DIGEST_LENGTH]{};
-    EXPECT_TRUE(SimpleSHA256(reinterpret_cast<unsigned char*>(&pass), SHA256_DIGEST_LENGTH, array));
-    unsigned char array2[SHA256_DIGEST_LENGTH]{};
+    EXPECT_TRUE(SimpleSHA256(pass, array));
+
     std::string pass2 = "qwerty12345";
-    EXPECT_TRUE(SimpleSHA256(reinterpret_cast<unsigned char*>(&pass2), SHA256_DIGEST_LENGTH, array2));
-    unsigned char array3[SHA256_DIGEST_LENGTH]{};
+    unsigned char array2[SHA256_DIGEST_LENGTH]{};
+    EXPECT_TRUE(SimpleSHA256(pass, array2));
+
     std::string pass3 = "qwerty1234567";
-    EXPECT_TRUE(SimpleSHA256(reinterpret_cast<unsigned char*>(&pass3), SHA256_DIGEST_LENGTH, array3));
+    unsigned char array3[SHA256_DIGEST_LENGTH]{};
+    EXPECT_TRUE(SimpleSHA256(pass3, array3));
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         EXPECT_EQ(array[i], array2[i]);
     }
