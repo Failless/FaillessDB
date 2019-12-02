@@ -3,8 +3,9 @@
 
 #include <string>
 #include "llssdb/auth/iauthorization.h"
+#include "llssdb/auth/user_info.h"
 
-bool SimpleSHA256(unsigned char *input, unsigned long length, unsigned char *md);
+bool SimpleSHA256(const std::string &input, unsigned char *md);
 
 class Authorization : public IAuthorization {
  public:
@@ -23,10 +24,9 @@ class Authorization : public IAuthorization {
  private:
     std::map<std::string, UserInfo> Users_;
 
-    virtual bool CheckCollisions_(const std::string &login);
+    bool CheckCollisions_(const std::string &login);
 
-    virtual unsigned char *Hasher_(const std::string &login, std::string pass,
-                                   unsigned char *pass_hash);
+    void Hasher_(const std::string &login, std::string pass, unsigned char *md);
 };
 
 #endif  // LLSSDB_AUTH_AUTHORIZATION_H_

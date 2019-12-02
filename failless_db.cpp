@@ -11,6 +11,9 @@ int main(/*int argc, char **argv*/) {
     failless::db::utils::Settings settings;
     failless::db::utils::ConfigManager config_manager("../failless.conf");
     config_manager.Initialize(settings);
+    failless::common::utils::Queue<int> queue;
+    queue.Push(1);
+    queue.Pop();
     // it is queue capacity. I don't like that and may be, because it is necessary for
     // lockfree::queue, we should write our custom thread safe queue
 //    failless::common::utils::Queue<failless::common::utils::Task> task_queue(1000);

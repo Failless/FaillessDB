@@ -31,52 +31,61 @@ bool FileSystem::OpenDB_(const std::string& db_path) {
     options.create_if_missing = true;
 
     /// Open DB with default ColumnFamily
-    Status s = DB::Open(options, db_path, &db_);
-    if (!s.ok()) {
-        std::cerr << "Failed to open a database\n";
-        return false;
+    auto status = DB::Open(options, db_path, &db_);
+    if (!status.ok()) {
+        throw std::logic_error("Failed to open a database");
     }
     return true;
 }
 
 void FileSystem::CloseDB_() {
     /// Close db
-    Status s = db_->Close();
-    if (!s.ok()) std::cerr << "Failed to close a database\n";
-
+    if (db_) {
+        auto status = db_->Close();
+        if (!status.ok()) {
+            throw std::logic_error("Failed to close a database");
+        }
+    }
     delete db_;
 }
 
 bool FileSystem::Get(const std::string& key, int8_t*& value_out, size_t size_out) {
-    PinnableSlice pinnable_value;
-    Status s = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
+    if (db_) {
+        PinnableSlice pinnable_value;
+        auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
-    /// Copy to output arguments
-    size_out = pinnable_value.size();
-    value_out = new int8_t[size_out];
-    memcpy(value_out, pinnable_value.data(), size_out * sizeof(int8_t));
+        /// Copy to output arguments
+        size_out = pinnable_value.size();
+        value_out = new int8_t[size_out];
+        memcpy(value_out, pinnable_value.data(), size_out * sizeof(int8_t));
 
-    return s.ok();
+        return status.ok();
+    }
+    return false;
 }
 
 bool FileSystem::Set(const std::string& key, int8_t* value_in, size_t size_in) {
-    std::string string_value = std::to_string(*(value_in));
-    Status s = db_->Put(WriteOptions(), key, string_value);
-    if (!s.ok()) {
-        std::cerr << "Failed to put a value\n";
-        return false;
+    if (db_) {
+        std::string string_value = std::to_string(*value_in);
+        auto status = db_->Put(WriteOptions(), key, string_value);
+        if (!status.ok()) {
+            std::cerr << "Failed to put a value\n";
+        }
+        return status.ok();
     }
-    return true;
+    return false;
 }
 
 bool FileSystem::Remove(const std::string& key) {
     /// Remove key
-    Status s = db_->Delete(WriteOptions(), key);
-    if (!s.ok()) {
-        std::cerr << "Failed to delete a value\n";  // TODO(EgorBedov): fix that later
-        return false;
+    if (db_) {
+        auto status = db_->Delete(WriteOptions(), key);
+        if (!status.ok()) {
+            std::cerr << "Failed to delete a value\n";  // TODO(EgorBedov): fix that later
+        }
+        return status.ok();
     }
-    return true;
+    return false;
 }
 
 void FileSystem::EraseAll(const std::string& db_path) {
@@ -92,23 +101,29 @@ void FileSystem::EraseAll(const std::string& db_path) {
 }
 
 uint64_t FileSystem::AmountOfKeys() {
-    uint64_t keys = 0;
-    db_->GetAggregatedIntProperty("rocksdb.estimate-num-keys", &keys);
-    return keys;
+    if (db_) {
+        uint64_t keys = 0;
+        db_->GetAggregatedIntProperty("rocksdb.estimate-num-keys", &keys);
+        return keys;
+    }
+    // TODO(EgorBedov): handle this error
+    return -1;
 }
 
 void FileSystem::LoadInMemory(std::map<std::string, ValueInfo>*& local_storage) {
-    // TODO(EgorBedov): map will insert at-runtime-known amount of nodes
-    // but there's no way to allocate memory in advance (boost?)
-    ReadOptions read_options;
-    Iterator* it = db_->NewIterator(read_options);
-    ValueInfo temp;
-    for (it->SeekToFirst(); it->Valid(); it->Next()) {
-        temp.in_memory = true;
-        temp.size = it->value().size();
-        // next thing is copying data from const char * to int8_t * (seems fine to me tho)
-        memcpy(temp.value, it->value().data(), temp.size * sizeof(int8_t));
-        local_storage->at(it->key().ToString()) = temp;
+    if (db_) {
+        // TODO(EgorBedov): map will insert at-runtime-known amount of nodes
+        // but there's no way to allocate memory in advance (boost?)
+        ReadOptions read_options;
+        Iterator* it = db_->NewIterator(read_options);
+        ValueInfo temp;
+        for (it->SeekToFirst(); it->Valid(); it->Next()) {
+            temp.in_memory = true;
+            temp.size = it->value().size();
+            // next thing is copying data from const char * to int8_t * (seems fine to me tho)
+            memcpy(temp.value, it->value().data(), temp.size * sizeof(int8_t));
+            local_storage->at(it->key().ToString()) = temp;
+        }
     }
 }
 
