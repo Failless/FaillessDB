@@ -8,7 +8,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -phtread -lpthread -lssl -lcrypto")
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -pthread -lpthread -lbz2 -lz -lssl -lcrypto")
-#remove -lboost-system, -lrocksdb, -lsnappy and -lrt
+#remove -lboost-system, -lrocksdb, -lsnappy, -lrt,
 #added -lssl -lcrypto for good work of OpenSSL hashing
 
 set(Boost_LIBRARY_DIR /usr/local/lib)
@@ -25,7 +25,18 @@ find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(msgpack REQUIRED)
 find_library(ROCKSDB_LIBRARY rocksdb REQUIRED)
+
+###### Finding OpenSSL ######
+if (EXISTS "/usr/local/opt/openssl@1.1")
+    # run next command if you're on macOS
+    # echo 'export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"' >> ~/.zshrc
+    # and go here if sha.h wasn't found
+    # https://github.com/mongodb/mongo-php-driver/issues/523
+    set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl@1.1/lib")
+    set(OPENSSL_INCLUDE_DIR "/usr/local/opt/openssl@1.1/include")
+endif()
 find_package(OpenSSL REQUIRED)
+
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
 if (EXISTS "/usr/local/lib/libgmock.a")

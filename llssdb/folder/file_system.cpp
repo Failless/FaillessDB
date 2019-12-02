@@ -1,26 +1,26 @@
-#include "llssdb/folder/file_system.h"
+#include <iostream>
+#include <memory>
 #include <rocksdb/db.h>
 #include <rocksdb/iterator.h>
 #include <rocksdb/options.h>
-#include <iostream>
+#include <string>
+#include "llssdb/folder/file_system.h"
 
-namespace failless {
-namespace db {
-namespace folder {
+namespace failless::db::folder {
 
+using namespace failless::db::folder;
 using namespace rocksdb;
 
-FileSystem::FileSystem(
-    const std::string& db_path /*, std::map<std::string, ValueInfo>*& local_storage*/)
-    : db_(nullptr) {
+
+FileSystem::FileSystem(const std::string& db_path) : db_(nullptr) {
     OpenDB_(db_path);
-    //    LoadInMemory(local_storage);
 }
 
-FileSystem::~FileSystem() { CloseDB_(); }
+FileSystem::~FileSystem() {
+    CloseDB_();
+}
 
-bool FileSystem::OpenDB_(const std::string& db_path) {
-    //    DB* db;
+bool FileSystem::OpenDB_(const std::string &db_path) {
     Options options;
 
     /// Optimize RocksDB. This is the easiest way to get RocksDB to perform well
@@ -31,61 +31,85 @@ bool FileSystem::OpenDB_(const std::string& db_path) {
     options.create_if_missing = true;
 
     /// Open DB with default ColumnFamily
-    auto status = DB::Open(options, db_path, &db_);
-    if (!status.ok()) {
-        throw std::logic_error("Failed to open a database");
+    Status s = DB::Open(options, db_path, &db_);
+    if ( !s.ok() ) {
+        std::cerr << "Failed to open a database\n";
+        return false;
     }
     return true;
 }
 
 void FileSystem::CloseDB_() {
-    /// Close db
-    if (db_) {
-        auto status = db_->Close();
-        if (!status.ok()) {
-            throw std::logic_error("Failed to close a database");
-        }
+    if ( DBIsOpen_() ) {
+        /// Close db
+        Status s = db_->Close();
+        if ( !s.ok() )
+            std::cerr << "Failed to close a database\n" <<
+            "If you're debugging then goto: tests/tests_db/mocks.h" << std::endl;
+
+        delete db_;
+        db_ = nullptr;
     }
-    delete db_;
 }
 
-bool FileSystem::Get(const std::string& key, int8_t*& value_out, size_t size_out) {
-    if (db_) {
+bool FileSystem::Get(const std::string &key, std::shared_ptr<int8_t>& value_out, size_t& size_out) {
+    if ( DBIsOpen_() ) {
         PinnableSlice pinnable_value;
-        auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
+        Status s = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
         /// Copy to output arguments
         size_out = pinnable_value.size();
-        value_out = new int8_t[size_out];
-        memcpy(value_out, pinnable_value.data(), size_out * sizeof(int8_t));
+        value_out.reset();
+        value_out = std::shared_ptr<int8_t>(
+            new int8_t[size_out],
+            std::default_delete<int8_t[]>());
+        memcpy(value_out.get(), pinnable_value.data(), size_out * sizeof(int8_t));
 
-        return status.ok();
+        return s.ok();
+    } else {
+        value_out = nullptr;
+        return false;
     }
-    return false;
 }
 
-bool FileSystem::Set(const std::string& key, int8_t* value_in, size_t size_in) {
-    if (db_) {
-        std::string string_value = std::to_string(*value_in);
-        auto status = db_->Put(WriteOptions(), key, string_value);
-        if (!status.ok()) {
-            std::cerr << "Failed to put a value\n";
+bool FileSystem::Set(const std::string &key, const std::shared_ptr<int8_t>& value_in, size_t size_in) {
+    if ( DBIsOpen_() ) {
+        std::string string_value;
+
+        for ( size_t iii = 0; iii < size_in; ++iii ) {
+            string_value += std::to_string(value_in.get()[iii]);
         }
-        return status.ok();
+
+        Status s = db_->Put(WriteOptions(), key, string_value);
+        if ( !s.ok() ) {
+            std::cerr << "Failed to put a value\n";
+            return false;
+        }
+        return true;
+    } else {
+        return false;
     }
-    return false;
 }
 
 bool FileSystem::Remove(const std::string& key) {
-    /// Remove key
-    if (db_) {
-        auto status = db_->Delete(WriteOptions(), key);
-        if (!status.ok()) {
-            std::cerr << "Failed to delete a value\n";  // TODO(EgorBedov): fix that later
+    if ( DBIsOpen_() ) {
+        /// Find key first
+        std::string* value;
+        Status s = db_->Get(ReadOptions(), key, value);
+        if ( s.IsNotFound() ) {
+            std::cerr << "Such key doesn't exist" << std::endl;
+            return false;
         }
-        return status.ok();
+        /// Remove key
+        s = db_->Delete(WriteOptions(), key);
+        if ( !s.ok() ) {
+            std::cerr << "Failed to delete a value" << std::endl;
+            return false;
+        }
+        return true;
+    } else {
+        return false;
     }
-    return false;
 }
 
 void FileSystem::EraseAll(const std::string& db_path) {
@@ -101,35 +125,41 @@ void FileSystem::EraseAll(const std::string& db_path) {
 }
 
 uint64_t FileSystem::AmountOfKeys() {
-    if (db_) {
+    if ( DBIsOpen_() ) {
         uint64_t keys = 0;
         db_->GetAggregatedIntProperty("rocksdb.estimate-num-keys", &keys);
         return keys;
+    } else {
+        return 0;
     }
-    // TODO(EgorBedov): handle this error
-    return -1;
 }
 
-void FileSystem::LoadInMemory(std::map<std::string, ValueInfo>*& local_storage) {
-    if (db_) {
-        // TODO(EgorBedov): map will insert at-runtime-known amount of nodes
-        // but there's no way to allocate memory in advance (boost?)
+void FileSystem::LoadInMemory_(std::map<std::string, ValueInfo>& local_storage) {
+    // TODO(EgorBedov): map will insert at-runtime-known amount of nodes
+    //  but there's no way to allocate memory in advance (boost?)
+    if ( DBIsOpen_() ) {
         ReadOptions read_options;
         Iterator* it = db_->NewIterator(read_options);
-        ValueInfo temp;
-        for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            temp.in_memory = true;
-            temp.size = it->value().size();
-            // next thing is copying data from const char * to int8_t * (seems fine to me tho)
-            memcpy(temp.value, it->value().data(), temp.size * sizeof(int8_t));
-            local_storage->at(it->key().ToString()) = temp;
+        for ( it->SeekToFirst(); it->Valid(); it->Next() ) {
+            ValueInfo tmp(nullptr, it->value().size(), true);
+
+            memcpy(tmp.value.get(), it->value().data(), tmp.size * sizeof(int8_t));
+            local_storage.at(it->key().ToString()) = tmp;
         }
+    } else {
+        return;
     }
 }
 
-}  // namespace folder
-}  // namespace db
-}  // namespace failless
+bool FileSystem::DBIsOpen_() {
+    if ( !db_ ) {
+        std::cerr << "DB wasn't opened" << std::endl;
+        return false;
+    }
+    return true;
+}
+
+}
 
 // https://github.com/facebook/rocksdb/blob/master/examples/column_families_example.cc
 // TODO(EgorBedov): https://github.com/facebook/rocksdb/wiki/A-Tutorial-of-RocksDB-SST-formats
