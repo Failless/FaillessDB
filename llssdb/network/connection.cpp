@@ -1,4 +1,6 @@
 #include "llssdb/network/connection.h"
+#include <llss3p/serialization/serializer.h>
+#include <llss3p/serialization/serializer_interface.h>
 #include <boost/asio.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/bind/bind.hpp>
@@ -8,11 +10,18 @@ namespace failless {
 namespace db {
 namespace network {
 
+namespace srz = common::serializer;
+namespace utl = common::utils;
+
 Connection::Connection(boost::asio::io_service& io_service) : socket_(io_service) {}
 
 void Connection::Read(const boost::system::error_code& err, size_t bytes_transferred) {
     if (!err) {
         std::cout << buffer_ << std::endl;
+        std::unique_ptr<srz::SerializerInterface<utl::Packet>> serializer(
+            new srz::Serializer<utl::Packet>);
+        serializer->Deserialize();
+        has_ = true;
     } else {
         std::cerr << "error: " << err.message() << std::endl;
         socket_.close();
@@ -39,6 +48,11 @@ void Connection::SendData(common::utils::Packet data) {
     socket_.async_write_some(boost::asio::buffer(buffer_, message.size()),
                              boost::bind(&Connection::Write, this, boost::asio::placeholders::error,
                                          boost::asio::placeholders::bytes_transferred));
+}
+bool Connection::HasData() const { return has_; }
+
+bool Connection::GetData(utils::Task& task) {
+    if (!has_) return false;
 }
 
 }  // namespace network

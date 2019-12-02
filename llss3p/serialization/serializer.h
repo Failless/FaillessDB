@@ -46,7 +46,7 @@ template <class T>
 size_t Serializer<T>::Deserialize(std::unique_ptr<std::stringstream>& current_task) {
     // deserialize
     msgpack::object_handle oh =
-        msgpack::unpack(out_buf_.get()->str().data(), out_buf_.get()->str().size());
+        msgpack::unpack(out_buf_->str().data(), out_buf_->str().size());
     msgpack::object deserialized = oh.get();
     std::cout << deserialized << std::endl;
 
@@ -55,7 +55,7 @@ size_t Serializer<T>::Deserialize(std::unique_ptr<std::stringstream>& current_ta
 
     std::stringstream ss;
     ss << deserialized;
-
+    // TODO(Shampooh): rewrite it on templates and add docs for this function
     std::cout << in_buf_.get()->payload.get()->value.get()->data() << std::endl;
     std::cout << ss.str().c_str() << std::endl;
     return 0;

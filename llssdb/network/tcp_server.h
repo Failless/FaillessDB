@@ -34,7 +34,7 @@ class TcpServer : public ITcpServer {
     void Accept_();
     void AcceptHandler_(ConnectionAdapter adaptor, const boost::system::error_code &error);
 
-    common::utils::Queue<Connection> *queue_ = nullptr;
+    std::shared_ptr<common::utils::Queue<std::shared_ptr<Connection>>> queue_;
     boost::asio::io_service io_service_;
     //    ip::tcp::socket *socket_;
     /// The acceptor object used to accept incoming socket connections.
