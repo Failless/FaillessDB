@@ -9,30 +9,14 @@
 
 bool SimpleSHA256(const std::string &input, unsigned char *md) {
     if (input.empty()) return false;
-//    auto hash = new uint8_t[SHA_DIGEST_LENGTH];
     SHA256(reinterpret_cast<const uint8_t *>(input.data()), input.size(), md);
     return true;
-//    SHA256_CTX context;
-//    if (!SHA256_Init(&context)) {
-//        std::cerr << "Can't initialize hash (wrong context format)" << std::endl;
-//        return false;
-//    }
-//    if (!SHA256_Update(&context, input.c_str(), length)) {
-//        std::cerr << "Can't update context to password" << std::endl;
-//        return false;
-//    }
-//    if (!SHA256_Update(&context, input.c_str(), length)) {
-//        std::cerr << "Can't update context to password" << std::endl;
-//        return false;
-//    }
-//    return SHA256_Final(md, &context) != 0;
 }
 
-unsigned char *Authorization::Hasher_(const std::string &login, std::string pass,
+void Authorization::Hasher_(const std::string &login, std::string pass,
                                       unsigned char *md) {
     std::string salt(pass);
-    int j = 0;
-    for (int i = login.length() - 1; i >= 0; i--) {
+    for (int i = login.length() - 1, j = 0; i >= 0; i--) {
         salt[j++] = login[i];  // salt - reversed login - unique
     }
 
@@ -41,10 +25,8 @@ unsigned char *Authorization::Hasher_(const std::string &login, std::string pass
     // одинаковыми паролями, взломав лишь один, т.к. итоговые хэши все равно различны
 
     if (!SimpleSHA256(pass, md)) {
-        std::cerr << "error in hasher" << std::endl;
+        throw std::logic_error("sha256 failed");
     }
-
-    return md;
 }
 
 bool Authorization::RemoveUser(const std::string &login, const std::string &pass) {

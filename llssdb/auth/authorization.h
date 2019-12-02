@@ -26,7 +26,7 @@ class Authorization : public IAuthorization {
 
     bool CheckCollisions_(const std::string &login);
 
-    unsigned char *Hasher_(const std::string &login, std::string pass, unsigned char *pass_hash);
+    void Hasher_(const std::string &login, std::string pass, unsigned char *md);
 };
 
 #endif  // LLSSDB_AUTH_AUTHORIZATION_H_
