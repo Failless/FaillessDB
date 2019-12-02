@@ -1,7 +1,7 @@
 #include <boost/algorithm/hex.hpp>
 #include <iostream>
 // #include <cstring>
-#include <boost/lexical_cast.hpp>
+// #include <boost/lexical_cast.hpp>
 #include "llssdb/auth/authorization.h"
 #include <openssl/md5.h>
 #include <openssl/sha.h>
@@ -53,16 +53,18 @@ bool Authorization::RemoveUser(const std::string &login, const std::string &pass
     }
     unsigned char pass_hash[SHA256_DIGEST_LENGTH];
     Hasher_(login, pass, pass_hash);
-    if (Users_[login].pass_hash == pass_hash) {
-        Users_.erase(login);
-        return true;
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        if (Users_[login].pass_hash[i] != pass_hash[i]) {
+            return false;
+        }
     }
-    return false;
+    Users_.erase(login);
+    return true;
 }
 
 bool Authorization::IsAuth(const std::string &login, const std::string &pass, int table_id) {
     unsigned char pass_hash[SHA256_DIGEST_LENGTH];
-    //    Hasher_(login, pass, pass_hash);
+    Hasher_(login, pass, pass_hash);
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         if (Users_[login].pass_hash[i] != pass_hash[i]) {
             return false;

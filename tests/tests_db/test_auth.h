@@ -50,7 +50,8 @@ TEST_F(RegisterImpl, Registration) {
 TEST_F(RegisterImpl, IsAuth) {
     std::string login = "mr_tester";
     std::string pass = "qwerty12345";
-    int folder_id = 0;
+    int folder_id = -1;
+    auth->Registration(login, pass);
     EXPECT_TRUE(auth->IsAuth(login, pass, folder_id));
     EXPECT_FALSE(auth->IsAuth(login, pass, 1));
     std::string login2 = "mr_tester2";
@@ -61,6 +62,7 @@ TEST_F(RegisterImpl, IsAuth) {
 TEST_F(RegisterImpl, RemoveUser) {
     std::string login = "mr_tester";
     std::string pass = "qwerty12345";
+    auth->Registration(login, pass);
     EXPECT_TRUE(auth->RemoveUser(login, pass));
     EXPECT_FALSE(auth->RemoveUser(login, pass));
     std::string login2 = "mr_tester2";
