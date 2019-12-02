@@ -18,8 +18,8 @@ using ::testing::AtLeast;
 class MockFileSystem : public FileSystem {
  public:
     explicit MockFileSystem(const string& db_path) : FileSystem(db_path){};
-    MOCK_METHOD3(Get, bool(const string& key, int8_t*& value_out, size_t size_out));
-    MOCK_METHOD3(Set, bool(const string& key, int8_t* value_in, size_t size_in));
+    MOCK_METHOD3(Get, bool(const string& key, int8_t*& value_out, size_t size_out)) uint8_t*&;
+    MOCK_METHOD3(Set, bool(const string& key, int8_t* value_in, size_t size_in)) uint8_t*;
     //  MOCK_METHOD1(GetRange, bool(const string& key));
     MOCK_METHOD1(Remove, bool(const string& key));
 };

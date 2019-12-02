@@ -4,6 +4,7 @@
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/lockfree/queue.hpp>
+#include "llss3p/utils/queue.h"
 #include "llssdb/network/connection.h"
 #include "llssdb/network/tcp_server_interface.h"
 #include "llssdb/utils/task.h"
@@ -33,7 +34,7 @@ class TcpServer : public ITcpServer {
     void Accept_();
     void AcceptHandler_(ConnectionAdapter adaptor, const boost::system::error_code &error);
 
-    boost::lockfree::queue<utils::Task> *queue_ = nullptr;
+    common::utils::Queue<Connection> *queue_ = nullptr;
     boost::asio::io_service io_service_;
     //    ip::tcp::socket *socket_;
     /// The acceptor object used to accept incoming socket connections.

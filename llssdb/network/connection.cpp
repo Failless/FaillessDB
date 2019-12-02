@@ -34,7 +34,8 @@ void Connection::DoJob() {
     socket_.async_read_some(boost::asio::buffer(buffer_, kMaxSize),
                             boost::bind(&Connection::Read, this, boost::asio::placeholders::error,
                                         boost::asio::placeholders::bytes_transferred));
-
+}
+void Connection::SendData(common::utils::Packet data) {
     socket_.async_write_some(boost::asio::buffer(buffer_, message.size()),
                              boost::bind(&Connection::Write, this, boost::asio::placeholders::error,
                                          boost::asio::placeholders::bytes_transferred));

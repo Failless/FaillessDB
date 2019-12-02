@@ -6,12 +6,12 @@ namespace db {
 namespace folder {
 
 struct ValueInfo {
-    int8_t* value;
+    uint8_t* value;
     size_t size;
     bool in_memory;
     //    int16_t calls;    // counts how many times this value was called
 
-    explicit ValueInfo(int8_t* _value = nullptr, bool flag = false)
+    explicit ValueInfo(uint8_t* _value = nullptr, bool flag = false)
         : value(_value), size(0), in_memory(flag){};
 };
 

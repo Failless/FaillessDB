@@ -1,6 +1,7 @@
 #ifndef FAILLESS_LLSSDB_NETWORK_CONNECTION_H_
 #define FAILLESS_LLSSDB_NETWORK_CONNECTION_H_
 
+#include <llss3p/utils/packet.h>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
@@ -22,6 +23,7 @@ class Connection {
     void Read(const boost::system::error_code& err, size_t bytes_transferred);
     void Write(const boost::system::error_code& err, size_t bytes_transferred);
     void DoJob();
+    void SendData(common::utils::Packet data);
     ip::tcp::socket& GetSocket();
     Connection(Connection&) = delete;
     Connection(Connection&&) = delete;
