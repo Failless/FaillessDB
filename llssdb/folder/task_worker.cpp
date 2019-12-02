@@ -73,7 +73,7 @@ bool TaskWorker::Read(const utils::Task &task_in) {
         result = true;
         std::cout << "In-Memory ";
     } else {
-        result = fs_.Get(*task_in.payload.key, task_out.payload.value, task_out.payload.size);
+        result = fs_.Get(*task_in.payload.key, task_out.payload.value);
         std::cout << "On HDD ";
     }
 

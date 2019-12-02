@@ -49,23 +49,26 @@ void FileSystem::CloseDB_() {
     delete db_;
 }
 
-bool FileSystem::Get(const std::string& key, uint8_t*& value_out, size_t size_out) {
+size_t FileSystem::Get(const std::string& key, uint8_t* value_out) {
     if (db_) {
         PinnableSlice pinnable_value;
         auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
+        if (!status.ok()) {
+            return 0;
+        }
         /// Copy to output arguments
-        size_out = pinnable_value.size();
-        value_out = new uint8_t[size_out];
-        memcpy(value_out, pinnable_value.data(), size_out * sizeof(decltype(value_out)));
-
-        return status.ok();
+        size_t size = pinnable_value.size();
+        value_out = new uint8_t[size];
+        memcpy(value_out, pinnable_value.data(), size * sizeof(decltype(value_out)));
+        return size;
     }
-    return false;
+    return 0;
 }
 
 bool FileSystem::Set(const std::string& key, uint8_t* value_in, size_t size_in) {
     if (db_) {
+        // TODO(EgorBedov): !critical! fix byte to string cast
         std::string string_value = std::to_string(*value_in);
         auto status = db_->Put(WriteOptions(), key, string_value);
         if (!status.ok()) {

@@ -31,7 +31,7 @@ TEST(ServerTest, SetConnection) {
     server->SetConfig(ip, port);
     network::Request request{};
     std::function<network::Response(network::Request &)> foo = [&](network::Request &) {
-      return testFunction(request);
+        return testFunction(request);
     };
     server->SetResponseFunction(foo);
     auto host = server->GetSettings();
@@ -44,20 +44,20 @@ TEST(ServerTest, PushTask) {
     //                   has to. May be I made a mistake when I deleted default constructor for the
     //                   parent of this class
     MockTcpServer mock_tcp_server("0.0.0.0", 11556);
-    auto *query = new std::string("SET key1 ");
+    std::string query("SET key1 ");
     boost::uuids::random_generator generator;
     boost::uuids::uuid client_id = generator();
     auto now = boost::chrono::system_clock::now();
     auto ms = boost::chrono::time_point_cast<boost::chrono::milliseconds>(now);
     short folder_id = 0;
-    auto *key = new std::string("key1");
+    std::string key("key1");
     size_t size = 3;
-    auto value = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
+    uint8_t value[size];
+    for (size_t i = 0; i < size; ++i) {
+        value[i] = i;
     }
-    utils::Task task(folder_id, size, key, value, query, common::enums::operators::SET, client_id,
-                      boost::chrono::microseconds(ms.time_since_epoch().count()));
+    utils::Task task(folder_id, size, &key, value, &query, common::enums::operators::SET, client_id,
+                     boost::chrono::microseconds(ms.time_since_epoch().count()));
 
     EXPECT_CALL(mock_tcp_server, PushTask_(task)).Times(AtLeast(1));
 }
@@ -68,7 +68,7 @@ TEST_F(TestTcpServerImpl, SendData) {
     int8_t bin_data[3] = {1, 2, 3};
     request.SetData(bin_data, 3);
     std::function<network::Response(network::Request &)> func = [&](network::Request &) {
-      return testFunction(request);
+        return testFunction(request);
     };
     tcp_server->SetResponseFunction(func);
     auto data = test_client.Ping();

@@ -15,7 +15,7 @@ class FileSystemInterface : boost::noncopyable {
     FileSystemInterface() = default;
     virtual ~FileSystemInterface() = default;
 
-    virtual bool Get(const std::string &key, uint8_t *&value_out, size_t size_out) = 0;
+    virtual size_t Get(const std::string &key, uint8_t *value_out) = 0;
     virtual bool Set(const std::string &key, uint8_t *value_in, size_t size_in) = 0;
     //    virtual bool GetRange(const std::string &key, int8_t* value) = 0;
     virtual bool Remove(const std::string &key) = 0;
@@ -28,7 +28,7 @@ class FileSystem : public FileSystemInterface {
         const std::string &db_path /*, std::map<std::string, ValueInfo>*& local_storage*/);
     ~FileSystem() override;
 
-    bool Get(const std::string &key, uint8_t *&value_out, size_t size_out) override;
+    size_t Get(const std::string &key, uint8_t *value_out) override;
     bool Set(const std::string &key, uint8_t *value_in, size_t size_in) override;
     //    bool GetRange(const std::string &key, int8_t* value) override;
     bool Remove(const std::string &key) override;

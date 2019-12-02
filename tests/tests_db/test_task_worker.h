@@ -40,32 +40,34 @@ class MockTaskWorker : public TaskWorker {
 
 TEST(TaskManager, Get_and_Set) {
     TaskWorker tw(test_db_path);
-    size_t size = 3;
-    auto value1 = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) {
+    const size_t kSize = 3;
+    uint8_t value1[kSize];
+    for (size_t iii = 0; iii < kSize; ++iii) {
         value1[iii] = iii;
     }
-    auto *key1 = new std::string("test_key");
-    utils::Task test_task1(value1, size, key1, common::enums::operators::SET);
+    std::string key1("test_key");
+    utils::Task test_task1(value1, kSize, &key1, common::enums::operators::SET);
     bool result1 = tw.AddTask(test_task1);
     test_task1.Destruct();
 
-    auto value2 = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) {
+    uint8_t value2[kSize];
+    for (size_t iii = 0; iii < kSize; ++iii) {
         value2[iii] = iii;
     }
-    auto *key2 = new std::string("test_key");
-    utils::Task test_task2(value2, size, key2, common::enums::operators::GET);
+    std::string key2("test_key");
+    utils::Task test_task2(value2, kSize, &key2, common::enums::operators::GET);
     bool result2 = tw.AddTask(test_task2);
     test_task2.Destruct();
 
     EXPECT_EQ(result1, result2);
 
     // clear
-    auto value3 = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) value3[iii] = iii;
-    auto *key3 = new std::string("test_key");
-    utils::Task test_task3(value3, size, key3, common::enums::operators::DELETE);
+    uint8_t value3[kSize];
+    for (size_t iii = 0; iii < kSize; ++iii) {
+        value3[iii] = iii;
+    }
+    std::string key3("test_key");
+    utils::Task test_task3(value3, kSize, &key3, common::enums::operators::DELETE);
     tw.AddTask(test_task3);
     test_task3.Destruct();
 }
@@ -74,13 +76,13 @@ TEST(TaskManager, Get_and_Set) {
 
 TEST(TaskManager, Calling_Set) {
     MockTaskWorker mockTaskWorker(test_db_path);
-    auto *key = new std::string("test_key");
+    std::string key("test_key");
     size_t size = 3;
-    auto value = new int8_t[size];
+    uint8_t value[size];
     for (size_t iii = 0; iii < size; ++iii) {
         value[iii] = iii;
     }
-    utils::Task test_task(value, size, key, common::enums::operators::SET);
+    utils::Task test_task(value, size, &key, common::enums::operators::SET);
 
     EXPECT_CALL(mockTaskWorker, Set(test_task)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
@@ -89,13 +91,13 @@ TEST(TaskManager, Calling_Set) {
 
 TEST(TaskManager, Calling_Read) {
     MockTaskWorker mockTaskWorker(test_db_path);
-    auto *key = new std::string("test_key");
+    std::string key("test_key");
     size_t size = 3;
-    auto value = new int8_t[size];
+    uint8_t value[size];
     for (size_t iii = 0; iii < size; ++iii) {
         value[iii] = iii;
     }
-    utils::Task test_task(value, size, key, common::enums::operators::GET);
+    utils::Task test_task(value, size, &key, common::enums::operators::GET);
 
     EXPECT_CALL(mockTaskWorker, Read(test_task)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
@@ -104,13 +106,13 @@ TEST(TaskManager, Calling_Read) {
 
 TEST(TaskManager, Calling_Update) {
     MockTaskWorker mockTaskWorker(test_db_path);
-    auto *key = new std::string("test_key");
+    std::string key("test_key");
     size_t size = 3;
-    auto value = new int8_t[size];
+    uint8_t value[size];
     for (size_t iii = 0; iii < size; ++iii) {
         value[iii] = iii;
     }
-    utils::Task test_task(value, size, key, common::enums::operators::UPDATE);
+    utils::Task test_task(value, size, &key, common::enums::operators::UPDATE);
 
     EXPECT_CALL(mockTaskWorker, Update(test_task)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
@@ -119,13 +121,13 @@ TEST(TaskManager, Calling_Update) {
 
 TEST(TaskManager, Calling_Delete) {
     MockTaskWorker mockTaskWorker(test_db_path);
-    auto *key = new std::string("test_key");
+    std::string key("test_key");
     size_t size = 3;
-    auto value = new int8_t[size];
+    uint8_t value[size];
     for (size_t iii = 0; iii < size; ++iii) {
         value[iii] = iii;
     }
-    utils::Task test_task(value, size, key, common::enums::operators::DELETE);
+    utils::Task test_task(value, size, &key, common::enums::operators::DELETE);
 
     EXPECT_CALL(mockTaskWorker, Delete(test_task)).Times(1);
     EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);

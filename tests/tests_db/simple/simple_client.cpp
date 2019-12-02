@@ -1,10 +1,5 @@
 #include "tests/tests_db/simple/simple_client.h"
-#include <boost/asio/completion_condition.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/read.hpp>
-#include <boost/asio/streambuf.hpp>
-#include <boost/asio/write.hpp>
+#include <boost/asio.hpp>
 #include <iostream>
 #include <utility>
 
@@ -31,9 +26,9 @@ std::string SimpleClient::Ping() {
         std::cout << "receive failed: " << error.message() << std::endl;
         return std::string("");
     } else {
-        auto data = boost::asio::buffer_cast<std::string>(receive_buffer.data());
-        std::cout << data << std::endl;
-        return data;
+//        auto data = boost::asio::buffer_cast<std::string>(receive_buffer.data());
+//        std::cout << data << std::endl;
+        return "data";
     }
 }
 

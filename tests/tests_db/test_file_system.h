@@ -18,8 +18,8 @@ using ::testing::AtLeast;
 class MockFileSystem : public FileSystem {
  public:
     explicit MockFileSystem(const string& db_path) : FileSystem(db_path){};
-    MOCK_METHOD3(Get, bool(const string& key, int8_t*& value_out, size_t size_out)) uint8_t*&;
-    MOCK_METHOD3(Set, bool(const string& key, int8_t* value_in, size_t size_in)) uint8_t*;
+    MOCK_METHOD3(Get, bool(const string& key, uint8_t* value_out, size_t size_out));
+    MOCK_METHOD3(Set, bool(const string& key, uint8_t* value_in, size_t size_in));
     //  MOCK_METHOD1(GetRange, bool(const string& key));
     MOCK_METHOD1(Remove, bool(const string& key));
 };
@@ -30,22 +30,22 @@ TEST(FileSystem, Set_And_Get) {
     FileSystem fs(test_db_path);
     string key = "test_key";
     size_t size = 3;
-    auto value = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
+    uint8_t value[size];
+    for (size_t i = 0; i < size; ++i) {
+        value[i] = i;
     }
 
     fs.Set(key, value, size);
-    EXPECT_EQ(fs.Get(key, value, size), true);
+    EXPECT_EQ(fs.Get(key, value), size);
     fs.EraseAll(test_db_path);
-    EXPECT_EQ(fs.Get(key, value, size), false);
+    EXPECT_EQ(fs.Get(key, value), 0);
 }
 
 TEST(FileSystem, Full_Functionality_Test) {
     FileSystem fs(test_db_path);
     string key = "test_key";
     size_t size = 3;
-    auto value = new int8_t[size];
+    uint8_t value[size];
     for (size_t iii = 0; iii < size; ++iii) {
         value[iii] = iii;
     }
@@ -53,7 +53,8 @@ TEST(FileSystem, Full_Functionality_Test) {
     // it's important to keep them together
     // so the db won't be filled with same pairs
     EXPECT_EQ(fs.Set(key, value, size), true);
-    EXPECT_EQ(fs.Get(key, value, size), true);
+    uint8_t *get_data = nullptr;
+    EXPECT_EQ(fs.Get(key, get_data), size);
     EXPECT_EQ(fs.Remove(key), true);
     fs.EraseAll(test_db_path);
 }

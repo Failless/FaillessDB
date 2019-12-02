@@ -4,7 +4,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
-#include "llssdb/common/settings.h"
+#include "llssdb/utils/settings.h"
 #include "llssdb/utils/config_manager.h"
 
 using ::testing::_;
@@ -22,7 +22,7 @@ MockConfig::MockConfig(const char *path) : ConfigManager(path) { this->fake_path
 
 TEST(WriteToSettings_, Parser) {
     MockConfig conf("path");
-    failless::db::common::Settings settings;
+    failless::db::utils::Settings settings;
     std::string settings_fake;
     std::string fake_stream;
 
