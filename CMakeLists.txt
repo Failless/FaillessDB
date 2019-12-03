@@ -7,12 +7,15 @@ find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono t
 include_directories(${Boost_INCLUDE_DIRS})
 
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -phtread -lpthread -lssl -lcrypto")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -pthread -lpthread -lbz2 -lz -lssl -lcrypto")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
 #remove -lboost-system, -lrocksdb, -lsnappy and -lrt
 #added -lssl -lcrypto for good work of OpenSSL hashing
 
 set(Boost_LIBRARY_DIR /usr/local/lib)
 link_directories(${Boost_LIBRARY_DIR})
+
+set(OpenSSL_LIBRARY_DIR /usr/local/lib)
+link_directories(${OpenSSL_LIBRARY_DIR})
 
 set(DATABSE_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_db.cpp)
 set(CLIENT_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_cli.cpp)
