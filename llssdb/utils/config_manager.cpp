@@ -81,4 +81,3 @@ ConfigManager::ConfigManager(const char *path) { this->config_path = path; }
 }  // namespace utils
 }  // namespace db
 }  // namespace failless
-

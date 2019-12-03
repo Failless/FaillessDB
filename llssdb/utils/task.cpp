@@ -1,8 +1,6 @@
 #include "llssdb/utils/task.h"
 
-namespace failless {
-namespace db {
-namespace utils {
+namespace failless::db::utils {
 
 bool Task::operator==(const Task &r) const {
     if (payload != r.payload) {
@@ -22,7 +20,7 @@ bool Data::operator!=(const Data &r) const {
         return true;
     }
     for (size_t i = 0; i < size; ++i) {
-        if (value[i] != r.value[i]) {
+        if (value.get()[i] != r.value.get()[i]) {
             return true;
         }
     }
@@ -32,6 +30,4 @@ bool Data::operator!=(const Data &r) const {
     return key != r.key;
 }
 
-}  // namespace utils
-}  // namespace db
 }  // namespace failless

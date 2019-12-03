@@ -28,7 +28,18 @@ find_package(GTest REQUIRED)
 find_package(Threads REQUIRED)
 find_package(msgpack REQUIRED)
 find_library(ROCKSDB_LIBRARY rocksdb REQUIRED)
+
+###### Finding OpenSSL ######
+if (EXISTS "/usr/local/opt/openssl@1.1")
+    # run next command if you're on macOS
+    # echo 'export PATH="/usr/local/opt/openssl@1.1/bin:$PATH"' >> ~/.zshrc
+    # and go here if sha.h wasn't found
+    # https://github.com/mongodb/mongo-php-driver/issues/523
+    set(OPENSSL_ROOT_DIR "/usr/local/opt/openssl@1.1/lib")
+    set(OPENSSL_INCLUDE_DIR "/usr/local/opt/openssl@1.1/include")
+endif()
 find_package(OpenSSL REQUIRED)
+
 
 set(GMock_INCLUDE_DIR "/usr/local/include")
 if (EXISTS "/usr/local/lib/libgmock.a")

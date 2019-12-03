@@ -44,18 +44,16 @@ TEST(ServerTest, PushTask) {
     //                   has to. May be I made a mistake when I deleted default constructor for the
     //                   parent of this class
     MockTcpServer mock_tcp_server("0.0.0.0", 11556);
-    auto *query = new std::string("SET key1 ");
+    auto query = std::make_shared<std::string>("SET key1");
     boost::uuids::random_generator generator;
     boost::uuids::uuid client_id = generator();
     auto now = boost::chrono::system_clock::now();
     auto ms = boost::chrono::time_point_cast<boost::chrono::milliseconds>(now);
     short folder_id = 0;
-    auto *key = new std::string("key1");
+    auto key = std::make_shared<std::string>("key1");
     size_t size = 3;
-    auto value = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
-    }
+    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
+
     utils::Task task(folder_id, size, key, value, query, common::enums::operators::SET, client_id,
                       boost::chrono::microseconds(ms.time_since_epoch().count()));
 

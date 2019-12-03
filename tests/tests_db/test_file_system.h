@@ -1,54 +1,108 @@
-#ifndef FAILLESS_TEST_FILE_SYSTEM_H_
-#define FAILLESS_TEST_FILE_SYSTEM_H_
+#ifndef TESTS_TESTS_DB_TEST_FILE_SYSTEM_H
+#define TESTS_TESTS_DB_TEST_FILE_SYSTEM_H
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string>
+
+#include "llssdb/utils/task.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
-#include "llssdb/utils/task.h"
+#include "tests/tests_db/mocks.h"
 
 namespace failless::db::tests {
 
-using folder::FileSystem;
-using std::string;
 using ::testing::_;
 using ::testing::AtLeast;
+using folder::FileSystem;
 
-class MockFileSystem : public FileSystem {
- public:
-    explicit MockFileSystem(const string& db_path) : FileSystem(db_path){};
-    MOCK_METHOD3(Get, bool(const string& key, int8_t*& value_out, size_t size_out));
-    MOCK_METHOD3(Set, bool(const string& key, int8_t* value_in, size_t size_in));
-    //  MOCK_METHOD1(GetRange, bool(const string& key));
-    MOCK_METHOD1(Remove, bool(const string& key));
-};
-
-// string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
-
-TEST(FileSystem, Set_And_Get) {
+TEST(FileSystem, Set) {
     FileSystem fs(test_db_path);
-    string key = "test_key";
+
+    /// Test values
+    std::string key = "test_key";
     size_t size = 3;
-    auto value = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
-    }
+    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
+
+    /// Empty arguments for Get()
+    size_t size_out = 0;
+    std::shared_ptr<int8_t> value_out;
 
     fs.Set(key, value, size);
-    EXPECT_EQ(fs.Get(key, value, size), true);
+    EXPECT_TRUE(fs.Get(key, value_out, size_out));
+    EXPECT_EQ(size, size_out);
+//    for ( size_t iii = 0; iii < size || iii < size_out; ++iii ) {
+//        EXPECT_EQ(value.get()[iii], value_out.get()[iii]);
+//    } // TODO(EgorBedov): values are the same but they're written differently (1 != x/1)
+
     fs.EraseAll(test_db_path);
-    EXPECT_EQ(fs.Get(key, value, size), false);
+    EXPECT_FALSE(fs.Get(key, value_out, size_out));
+}
+
+TEST(FileSystem, Get) {
+    FileSystem fs(test_db_path);
+
+    /// Test values
+    std::string key = "test_key";
+    size_t size = 3;
+    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
+
+    /// Empty arguments for Get()
+    size_t size_out = 0;
+    std::shared_ptr<int8_t> value_out;
+
+    /// Get() from empty db
+    fs.EraseAll(test_db_path);
+    EXPECT_FALSE(fs.Get(key, value_out, size_out));
+
+    fs.Set(key, value, size);
+
+    /// Get() wrong key
+    std::string wrong_key = "wrong_key";
+    EXPECT_FALSE(fs.Get(wrong_key, value_out, size_out));
+
+    /// Actual Get()
+    EXPECT_TRUE(fs.Get(key, value_out, size_out));
+
+    fs.EraseAll(test_db_path);
+}
+
+TEST(FileSystem, Remove) {
+    FileSystem fs(test_db_path);
+
+    /// Test values
+    std::string key = "test_key";
+    size_t size = 3;
+    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
+
+    /// Empty arguments for Get()
+    size_t size_out = 0;
+    std::shared_ptr<int8_t> value_out;
+
+    /// Remove() from empty db
+    fs.EraseAll(test_db_path);
+    EXPECT_FALSE(fs.Remove(key));
+
+    fs.Set(key, value, size);
+
+    /// Remove() wrong key
+    std::string wrong_key = "wrong_key";
+    EXPECT_FALSE(fs.Remove(wrong_key));
+
+    /// Actual Remove()
+    EXPECT_TRUE(fs.Remove(key));
+    EXPECT_FALSE(fs.Get(key, value_out, size_out));
+
+    fs.EraseAll(test_db_path);
 }
 
 TEST(FileSystem, Full_Functionality_Test) {
     FileSystem fs(test_db_path);
-    string key = "test_key";
+
+    /// Test values
+    std::string key = "test_key";
     size_t size = 3;
-    auto value = new int8_t[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
-    }
+    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
 
     // it's important to keep them together
     // so the db won't be filled with same pairs
@@ -58,6 +112,8 @@ TEST(FileSystem, Full_Functionality_Test) {
     fs.EraseAll(test_db_path);
 }
 
-}  // namespace failless::db::tests
 
-#endif  // FAILLESS_TEST_FILE_SYSTEM_H_
+}
+
+
+#endif // TESTS_TESTS_DB_TEST_FILE_SYSTEM_H
