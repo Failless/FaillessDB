@@ -18,11 +18,11 @@ TEST(Serializer, Ser_And_Get) {
     std::unique_ptr<config::Task> current_task_in(new config::Task());
     std::unique_ptr<std::stringstream> current_task_out(new std::stringstream());
     std::unique_ptr<std::vector<unsigned char> > value(
-        new std::vector<unsigned char>{'s', 'o', 's', 'i'});
+        new std::vector<unsigned char>{'a', 'b', 'c', 'd'});
 
-    std::unique_ptr<std::string> key(new std::string{"pisu_key"});
-    std::unique_ptr<std::string> client_id(new std::string{"pisu_client"});
-    std::unique_ptr<std::string> query(new std::string{"pisu_query"});
+    std::unique_ptr<std::string> key(new std::string{"abcd_key"});
+    std::unique_ptr<std::string> client_id(new std::string{"abcd_client"});
+    std::unique_ptr<std::string> query(new std::string{"abcd_query"});
 
     std::unique_ptr<config::Data> current_data(new config::Data(value, 6, 0, key));
     std::shared_ptr<config::Task> current_task(new config::Task(client_id, query, current_data));
