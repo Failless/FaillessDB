@@ -66,7 +66,7 @@ size_t Client::ExecQuery_() {
 
         std::cout << current_task_->payload->value->data() << std::endl;
 
-        serializer_->Serialize(current_task_);
+        serializer_->Serialize(*current_task_);
     } else if (query_tokens_[0] == "GET") {
         // TODO
     }

@@ -1,6 +1,7 @@
 #ifndef FAILLESS_LLSSDB_COMMON_TASK_H_
 #define FAILLESS_LLSSDB_COMMON_TASK_H_
 
+#include <llss3p/utils/packet.h>
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <string>
@@ -21,8 +22,8 @@ class Task {
  public:
     Task() : query(nullptr), command(common::enums::operators::GET) {}
     Task(short _id, common::enums::operators _command, std::string* _query)
-        : query(_query), payload(_id), command(_command) {}
-    Task(short _id, size_t _size, std::string* _key, uint8_t* _data, std::string* _query,
+        : query(_query), payload(), command(_command) {}
+    Task(short _id, size_t _size, std::string* _key, std::vector<uint8_t>& _data, std::string* _query,
          common::enums::operators _command, boost::uuids::uuid _client_id,
          boost::chrono::microseconds _time)
         : query(_query),
@@ -32,9 +33,9 @@ class Task {
           time(_time) {}
     Task(std::string* _query, common::enums::operators _command)
         : query(_query), command(_command) {}
-    Task(uint8_t* _data, size_t _size, common::enums::operators _command)
+    Task(std::vector<uint8_t>& _data, size_t _size, common::enums::operators _command)
         : query(nullptr), payload(0, _size, _data), command(_command) {}
-    Task(uint8_t* _data, size_t _size, std::string* _key,
+    Task(std::vector<uint8_t>& _data, size_t _size, std::string* _key,
          common::enums::operators _command)  // this one is used for tests
         : query(nullptr), payload(0, _size, _data, _key), command(_command) {}
 
@@ -53,6 +54,20 @@ class Task {
     common::enums::operators command;
     boost::uuids::uuid client_id{};
     boost::chrono::microseconds time{};
+};
+
+struct ServerTask {
+    common::enums::operators command;
+    std::string login;
+    std::string password;
+    common::utils::Data* payload;
+    ServerTask() : command(common::enums::operators::GET), payload(nullptr) {};
+    explicit ServerTask(common::utils::Data* data) : payload(data) {}
+    explicit ServerTask(common::utils::Packet& packet)
+        : command(static_cast<common::enums::operators>(packet.command)),
+          login(packet.login),
+          password(packet.pass),
+          payload(&packet.data) {}
 };
 
 }  // namespace utils

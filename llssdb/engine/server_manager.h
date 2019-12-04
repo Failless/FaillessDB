@@ -6,6 +6,7 @@
 #include <string>
 #include <utility>
 #include "llss3p/utils/queue.h"
+#include "llssdb/auth/authorization.h"
 #include "llssdb/engine/manager_interface.h"
 #include "llssdb/folder/task_worker.h"
 #include "llssdb/network/connection.h"
@@ -17,10 +18,7 @@ namespace engine {
 class ServerManager : public IServerManager {
  public:
     ServerManager() = delete;
-    explicit ServerManager(common::utils::Queue<network::ConnectionAdapter>& task_queue)
-        : task_queue_(task_queue),
-          //          folders_(0),  // I don't think that it's necessary but...
-          is_run_(false){};
+    explicit ServerManager(common::utils::Queue<network::ConnectionAdapter>& task_queue);
     ~ServerManager() override = default;
 
     void SetTask(utils::Task task) override;
@@ -41,6 +39,7 @@ class ServerManager : public IServerManager {
     common::utils::Queue<network::ConnectionAdapter>& task_queue_;
     std::vector<std::unique_ptr<folder::ITaskWorker>> folders_;
     bool is_run_ = false;
+    std::unique_ptr<auth::IAuthorization> users_;
 };
 
 }  // namespace engine

@@ -6,6 +6,7 @@ namespace common {
 namespace enums {
 
 enum operators {
+    REG = -1,
     SET = 0,
     GET,
     UPDATE,
@@ -14,6 +15,15 @@ enum operators {
     KILL,
     CONNECT,
     DISCONNECT
+};
+
+enum response_type {
+    NOT_SET = -1,
+    OK = 0,
+    EXIST,
+    NOT_ALLOWED,
+    NOT_FOUND,
+    NOT_DONE
 };
 
 }  // namespace enums

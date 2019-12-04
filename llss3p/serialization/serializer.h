@@ -11,15 +11,15 @@ class Serializer : public SerializerInterface<T> {
     Serializer() = default;
     ~Serializer() = default;
 
-    size_t Serialize(std::unique_ptr<T>& data) override;
-    size_t Deserialize(std::unique_ptr<std::stringstream>& current_task) override;
+    size_t Serialize(T& data) override;
+    T Deserialize(char* data, size_t size) override;
 
-    std::unique_ptr<std::stringstream>& GetOutStringStream() override;
-    std::unique_ptr<T>& GetInConfig() override;
+    std::stringstream* GetOutStringStream() override;
+    std::shared_ptr<T> GetInConfig() override;
 
  private:
-    std::unique_ptr<std::stringstream> out_buf_;
-    std::unique_ptr<T> in_buf_;
+    std::stringstream out_buf_{};
+    std::shared_ptr<T> in_buf_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,38 +36,40 @@ class Serializer : public SerializerInterface<T> {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <class T>
-size_t Serializer<T>::Serialize(std::unique_ptr<T>& data) {
-    out_buf_ = std::make_unique<std::stringstream>();
-    msgpack::pack(*out_buf_, *(data.get()));
+size_t Serializer<T>::Serialize(T& data) {
+//    out_buf_ = std::make_unique<std::stringstream>();
+    msgpack::pack(out_buf_, data);
     return 0;
 }
 
 template <class T>
-size_t Serializer<T>::Deserialize(std::unique_ptr<std::stringstream>& current_task) {
+T Serializer<T>::Deserialize(char* data, size_t size) {
     // deserialize
-    msgpack::object_handle oh =
-        msgpack::unpack(out_buf_->str().data(), out_buf_->str().size());
+    msgpack::object_handle oh = msgpack::unpack(data, size);
     msgpack::object deserialized = oh.get();
     std::cout << deserialized << std::endl;
 
-    in_buf_.reset(new T());
-    deserialized.convert(*(in_buf_.get()));
-
-    std::stringstream ss;
-    ss << deserialized;
-    // TODO(Shampooh): rewrite it on templates and add docs for this function
-    std::cout << in_buf_.get()->payload.get()->value.get()->data() << std::endl;
-    std::cout << ss.str().c_str() << std::endl;
-    return 0;
+    //    in_buf_ = std::make_unique<T>();
+    T object;
+    deserialized.convert(object);
+    return object;
+    //    deserialized.convert(*(in_buf_.get()));
+    //
+    //    std::stringstream ss;
+    //    ss << deserialized;
+    //    // TODO(Shampooh): rewrite it on templates and add docs for this function
+    //    std::cout << in_buf_.get()->payload.get()->value.get()->data() << std::endl;
+    //    std::cout << ss.str().c_str() << std::endl;
+    //    return 0;
 }
 
 template <class T>
-std::unique_ptr<std::stringstream>& Serializer<T>::GetOutStringStream() {
-    return out_buf_;
+std::stringstream* Serializer<T>::GetOutStringStream() {
+    return &out_buf_;
 }
 
 template <class T>
-std::unique_ptr<T>& Serializer<T>::GetInConfig() {
+std::shared_ptr<T> Serializer<T>::GetInConfig() {
     return in_buf_;
 }
 

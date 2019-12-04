@@ -13,7 +13,7 @@ namespace network {
 namespace ip = boost::asio::ip;
 const size_t kMaxSize = 1024;
 
-class Connection {
+class   Connection {
  public:
     Connection() = delete;
     explicit Connection(boost::asio::io_service& io_service);
@@ -24,8 +24,8 @@ class Connection {
     void Read(const boost::system::error_code& err, size_t bytes_transferred);
     void Write(const boost::system::error_code& err, size_t bytes_transferred);
     void DoJob();
-    void SendData(common::utils::Packet data);
-    bool GetData(utils::Task& task);
+    void SendData(common::utils::Packet& data);
+    bool GetData(utils::ServerTask& task);
     ip::tcp::socket& GetSocket();
     [[nodiscard]] bool HasData() const;
 
