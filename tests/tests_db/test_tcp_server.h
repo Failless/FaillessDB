@@ -13,7 +13,7 @@ class TestTcpServerImpl : public ::testing::Test {
  public:
     void SetUp() {
         network::Host host("127.0.0.1", 11556);
-        tcp_server.reset(new network::TcpServer(host));
+        tcp_server.reset(new network::TcpServer(host, <#initializer #>));
         test_client.SetConfig(host);
     }
 

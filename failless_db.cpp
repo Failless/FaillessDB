@@ -19,7 +19,7 @@ int main(/*int argc, char **argv*/) {
     manager->SetSettings(settings);
     std::thread start_manager(StartManager, manager);
     std::unique_ptr<failless::db::network::ITcpServer> tcp_server =
-        std::make_unique<failless::db::network::TcpServer>("127.0.0.1", 11556);
+        std::make_unique<failless::db::network::TcpServer>(queue, "127.0.0.1", 11556);
     tcp_server->Listen();
     start_manager.join();
     return 0;

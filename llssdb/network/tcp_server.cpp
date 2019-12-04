@@ -24,7 +24,7 @@ void TcpServer::SetConfig(std::string ip, int port) {
         // i am not sure about it
         acceptor_->bind(ip::tcp::acceptor::endpoint_type(host_.ip, host_.port));
         acceptor_->set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
-    } catch (const boost::system::system_error &error) {
+    } catch (const boost::system::system_error& error) {
         std::cerr << "Error accepting" << std::endl;
     }
 }
@@ -39,7 +39,8 @@ void TcpServer::Listen() {
 
 Host TcpServer::GetSettings() { return host_; }
 
-void TcpServer::SetResponseFunction(std::function<Response(Request &)> &generate_response) {
+void TcpServer::SetQueue(common::utils::Queue<ConnectionAdapter>& queue) {
+    queue_ = std::shared_ptr<common::utils::Queue<ConnectionAdapter>>(&queue);
     // TODO(rowbotman) : change understand code and rewrite this part
     // generate_response_ = generate_response;
     //    connections_.emplace_back(Connection(io_service_));
@@ -52,26 +53,31 @@ void TcpServer::SetResponseFunction(std::function<Response(Request &)> &generate
 
 void TcpServer::PushTask_(utils::Task task) {}
 
-TcpServer::TcpServer(Host host) : host_(std::move(host)) {
+TcpServer::TcpServer(common::utils::Queue<ConnectionAdapter>& queue, Host host)
+    : host_(std::move(host)) {
     acceptor_ =
         std::make_unique<ip::tcp::acceptor>(io_service_, ip::tcp::endpoint(host_.ip, host_.port));
+    queue_ = std::shared_ptr<common::utils::Queue<ConnectionAdapter>>(&queue);
 }
 
-TcpServer::TcpServer(std::string ip, unsigned short port) : host_(std::move(ip), port) {
+TcpServer::TcpServer(common::utils::Queue<ConnectionAdapter>& queue, std::string ip,
+                     unsigned short port)
+    : host_(std::move(ip), port) {
     acceptor_ =
         std::make_unique<ip::tcp::acceptor>(io_service_, ip::tcp::endpoint(host_.ip, host_.port));
+    queue_ = std::shared_ptr<common::utils::Queue<ConnectionAdapter>>(&queue);
     Accept_();
 }
 
 void TcpServer::Accept_() {
     ConnectionAdapter adapter(io_service_);
-    queue_->Push(adapter.conn);
+    queue_->Push(adapter);
     acceptor_->async_accept(
         adapter.conn->GetSocket(),
         boost::bind(&TcpServer::AcceptHandler_, this, adapter, boost::asio::placeholders::error));
 }
 
-void TcpServer::AcceptHandler_(ConnectionAdapter adaptor, const boost::system::error_code &error) {
+void TcpServer::AcceptHandler_(ConnectionAdapter adaptor, const boost::system::error_code& error) {
     if (!error) {
         adaptor.conn->DoJob();
     }
