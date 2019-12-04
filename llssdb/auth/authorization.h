@@ -13,7 +13,7 @@ class Authorization : public IAuthorization {
 
     explicit Authorization(std::string login);
 
-    bool Registration(const std::string &login, const std::string &pass) override;
+    bool Registration(const std::string &login, const std::string &pass, int folder_id) override;
 
     bool RemoveUser(const std::string &login, const std::string &pass) override;
 
