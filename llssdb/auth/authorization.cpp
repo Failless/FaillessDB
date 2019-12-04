@@ -1,8 +1,6 @@
 #include <boost/algorithm/hex.hpp>
 #include <iostream>
-// #include <cstring>
-// #include <boost/lexical_cast.hpp>
-#include <openssl/md5.h>
+// #include <openssl/md5.h>
 #include <openssl/sha.h>
 #include "llssdb/auth/authorization.h"
 
@@ -76,6 +74,7 @@ bool Authorization::Registration(const std::string &login, const std::string &pa
     if (CheckCollisions_(login)) {
         return false;
     }
+    // TODO add password validation
     UserInfo User(login);
     unsigned char pass_hash[SHA256_DIGEST_LENGTH]{};
     Hasher_(login, pass, pass_hash);

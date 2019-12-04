@@ -38,7 +38,6 @@ class RegisterImpl : public ::testing::Test {
 
 TEST_F(RegisterImpl, Registration) {
     // TODO: add tests on validation
-    // TODO: add tests on registration with folder_id
     std::string login = "mr_tester";
     std::string pass = "qwerty12345";
     EXPECT_TRUE(auth->Registration(login, pass, -1));
