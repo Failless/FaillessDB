@@ -30,15 +30,13 @@ class Client : public ClientInterface {
     std::unique_ptr<filesystem::FileSystemInterface> filesystem_;
     std::unique_ptr<serializer::SerializerInterface> serializer_;
 
-    std::shared_ptr<boost::asio::io_service> io_service_;
     std::shared_ptr<config::NetworkConfig> net_config_;
-
-    std::shared_ptr<std::stringstream> serialized_query_;
 
     config::ClientConfig config_;
 
     std::string query_tokens_[4];
     std::shared_ptr<config::Task> current_task_;
+    std::shared_ptr<std::stringstream> serialized_query_;
 
     bool parse_input_status_;
     bool exec_query_status_;

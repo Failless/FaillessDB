@@ -18,24 +18,21 @@ size_t Client::Run() {
 
     //вернуть статус запуска
 
-    filesystem_.reset(new filesystem::FileSystem());
-    serializer_.reset(new serializer::Serializer());
+    filesystem_ = std::unique_ptr<filesystem::FileSystemInterface>(new filesystem::FileSystem());
+    serializer_ = std::unique_ptr<serializer::SerializerInterface>(new serializer::Serializer());
 
     parse_input_status_ = ParseInput_(config_.user_request);
     if (parse_input_status_) {
         return -1;
     }
 
+    net_config_ = std::shared_ptr<config::NetworkConfig>(new config::NetworkConfig(config_.db_host, config_.db_port, config_.client_num));
+    network_client_ = std::unique_ptr<network::NetworkClientInterface>(new network::NetworkClient( net_config_));
+
     exec_query_status_ = ExecQuery_();
     if (exec_query_status_) {
         return -1;
     }
-
-    io_service_.reset(new boost::asio::io_service());
-    net_config_.reset(new config::NetworkConfig(config_.db_host, config_.db_port));
-//    config::NetworkConfig net_config(config_.db_host, config_.db_port);
-
-    network_client_.reset(new network::NetworkClient(io_service_, net_config_));
 
     return 0;
 }
@@ -47,7 +44,7 @@ size_t Client::SendRequestWithCB_(std::stringstream serialized_query, std::uintp
 size_t Client::SerializeQuery_(std::string query) {
     return 0;
 }
-
+size_t Test(){}
 size_t Client::ExecQuery_() {
     if (query_tokens_[0] == "SEND") {
         std::unique_ptr< std::vector<unsigned char> > value;
@@ -63,13 +60,18 @@ size_t Client::ExecQuery_() {
         std::unique_ptr< std::string > user_name(new std::string(config_.user_name));
         std::unique_ptr< std::string > query(new std::string(config_.user_request));
 
-        current_task_.reset(new config::Task(user_name, query, data));
+        current_task_ = std::shared_ptr<config::Task>(new config::Task(user_name, query, data));
 
         std::cout<<current_task_.get()->payload.get()->value->data()<<std::endl;
 
         serializer_->Serialize(current_task_);
         serialized_query_ = serializer_->GetOutStringStream();
 
+        std::function<size_t()> a = Test;
+        std::shared_ptr<std::function<size_t()>> b(new std::function<size_t()>(a));
+
+        network_client_->AddUserTask(serialized_query_, b);
+        network_client_->OpenConnection();
 
     } else if (query_tokens_[0] == "GET") {
         // TODO
