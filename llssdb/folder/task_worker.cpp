@@ -49,13 +49,14 @@ int TaskWorker::DoTask(const utils::Task &task) {
 
 bool TaskWorker::Set(const utils::Task &task_in) {
     /// Create key-value pair(s) on hdd
-    bool result = fs_.Set(*task_in.payload.key, task_in.payload.value, task_in.payload.size);
+    bool result = fs_.Set(task_in.payload.key, const_cast<uint8_t *>(task_in.payload.value.data()),
+                          task_in.payload.size);
 
     /// Send answer to output_queue_
     /// Update in-memory storage
 
     if (result) {
-        std::cout << "{" << *task_in.payload.key << ": " << task_in.payload.size << "} was set\n";
+        std::cout << "{" << task_in.payload.key << ": " << task_in.payload.size << "} was set\n";
     }
     return result;
 }
@@ -63,21 +64,25 @@ bool TaskWorker::Set(const utils::Task &task_in) {
 bool TaskWorker::Read(const utils::Task &task_in) {
     utils::Task task_out;
     task_out.client_id = task_in.client_id;
-    task_out.payload.key = new std::string(*task_in.payload.key);
+    task_out.payload.key = task_in.payload.key;
     task_out.command = task_in.command;
 
     bool result;
 
-    if (local_storage_ && (local_storage_->at(*task_in.payload.key).in_memory)) {
-        task_out.payload.value = local_storage_->at(*task_in.payload.key).value;
+    uint8_t value[20000];
+    if (local_storage_ && (local_storage_->at(task_in.payload.key).in_memory)) {
+        task_out.payload.value = std::vector(&local_storage_->at(task_in.payload.key).value[0],
+                                             &local_storage_->at(task_in.payload.key).value[20000]);
+        //        task_out.payload.value = local_storage_->at(task_in.payload.key).value;
         result = true;
         std::cout << "In-Memory ";
     } else {
-        result = fs_.Get(*task_in.payload.key, task_out.payload.value);
+        result = fs_.Get(task_in.payload.key, value);
+        task_out.payload.value = std::vector(&value[0], &value[20000]);
         std::cout << "On HDD ";
     }
 
-    std::cout << task_out.payload.value << std::endl;
+    std::cout << task_out.payload.value.size() << std::endl;
 
     /// Send answer to output_queue_
     //    output_queue_->push(task_out);
@@ -98,12 +103,12 @@ bool TaskWorker::Update(const utils::Task &task_in) {
 
 bool TaskWorker::Delete(const utils::Task &task_in) {
     /// Delete key-value pair(s) on hdd
-    bool result = fs_.Remove(*task_in.payload.key);
+    bool result = fs_.Remove(task_in.payload.key);
 
     /// Send answer
 
     /// Update in-memory storage
-    if (local_storage_) local_storage_->erase(*task_in.payload.key);
+    if (local_storage_) local_storage_->erase(task_in.payload.key);
 
     return result;
 }

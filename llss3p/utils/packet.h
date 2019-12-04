@@ -20,7 +20,14 @@ struct Packet {
 
     MSGPACK_DEFINE_MAP(login, pass, request, command, ret_value, data);
 
-    Packet& operator=(const Packet& packet) = default;
+    Packet& operator=(const Packet& packet) = default;//{
+//        login = packet.login;
+//        pass = packet.pass;
+//        request = packet.request;
+//        command = packet.command;
+//        ret_value = packet.ret_value;
+//        data = packet.data;
+//    };
     Packet() = default;
 };
 

@@ -22,13 +22,13 @@ bool Data::operator!=(const Data& r) const {
 
 Data& Data::operator=(const Data& data) {
     if (this != &data) {
-        delete[] value;
-        delete[] key;
         size = data.size;
         folder_id = data.folder_id;
-        key = new std::string(*data.key);
-        value = new uint8_t[size];
-        memcpy(value, data.value, sizeof(uint8_t) * size);
+        key = data.key;
+//        value = new uint8_t[size];
+        // TODO: remove
+        value = std::move(data.value);
+//        memcpy(value, data.value, sizeof(uint8_t) * size);
     }
     return *this;
 }

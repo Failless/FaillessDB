@@ -56,6 +56,7 @@ target_link_libraries(failless-server llss3p)
 target_link_libraries(failless-server ${Boost_LIBRARIES})
 target_link_libraries(failless-server ${msgpack_LIBRARIES})
 target_link_libraries(failless-server ${ROCKSDB_LIBRARY})
+target_link_libraries(failless-server ${OPENSSL_LIBRARIES})
 # maybe we need to add ${OPENSSL_LIBRARY} ??? (Serjio2888)
 
 # compile client
