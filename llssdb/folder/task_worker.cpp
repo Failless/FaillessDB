@@ -112,6 +112,12 @@ bool TaskWorker::Delete(const utils::Task &task_in) {
 
     return result;
 }
+void TaskWorker::Work() {
+    // TODO(EgorBedov): implement your event loop here
+}
+TaskWorker::TaskWorker(common::utils::Queue<utils::Task> &queue, std::string &db_path)
+    : ITaskWorker(db_path),
+      input_queue_(std::shared_ptr<common::utils::Queue<utils::Task>>(&queue)) {}
 
 }  // namespace folder
 }  // namespace db

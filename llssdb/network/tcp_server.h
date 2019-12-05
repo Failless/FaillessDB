@@ -5,8 +5,9 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/lockfree/queue.hpp>
 #include "llss3p/utils/queue.h"
-#include "llssdb/network/connection.h"
 #include "llssdb/network/tcp_server_interface.h"
+#include "llssdb/network/transfer/connection.h"
+#include "llssdb/network/transfer/adapter.h"
 #include "llssdb/utils/task.h"
 
 namespace failless {
@@ -36,10 +37,7 @@ class TcpServer : public ITcpServer {
 
     std::shared_ptr<common::utils::Queue<std::shared_ptr<Connection>>> queue_;
     boost::asio::io_service io_service_;
-    //    ip::tcp::socket *socket_;
-    /// The acceptor object used to accept incoming socket connections.
     std::unique_ptr<ip::tcp::acceptor> acceptor_;
-    /// The data to be sent to each client.
     std::vector<utils::Task> tasks_;
     std::vector<Connection> connections_;
     bool is_run_ = false;

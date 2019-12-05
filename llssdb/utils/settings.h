@@ -42,6 +42,11 @@ struct Settings {
           port(8888) {}
 };
 
+struct WorkerSettings {
+    std::string db_path;
+};
+
+
 }  // namespace utils
 }  // namespace db
 }  // namespace failless

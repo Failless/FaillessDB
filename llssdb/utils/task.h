@@ -2,6 +2,7 @@
 #define FAILLESS_LLSSDB_COMMON_TASK_H_
 
 #include <llss3p/utils/packet.h>
+#include <llssdb/network/transfer/adapter.h>
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <string>
@@ -54,6 +55,7 @@ class Task {
     common::enums::operators command;
     boost::uuids::uuid client_id{};
     boost::chrono::microseconds time{};
+    network::ConnectionAdapter adapter{};
 };
 
 struct ServerTask {

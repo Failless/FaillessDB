@@ -24,6 +24,7 @@ class FileSystemInterface : boost::noncopyable {
 
 class FileSystem : public FileSystemInterface {
  public:
+    FileSystem() = default;
     explicit FileSystem(
         const std::string &db_path /*, std::map<std::string, ValueInfo>*& local_storage*/);
     ~FileSystem() override;
@@ -40,7 +41,7 @@ class FileSystem : public FileSystemInterface {
  private:
     bool OpenDB_(const std::string &db_path);
     void CloseDB_();
-    rocksdb::DB *db_;
+    rocksdb::DB *db_ = nullptr;
 };
 
 }  // namespace folder

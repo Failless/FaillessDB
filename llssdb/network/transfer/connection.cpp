@@ -1,4 +1,4 @@
-#include "llssdb/network/connection.h"
+#include "llssdb/network/transfer/connection.h"
 #include <llss3p/serialization/serializer.h>
 #include <llss3p/serialization/serializer_interface.h>
 #include <boost/asio.hpp>

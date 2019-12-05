@@ -9,7 +9,7 @@
 #include "llssdb/auth/authorization.h"
 #include "llssdb/engine/manager_interface.h"
 #include "llssdb/folder/task_worker.h"
-#include "llssdb/network/connection.h"
+#include "llssdb/network/transfer/adapter.h"
 
 namespace failless {
 namespace db {
