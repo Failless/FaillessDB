@@ -25,7 +25,7 @@ network::Response testFunction(network::Request &request) {
 }
 
 TEST(ServerTest, SetConnection) {
-    auto server = std::shared_ptr<network::ITcpServer>(new network::TcpServer("0.0.0.0", 11556));
+    auto server = std::shared_ptr<network::ITcpServer>(new network::TcpServer("0.0.0.0", <#initializer #>));
     int port = 11556;
     std::string ip = "127.0.0.1";
     server->SetConfig(ip, port);
@@ -33,7 +33,7 @@ TEST(ServerTest, SetConnection) {
     std::function<network::Response(network::Request &)> foo = [&](network::Request &) {
         return testFunction(request);
     };
-    server->SetResponseFunction(foo);
+    server->SetQueue(foo);
     auto host = server->GetSettings();
     EXPECT_EQ(boost::lexical_cast<std::string>(host.ip), "127.0.0.1");
     EXPECT_EQ(host.port, 11556);
@@ -70,7 +70,7 @@ TEST_F(TestTcpServerImpl, SendData) {
     std::function<network::Response(network::Request &)> func = [&](network::Request &) {
         return testFunction(request);
     };
-    tcp_server->SetResponseFunction(func);
+    tcp_server->SetQueue(func);
     auto data = test_client.Ping();
     EXPECT_EQ(data, set_data);
     //  tcp_server->Listen();

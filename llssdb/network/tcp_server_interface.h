@@ -25,7 +25,7 @@ class ITcpServer : boost::noncopyable {
     virtual void SetConfig(std::string ip, int port) = 0;
     virtual void Listen() = 0;
     virtual Host GetSettings() = 0;
-    virtual void SetResponseFunction(std::function<Response(Request &)> &generate_response) = 0;
+    virtual void SetQueue(common::utils::Queue<ConnectionAdapter>& queue) = 0;
 
  protected:
     Host host_;
