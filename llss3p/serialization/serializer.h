@@ -45,14 +45,18 @@ size_t Serializer<T>::Serialize(T& data) {
 template <class T>
 T Serializer<T>::Deserialize(char* data, size_t size) {
     // deserialize
-    msgpack::object_handle oh = msgpack::unpack(data, size);
-    msgpack::object deserialized = oh.get();
-    std::cout << deserialized << std::endl;
-
-    //    in_buf_ = std::make_unique<T>();
+    msgpack::unpacked result;
+    msgpack::unpack(result, data, size, 0);
+    msgpack::object object1(result.get());
     T object;
-    deserialized.convert(object);
-    return object;
+    object1.convert(object);
+//    msgpack::object_handle oh = msgpack::unpack(data, size);
+//    msgpack::object deserialized = oh.get();
+//    std::cout << deserialized << std::endl;
+//
+//        in_buf_ = std::make_unique<T>();
+//    deserialized.convert(object);
+    return std::move(object);
     //    deserialized.convert(*(in_buf_.get()));
     //
     //    std::stringstream ss;

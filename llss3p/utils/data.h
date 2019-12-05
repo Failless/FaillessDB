@@ -15,7 +15,9 @@ struct Data {
     std::string key{};
     //    Data() : size(0), value(nullptr), folder_id(0), key(nullptr){};
     Data(short _folder_id, size_t _size, std::vector<uint8_t>& _value)
-        : size(_size), value(_value), folder_id(_folder_id), key(nullptr){};
+        : size(_size), value(_value), folder_id(_folder_id), key(""){};
+    Data(short _folder_id, size_t _size)
+        : size(_size), folder_id(_folder_id), key(""){};
     Data(short _folder_id, size_t _size, std::vector<uint8_t>& _value, std::string* _key)
         : size(_size), value(_value), folder_id(_folder_id), key(*_key){};
 

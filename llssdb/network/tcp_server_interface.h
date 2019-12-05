@@ -15,7 +15,7 @@ struct Host {
     boost::asio::ip::address ip{};
     unsigned short port = 0;
     Host() = default;
-    Host(std::string ip_, unsigned short port_)
+    Host(const std::string& ip_, unsigned short port_)
         : ip(boost::asio::ip::address::from_string(ip_)), port(port_) {}
 };
 
