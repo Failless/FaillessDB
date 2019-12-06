@@ -28,7 +28,7 @@ namespace failless::db::tests {
 
 using folder::TaskWorker;
 using ::testing::_;
-
+/*
 class MockTaskWorker : public TaskWorker {
  public:
     explicit MockTaskWorker(const std::string &db_path = test_db_path) : TaskWorker(db_path){};
@@ -135,6 +135,7 @@ TEST(TaskManager, Calling_Delete) {
 }
 
 /// test for loading from local_Storage
+*/
 
 }  // namespace failless::db::tests
 

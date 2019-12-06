@@ -5,7 +5,7 @@
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/utils/config_manager.h"
 
-void StartManager(const std::shared_ptr<failless::db::engine::IServerManager>& manager) {
+void StartManager(std::shared_ptr<failless::db::engine::IServerManager> manager) {
     manager->Run();
 }
 

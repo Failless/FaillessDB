@@ -18,6 +18,7 @@ enum operators {
 };
 
 enum response_type {
+    SERVER_ERROR = -2,
     NOT_SET = -1,
     OK = 0,
     EXIST,

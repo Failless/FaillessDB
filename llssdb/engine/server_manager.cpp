@@ -6,6 +6,13 @@ namespace failless {
 namespace db {
 namespace engine {
 
+void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* queue,
+                  const utils::WorkerSettings& settings) {
+    std::unique_ptr<folder::ITaskWorker> worker(
+        new folder::TaskWorker(*queue, const_cast<std::string&>(settings.db_path)));
+    worker->Work();
+}
+
 void ServerManager::SetTask(utils::Task task) {}
 
 void ServerManager::Reload() {}
@@ -22,34 +29,55 @@ void ServerManager::Run() {
         while (!connection->HasData()) {
             std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
-        utils::ServerTask task;
-        connection->GetData(task);
+        utils::ServerTask task{};
+        connection->GetMetaData(task);
         if (task.command == common::enums::operators::REG) {
-            if (users_->Registration(task.login, task.password)) {
-                common::utils::Packet packet;
+            common::utils::Packet packet;
+            if (users_->Registration(*task.login, *task.password)) {
                 packet.ret_value = common::enums::response_type::OK;
-                connection->SendData(packet);
-                continue;
+            } else {
+                packet.ret_value = common::enums::response_type::SERVER_ERROR;
             }
+            connection->SendData(packet);
+            continue;
         }
         switch (task.command) {
             case common::enums::operators::CREATE: {
-                std::cout << "Created new folder with id " << std::endl;
-                break;
-            }
-            case common::enums::operators::KILL: {
+                //                common::utils::Queue<std::shared_ptr<network::Connection>>
+                //                folder_queue;
+                short idx = FindEmpty_();
+                if (idx == -1) {
+                    //                    folders_.emplace_back();
+                    idx = static_cast<short>(folders_.size() - 1);
+                }
+                connection->GetPacket()->data.folder_id = idx;
+                folders_[idx].queue.Push(connection);
+                folders_[idx].exist = true;
+                std::thread folder_run(WorkInThread, &folders_[idx].queue, w_settings_);
+                folders_[idx].tread = std::move(folder_run);
+                std::cout << "Created new folder with id " << idx << std::endl;
                 break;
             }
             case common::enums::operators::CONNECT: {
-                // create connection_worker for exist folder in the other thread
+                short idx = connection->GetPacket()->data.folder_id;
+                folders_[idx].exist = true;
+                folders_[idx].queue.Push(connection);
                 break;
             }
+            case common::enums::operators::KILL:
             case common::enums::operators::DISCONNECT: {
-                // join tread with exist connection_worker which have created data dump before
+                short idx = connection->GetPacket()->data.folder_id;
+                folders_[idx].queue.Push(connection);
+                folders_[idx].exist = false;
+                // TODO(rowbotman): check how is it work
+                //                folders_.erase(folders_.begin() + idx);
                 break;
             }
             default: {
-//                Execute_(connection);
+                short idx = connection->GetPacket()->data.folder_id;
+                if (folders_[idx].exist) {
+                    folders_[idx].queue.Push(connection);
+                }
                 break;
             }
         }
@@ -70,13 +98,21 @@ common::enums::operators ServerManager::HandleRequest_(utils::Task& Task) {
     return common::enums::DELETE;
 }
 
-void ServerManager::SetSettings(utils::Settings& settings) {}
+void ServerManager::SetSettings(utils::Settings& settings) {
+    w_settings_ = utils::WorkerSettings(settings.data_path);
+}
 
 ServerManager::ServerManager(common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue)
-    : task_queue_(task_queue),
-      //          folders_(0),  // I don't think that it's necessary but...
-      is_run_(false) {
+    : task_queue_(task_queue), folders_(8), is_run_(false) {
     users_ = std::make_unique<auth::Authorization>();
+}
+short ServerManager::FindEmpty_() {
+    auto it = std::find_if(folders_.begin(), folders_.end(),
+                           [](const VirtualFolder& folder) { return !folder.exist; });
+    if (it != folders_.end()) {
+        return it - folders_.begin();
+    }
+    return -1;
 }
 
 }  // namespace engine

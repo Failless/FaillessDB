@@ -56,13 +56,17 @@ void Connection::SendData(common::utils::Packet& data) {
 }
 bool Connection::HasData() const { return has_; }
 
-bool Connection::GetData(utils::ServerTask& task) {
+bool Connection::GetMetaData(utils::ServerTask& task) {
     if (!has_) return false;
-    task.payload = &packet_.data;
     task.command = static_cast<common::enums::operators>(packet_.command);
-    task.login = packet_.login;
-    task.password = packet_.pass;
+    task.login = &packet_.login;
+    task.password = &packet_.pass;
     return true;
+}
+
+common::utils::Packet* Connection::GetPacket() {
+    if (!has_) return nullptr;
+    return &packet_;
 }
 
 }  // namespace network

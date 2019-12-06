@@ -58,16 +58,13 @@ class Task {
 
 struct ServerTask {
     common::enums::operators command;
-    std::string login;
-    std::string password;
-    common::utils::Data* payload;
-    ServerTask() : command(common::enums::operators::GET), payload(nullptr){};
-    explicit ServerTask(common::utils::Data* data) : payload(data) {}
+    std::string* login;
+    std::string* password;
+    ServerTask() : command(common::enums::operators::GET), login(nullptr), password(nullptr) {}
     explicit ServerTask(common::utils::Packet& packet)
         : command(static_cast<common::enums::operators>(packet.command)),
-          login(packet.login),
-          password(packet.pass),
-          payload(&packet.data) {}
+          login(&packet.login),
+          password(&packet.pass) {}
 };
 
 }  // namespace utils

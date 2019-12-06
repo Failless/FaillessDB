@@ -16,7 +16,8 @@ class TcpServer : public ITcpServer {
  public:
     TcpServer() = delete;
     TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, Host host);
-    TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, const std::string& ip, unsigned short port);
+    TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, const std::string& ip,
+              unsigned short port);
     ~TcpServer() override = default;
     void SetConfig(std::string ip, int port) override;
     void Listen() override;
@@ -29,7 +30,8 @@ class TcpServer : public ITcpServer {
 
  private:
     void Accept_();
-    void AcceptHandler_(std::shared_ptr<Connection>& adaptor, const boost::system::error_code& error);
+    void AcceptHandler_(std::shared_ptr<Connection>& adaptor,
+                        const boost::system::error_code& error);
 
     std::shared_ptr<common::utils::Queue<std::shared_ptr<Connection>>> queue_;
     boost::asio::io_service io_service_;

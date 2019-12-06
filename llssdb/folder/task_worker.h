@@ -7,20 +7,20 @@
 #include "llss3p/utils/queue.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/worker_interface.h"
+#include "llssdb/network/transfer/hookup.h"
 
 namespace failless {
 namespace db {
 namespace folder {
 
-
 class TaskWorker : public ITaskWorker {
  public:
-    explicit TaskWorker(const std::string &db_path);
-    TaskWorker(common::utils::Queue<utils::Task>& queue, std::string &db_path);
+    TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>> &queue,
+               std::string &db_path);
     ~TaskWorker() override = default;
 
     int AddTask(const utils::Task &task) override;
-    void Work() override ;
+    void Work() override;
 
  protected:
     int DoTask(const utils::Task &task) override;
@@ -30,7 +30,7 @@ class TaskWorker : public ITaskWorker {
     bool Read(const utils::Task &task_in) override;
     bool Update(const utils::Task &task_in) override;
     bool Delete(const utils::Task &task_in) override;
-    std::shared_ptr<common::utils::Queue<utils::Task>> input_queue_;
+    common::utils::Queue<std::shared_ptr<network::Connection>> &input_queue_;
     FileSystem fs_;
 };
 

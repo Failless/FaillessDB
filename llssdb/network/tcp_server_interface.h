@@ -5,7 +5,8 @@
 #include <boost/noncopyable.hpp>
 #include <functional>
 #include <string>
-#include "llssdb/network/transfer/adapter.h"
+#include "llssdb/network/transfer/hookup.h"
+#include "llss3p/utils/queue.h"
 
 namespace failless {
 namespace db {

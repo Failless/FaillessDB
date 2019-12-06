@@ -10,11 +10,6 @@ namespace failless {
 namespace db {
 namespace folder {
 
-TaskWorker::TaskWorker(const std::string &db_path) : ITaskWorker(db_path) {
-    /// Retrieve all k-v pairs from hdd in local_storage_
-    //    fs_.LoadInMemory(local_storage_);
-}
-
 // TODO(EgorBedov): this func is endless so make it void
 int TaskWorker::AddTask(const utils::Task &task) {
     /// Check input_queue_ for emptiness
@@ -115,9 +110,9 @@ bool TaskWorker::Delete(const utils::Task &task_in) {
 void TaskWorker::Work() {
     // TODO(EgorBedov): implement your event loop here
 }
-TaskWorker::TaskWorker(common::utils::Queue<utils::Task> &queue, std::string &db_path)
-    : ITaskWorker(db_path),
-      input_queue_(std::shared_ptr<common::utils::Queue<utils::Task>>(&queue)) {}
+TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>> &queue,
+                       std::string &db_path)
+    : ITaskWorker(db_path), input_queue_(queue) {}
 
 }  // namespace folder
 }  // namespace db

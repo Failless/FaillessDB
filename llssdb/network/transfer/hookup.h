@@ -25,7 +25,8 @@ class Connection {
     void Write(const boost::system::error_code& err, size_t bytes_transferred);
     void DoJob();
     void SendData(common::utils::Packet& data);
-    bool GetData(utils::ServerTask& task);
+    bool GetMetaData(utils::ServerTask& task);
+    common::utils::Packet* GetPacket();
     ip::tcp::socket& GetSocket();
     [[nodiscard]] bool HasData() const;
 

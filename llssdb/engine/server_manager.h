@@ -4,16 +4,26 @@
 #include <map>
 #include <queue>
 #include <string>
+#include <thread>
 #include <utility>
 #include "llss3p/utils/queue.h"
 #include "llssdb/auth/authorization.h"
 #include "llssdb/engine/manager_interface.h"
 #include "llssdb/folder/task_worker.h"
-#include "llssdb/network/transfer/adapter.h"
 
 namespace failless {
 namespace db {
 namespace engine {
+
+void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* queue,
+                  const utils::WorkerSettings& settings);
+
+struct VirtualFolder {
+    bool exist = false;
+    std::thread tread;
+    common::utils::Queue<std::shared_ptr<network::Connection>> queue;
+    VirtualFolder() = default;
+};
 
 class ServerManager : public IServerManager {
  public:
@@ -34,12 +44,14 @@ class ServerManager : public IServerManager {
     int CreateFolder_(boost::uuids::uuid& client_id);
     bool KillFolder_(int folder_id);
     bool RedirectTask_(utils::Task& task);
+    short FindEmpty_();
     common::enums::operators HandleRequest_(utils::Task& Task);
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue_;
-    std::vector<std::unique_ptr<folder::ITaskWorker>> folders_;
+    std::vector<VirtualFolder> folders_;
     bool is_run_ = false;
     std::unique_ptr<auth::IAuthorization> users_;
+    utils::WorkerSettings w_settings_;
 };
 
 }  // namespace engine
