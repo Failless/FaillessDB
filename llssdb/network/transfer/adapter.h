@@ -2,7 +2,7 @@
 #define FAILLESS_LLSSDB_NETWORK_TRANSFER_ADAPTER_H_
 
 #include <boost/asio/io_service.hpp>
-#include "llssdb/network/transfer/connection.h"
+#include "llssdb/network/transfer/hookup.h"
 
 namespace failless {
 namespace db {

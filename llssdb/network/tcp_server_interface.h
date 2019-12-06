@@ -5,7 +5,7 @@
 #include <boost/noncopyable.hpp>
 #include <functional>
 #include <string>
-#include "llssdb/network/transfer/response.h"
+#include "llssdb/network/transfer/adapter.h"
 
 namespace failless {
 namespace db {
@@ -25,11 +25,11 @@ class ITcpServer : boost::noncopyable {
     virtual void SetConfig(std::string ip, int port) = 0;
     virtual void Listen() = 0;
     virtual Host GetSettings() = 0;
-    virtual void SetQueue(common::utils::Queue<ConnectionAdapter>& queue) = 0;
+    virtual void SetQueue(common::utils::Queue<std::shared_ptr<Connection>>& queue) = 0;
 
  protected:
     Host host_;
-    std::function<Response(Request &)> generate_response_;
+    std::function<void(Connection&)> generate_response_;
 };
 
 }  // namespace network

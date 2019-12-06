@@ -1,13 +1,12 @@
 #ifndef FAILLESS_LLSSDB_COMMON_TASK_H_
 #define FAILLESS_LLSSDB_COMMON_TASK_H_
 
-#include <llss3p/utils/packet.h>
-#include <llssdb/network/transfer/adapter.h>
 #include <boost/chrono/system_clocks.hpp>
 #include <boost/uuid/uuid.hpp>
 #include <string>
 #include "llss3p/enums/operators.h"
 #include "llss3p/utils/data.h"
+#include "llss3p/utils/packet.h"
 
 namespace failless {
 namespace db {
@@ -24,8 +23,8 @@ class Task {
     Task() : query(nullptr), command(common::enums::operators::GET) {}
     Task(short _id, common::enums::operators _command, std::string* _query)
         : query(_query), payload(), command(_command) {}
-    Task(short _id, size_t _size, std::string* _key, std::vector<uint8_t>& _data, std::string* _query,
-         common::enums::operators _command, boost::uuids::uuid _client_id,
+    Task(short _id, size_t _size, std::string* _key, std::vector<uint8_t>& _data,
+         std::string* _query, common::enums::operators _command, boost::uuids::uuid _client_id,
          boost::chrono::microseconds _time)
         : query(_query),
           payload(_id, _size, _data, _key),
@@ -55,7 +54,6 @@ class Task {
     common::enums::operators command;
     boost::uuids::uuid client_id{};
     boost::chrono::microseconds time{};
-    network::ConnectionAdapter adapter{};
 };
 
 struct ServerTask {
@@ -63,7 +61,7 @@ struct ServerTask {
     std::string login;
     std::string password;
     common::utils::Data* payload;
-    ServerTask() : command(common::enums::operators::GET), payload(nullptr) {};
+    ServerTask() : command(common::enums::operators::GET), payload(nullptr){};
     explicit ServerTask(common::utils::Data* data) : payload(data) {}
     explicit ServerTask(common::utils::Packet& packet)
         : command(static_cast<common::enums::operators>(packet.command)),

@@ -1,10 +1,10 @@
-#ifndef FAILLESS_LLSSDB_NETWORK_CONNECTION_H_
-#define FAILLESS_LLSSDB_NETWORK_CONNECTION_H_
+#ifndef FAILLESS_LLSSDB_NETWORK_TRANSFER_HOOKUP_H_
+#define FAILLESS_LLSSDB_NETWORK_TRANSFER_HOOKUP_H_
 
-#include <llss3p/utils/packet.h>
-#include <llssdb/utils/task.h>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include "llss3p/utils/packet.h"
+#include "llssdb/utils/task.h"
 
 namespace failless {
 namespace db {
@@ -13,7 +13,7 @@ namespace network {
 namespace ip = boost::asio::ip;
 const size_t kMaxSize = 1024;
 
-class   Connection {
+class Connection {
  public:
     Connection() = delete;
     explicit Connection(boost::asio::io_service& io_service);
@@ -32,7 +32,7 @@ class   Connection {
  private:
     ip::tcp::socket socket_;
     char buffer_[kMaxSize]{};
-    bool has_= false;
+    bool has_ = false;
     common::utils::Packet packet_;
 };
 
@@ -40,4 +40,4 @@ class   Connection {
 }  // namespace db
 }  // namespace failless
 
-#endif  // FAILLESS_LLSSDB_NETWORK_CONNECTION_H_
+#endif  // FAILLESS_LLSSDB_NETWORK_TRANSFER_HOOKUP_H_

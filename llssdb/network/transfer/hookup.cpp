@@ -1,6 +1,5 @@
-#include "llssdb/network/transfer/connection.h"
-#include <llss3p/serialization/serializer.h>
-#include <llss3p/serialization/serializer_interface.h>
+#include "llssdb/network/transfer/hookup.h"
+#include "llss3p/serialization/serializer.h"
 #include <boost/asio.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/bind/bind.hpp>

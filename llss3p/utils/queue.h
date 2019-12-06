@@ -12,11 +12,9 @@ namespace common {
 namespace utils {
 
 template <class T>
-class Queue {
+class Queue : boost::noncopyable {
  public:
-    Queue() {
-        int i =0;
-    };
+    Queue() = default;
     explicit Queue(size_t size);
     ~Queue() = default;
 

@@ -18,7 +18,7 @@ namespace engine {
 class ServerManager : public IServerManager {
  public:
     ServerManager() = delete;
-    explicit ServerManager(common::utils::Queue<network::ConnectionAdapter>& task_queue);
+    explicit ServerManager(common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue);
     ~ServerManager() override = default;
 
     void SetTask(utils::Task task) override;
@@ -36,7 +36,7 @@ class ServerManager : public IServerManager {
     bool RedirectTask_(utils::Task& task);
     common::enums::operators HandleRequest_(utils::Task& Task);
 
-    common::utils::Queue<network::ConnectionAdapter>& task_queue_;
+    common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue_;
     std::vector<std::unique_ptr<folder::ITaskWorker>> folders_;
     bool is_run_ = false;
     std::unique_ptr<auth::IAuthorization> users_;

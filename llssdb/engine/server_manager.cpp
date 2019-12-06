@@ -18,17 +18,17 @@ void ServerManager::Run() {
             std::this_thread::sleep_for(std::chrono::microseconds(kMsDelay));
             continue;  // May by it will be better   if I change if-body to all code below here
         }
-        network::ConnectionAdapter connection = task_queue_.Pop();
-        while (!connection.conn->HasData()) {
+        auto connection = task_queue_.Pop();
+        while (!connection->HasData()) {
             std::this_thread::sleep_for(std::chrono::microseconds(10));
         }
         utils::ServerTask task;
-        connection.conn->GetData(task);
+        connection->GetData(task);
         if (task.command == common::enums::operators::REG) {
             if (users_->Registration(task.login, task.password)) {
                 common::utils::Packet packet;
                 packet.ret_value = common::enums::response_type::OK;
-                connection.conn->SendData(packet);
+                connection->SendData(packet);
                 continue;
             }
         }
@@ -72,7 +72,7 @@ common::enums::operators ServerManager::HandleRequest_(utils::Task& Task) {
 
 void ServerManager::SetSettings(utils::Settings& settings) {}
 
-ServerManager::ServerManager(common::utils::Queue<network::ConnectionAdapter>& task_queue)
+ServerManager::ServerManager(common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue)
     : task_queue_(task_queue),
       //          folders_(0),  // I don't think that it's necessary but...
       is_run_(false) {

@@ -12,7 +12,7 @@ namespace tests {
 
 class MockTcpServer : public network::TcpServer {
  public:
-    MockTcpServer(const std::string& ip, unsigned short port) : network::TcpServer(ip, <#initializer #>) {}
+    MockTcpServer(common::utils::Queue<network::Connection>& queue, const std::string& ip, unsigned short port) : network::TcpServer(queue, ip, port) {}
     MOCK_METHOD1(PushTask_, void(utils::Task task));
 };
 
