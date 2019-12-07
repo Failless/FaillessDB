@@ -16,6 +16,7 @@ Client::Client(config::ClientConfig& test_data) : config_(std::move(test_data)) 
     filesystem_ = std::unique_ptr<filesystem::FileSystemInterface>(new filesystem::FileSystem());
     serializer_ = std::unique_ptr<serializer::SerializerInterface>(new serializer::Serializer());
 
+    // подумать над сверткой в 1 ф-ю
     // Init pointers to main callbacks
     send_to_db_callback_ = std::shared_ptr<std::function<size_t()>>(
         new std::function<size_t()>(std::bind(&Client::SendToDbCallback_, this)));
@@ -45,9 +46,15 @@ size_t Client::Run() {
 
     // Execute user query and check its status
     exec_query_status_ = ExecQuery_();
+
     if (exec_query_status_) {
         return -1;
     }
+
+    // Add new task for execution
+    network_client_->AddUserTask(serialized_query_, send_to_db_callback_);
+    // [REMOVE] It should be called during Client::Run()
+    network_client_->OpenConnection();
 
     return 0;
 }
@@ -61,7 +68,7 @@ size_t Client::SerializeQuery_() {
 
 size_t Client::ExecQuery_() {
     std::for_each(query_tokens_[0].begin(), query_tokens_[0].end(),
-                  [](char& c) { c = ::toupper(c); });
+                  [](char& c) { c = std::toupper(c); });
     SWITCH(query_tokens_[0]) {
         CASE("SEND") : SendToDb_();
         break;
@@ -130,11 +137,6 @@ size_t Client::SendToDb_() {
     std::cout << current_task_.get()->payload.get()->value->data() << std::endl;
 
     SerializeQuery_();
-
-    // Add new task for execution
-    network_client_->AddUserTask(serialized_query_, send_to_db_callback_);
-    // [REMOVE] It should be called during Client::Run()
-    network_client_->OpenConnection();
     return 0;
 }
 
