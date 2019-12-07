@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "llss3p/utils/str_switch.h"
 #include "llsscli/core/client.h"
+#include "llsscli/utils/str_switch.h"
 
 // https://www.modernescpp.com/index.php/c-core-guidelines-passing-smart-pointer#h2-get-your-e-book-at-leanpub
 // - про unique_ptr
