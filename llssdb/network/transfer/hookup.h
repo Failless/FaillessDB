@@ -30,11 +30,21 @@ class Connection {
     ip::tcp::socket& GetSocket();
     [[nodiscard]] bool HasData() const;
 
- private:
+protected:
     ip::tcp::socket socket_;
     char buffer_[kMaxSize]{};
     bool has_ = false;
     common::utils::Packet packet_;
+};
+
+// this class merely makes testing easier
+class TestConnection : public Connection {
+public:
+    TestConnection(boost::asio::io_service& io_service, common::utils::Packet& _packet)
+      : Connection(io_service) {
+            packet_ = _packet;
+            has_ = true;
+        };
 };
 
 }  // namespace network

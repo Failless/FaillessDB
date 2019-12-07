@@ -5,6 +5,16 @@ namespace failless {
 namespace common {
 namespace utils {
 
+Data& Data::operator=(const Data& data) {
+    if (this != &data) {
+        size = data.size;
+        folder_id = data.folder_id;
+        key = data.key;
+        value = std::move(data.value);
+    }
+    return *this;
+}
+
 bool Data::operator!=(const Data& r) const {
     if (size != r.size) {
         return true;
@@ -20,17 +30,8 @@ bool Data::operator!=(const Data& r) const {
     return key != r.key;
 }
 
-Data& Data::operator=(const Data& data) {
-    if (this != &data) {
-        size = data.size;
-        folder_id = data.folder_id;
-        key = data.key;
-//        value = new uint8_t[size];
-        // TODO: remove
-        value = std::move(data.value);
-//        memcpy(value, data.value, sizeof(uint8_t) * size);
-    }
-    return *this;
+bool Data::operator==(const Data& r) const {
+    return !(*this != r);
 }
 
 }  // namespace utils

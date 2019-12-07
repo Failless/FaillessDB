@@ -8,6 +8,7 @@
 #include <string>
 #include "llss3p/utils/queue.h"
 #include "llssdb/folder/value_info.h"
+#include "llssdb/network/transfer/hookup.h"
 #include "llssdb/utils/task.h"
 
 namespace failless {
@@ -17,16 +18,14 @@ namespace folder {
 class ITaskWorker : boost::noncopyable {
  public:
     virtual ~ITaskWorker() = default;
-    // TODO(EgorBedov): command should be parsed from task.query
-    virtual int AddTask(const utils::Task &task) = 0;
     virtual void Work() = 0;
 
  protected:
-    virtual int DoTask(const utils::Task &task) = 0;
-    virtual bool Set(const utils::Task &task_in) = 0;
-    virtual bool Read(const utils::Task &task_in) = 0;
-    virtual bool Update(const utils::Task &task_in) = 0;
-    virtual bool Delete(const utils::Task &task_in) = 0;
+    virtual int DoTask(std::shared_ptr<network::Connection> conn) = 0;
+    virtual bool Set(common::utils::Data& data) = 0;
+    virtual bool Read(common::utils::Data& data) = 0;
+    virtual bool Update(common::utils::Data& data) = 0;
+    virtual bool Delete(common::utils::Data& data) = 0;
 
 
 };

@@ -1,39 +1,53 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include "llssdb/folder/task_worker.h"
 #include "llssdb/folder/value_info.h"
 #include "llssdb/utils/task.h"
 
+#define MAX_BUFFER 20000
+
 namespace failless {
 namespace db {
 namespace folder {
 
-// TODO(EgorBedov): this func is endless so make it void
-int TaskWorker::AddTask(const utils::Task &task) {
+TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
+                   const std::string& db_path)
+          : input_queue_(queue),
+            fs_(std::make_unique<FileSystem>(db_path))
+            {
+                LoadInMemory();
+            }
+
+void TaskWorker::Work() {
     /// Check input_queue_ for emptiness
+    while ( true ) {
+        if ( !input_queue_.IsEmpty() ) {
+            DoTask(input_queue_.Pop());
+        } else {
+            sleep(1);
+        }
+    }
+}
 
-    DoTask(task);
-    return EXIT_SUCCESS;
-};
-
-int TaskWorker::DoTask(const utils::Task &task) {
-    switch (task.command) {
+int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
+    switch (conn->GetPacket()->command) {
         // TODO: order them in most frequent
         case common::enums::operators::KILL:
             break;
         case common::enums::operators::SET:
-            Set(task);
+            Set(conn->GetPacket()->data);
             break;
         case common::enums::operators::GET:
-            Read(task);
+            Read(conn->GetPacket()->data);
             break;
         case common::enums::operators::UPDATE:
-            Update(task);
+            Update(conn->GetPacket()->data);
             break;
         case common::enums::operators::DELETE:
-            Delete(task);
+            Delete(conn->GetPacket()->data);
             break;
         default:
             return EXIT_FAILURE;
@@ -41,71 +55,54 @@ int TaskWorker::DoTask(const utils::Task &task) {
     return EXIT_SUCCESS;
 }
 
-bool TaskWorker::Set(const utils::Task &task_in) {
+bool TaskWorker::Set(common::utils::Data& data) {
     /// Create key-value pair(s) on hdd
-    bool result = fs_->Set(task_in.payload.key, const_cast<uint8_t *>(task_in.payload.value.data()),
-                          task_in.payload.size);
+    bool result = fs_->Set(data.key, const_cast<uint8_t *>(data.value.data()),
+                          data.size);
 
     /// Send answer to output_queue_
 
-    if (task_in.payload.value.empty()) {
-        std::cout << "value is null!" << std::endl;
-    }
     /// Update in-memory storage
+    // TODO(EgorBedov): check for memory condition first
+    //  if it's odd - emplace empty
     if (result) {
-        // TODO(EgorBedov): check for memory condition first
-        //  if it's odd - emplace empty
-        local_storage_->emplace(task_in.payload.key,
-                                ValueInfo(const_cast<uint8_t *>(task_in.payload.value.data()),
-                                          task_in.payload.size, true));
-        std::cout << "{" << task_in.payload.key << ": "
-                  << (*local_storage_)[task_in.payload.key].size
+        local_storage_.emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
+        std::cout << "{" << data.key << ": "
+                  << local_storage_.at(data.key).size
                   << "(size)} was set both in HDD and in memory\n"
                   << std::endl;
     }
     return result;
 }
 
-bool TaskWorker::Read(const utils::Task &task_in) {
-    utils::Task task_out;
-    task_out.client_id = task_in.client_id;
-    task_out.payload.key = task_in.payload.key;
-    task_out.command = task_in.command;
+bool TaskWorker::Read(common::utils::Data& data) {
+    common::utils::Data data_out;
+    data_out.key = data.key;
 
     size_t result = 0;
 
-    std::cout << "Inside of map" << std::endl;
-    std::map<std::string, ValueInfo>::iterator it;
-    for (it = local_storage_->begin(); it != local_storage_->end(); ++it) {
-        std::cout << "{" << it->first << ": " << it->second.size << "(size)} and it's "
-                  << (it->second.value == nullptr ? "" : "not ") << "a nullptr" << std::endl;
-    }
-
     std::cout << "Found it ";
     /// Grab file from memory if it's in there
-//    if (local_storage_->at(task_in.payload.key).in_memory) {
-//        task_out.payload.value = local_storage_->at(task_in.payload.key).value;
-    // TODO(EgorBedov): rewrite it on smth good
-    uint8_t value[20000];
-    if (local_storage_ && (local_storage_->at(task_in.payload.key).in_memory)) {
-        task_out.payload.value = std::vector(&local_storage_->at(task_in.payload.key).value[0],
-                                             &local_storage_->at(task_in.payload.key).value[20000]);
-        //        task_out.payload.value = local_storage_->at(task_in.payload.key).value;
+    if ( !local_storage_.empty() && (local_storage_.at(data.key).in_memory) ) {
+        data_out.size = local_storage_.at(data.key).size;
+        data_out.value = local_storage_.at(data.key).value;
         result = true;
-        std::cout << "in-memory" << std::endl;
+        std::cout << "in-memory\n" << std::endl;
     } else {
-        result = fs_->Get(task_in.payload.key, value);
-        task_out.payload.value = std::vector(&value[0], &value[20000]);
-        std::cout << "On HDD ";
+        auto value_out = new uint8_t[MAX_BUFFER];
+        result = fs_->Get(data.key, value_out);
+        data_out.value = std::vector(value_out[0], value_out[MAX_BUFFER]);
+        std::cout << "On disk\n" << std::endl;
     }
 
-    std::cout << task_out.payload.value.size() << std::endl;
-    /// Send answer to output_queue_
-    //    output_queue_->push(task_out);
+    /// Send data_out to socket
+
+    /// Consider loading data_out to local_storage_
+
     return result;
 }
 
-bool TaskWorker::Update(const utils::Task &task_in) {
+bool TaskWorker::Update(common::utils::Data& data) {
     bool result = true;
     // TODO(EgorBedov): https://github.com/facebook/rocksdb/wiki/Merge-Operator
     /// Modify key-value pair(s) on hdd
@@ -117,30 +114,26 @@ bool TaskWorker::Update(const utils::Task &task_in) {
     return result;
 }
 
-bool TaskWorker::Delete(const utils::Task &task_in) {
+bool TaskWorker::Delete(common::utils::Data& data) {
     /// Delete key-value pair(s) on hdd
-    bool result = fs_->Remove(task_in.payload.key);
+    bool result = fs_->Remove(data.key);
 
     /// Send answer
 
     /// Update in-memory storage
-    if (local_storage_->at(task_in.payload.key).in_memory) {
-        local_storage_->erase(task_in.payload.key);
+    if (local_storage_.at(data.key).in_memory) {
+        local_storage_.erase(data.key.c_str());
     }
     return result;
 }
-void TaskWorker::Work() {
-    // TODO(EgorBedov): implement your event loop here
-}
-TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>> &queue,
-                       std::string &db_path)
-    : input_queue_(queue), fs_(std::make_unique<FileSystem>(db_path)) {}
 
-void TaskWorker::LoadInMemory() { fs_->LoadInMemory(*local_storage_); }
+void TaskWorker::LoadInMemory() { fs_->LoadInMemory(local_storage_); }
 
 void TaskWorker::UnloadFromMemory() {
-    for (auto &it : *local_storage_) {
-        delete [] it.second.value;
+    /// Clear vector and free space it occupied
+    for (auto &it : local_storage_) {
+        it.second.value.clear();
+        it.second.value.shrink_to_fit();
         it.second.in_memory = false;
     }
 }

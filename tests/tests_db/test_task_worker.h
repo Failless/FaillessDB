@@ -11,164 +11,78 @@
 #include "tests/tests_db/mocks.h"
 #include "tests/tests_db/test_file_system.h"
 
-/*
 namespace failless::db::tests {
 
-<<<<<<< HEAD
-TEST(TaskManager, Get_and_Set) {
-    folder::TaskWorker tw(kTestDbPath);
-
+std::shared_ptr<network::TestConnection> create_test_connection(common::enums::operators command) {
+    boost::asio::io_service ios;
+    common::utils::Packet packet;
+    packet.command = command;
     size_t size = 3;
-    auto key = std::make_shared<std::string>("test_key");
-    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
-    utils::Task test_task1(value, size, key, utils::operators::SET);
-    bool result1 = tw.AddTask(test_task1);
-
-    utils::Task test_task2(nullptr, size, key, utils::operators::GET);
-=======
-using folder::TaskWorker;
-using ::testing::_;
-class MockTaskWorker : public TaskWorker {
- public:
-    explicit MockTaskWorker(const std::string &db_path = kTestDbPath) : TaskWorker(db_path){};
-    MOCK_METHOD1(Set, bool(const utils::Task &task_in));
-    MOCK_METHOD1(Read, bool(const utils::Task &task_in));
-    MOCK_METHOD1(Update, bool(const utils::Task &task_in));
-    MOCK_METHOD1(Delete, bool(const utils::Task &task_in));
-};
+    std::vector<uint8_t> value = {1, 2, 3};
+    auto key = new std::string("test_key");
+    packet.data = {0, size, value, key};
+    return std::make_shared<network::TestConnection>(ios, packet);
+}
 
 TEST(TaskManager, Get_and_Set) {
-    TaskWorker tw(kTestDbPath);
-    const size_t kSize = 3;
-    uint8_t value1[kSize];
-    for (size_t iii = 0; iii < kSize; ++iii) {
-        value1[iii] = iii;
-    }
-    std::string key1("test_key");
-    utils::Task test_task1(value1, kSize, &key1, common::enums::operators::SET);
-    bool result1 = tw.AddTask(test_task1);
-    test_task1.Destruct();
+    common::utils::Queue<std::shared_ptr<network::Connection>> q;
+    folder::TaskWorker tw(q, kTestDbPath);
 
-    uint8_t value2[kSize];
-    for (size_t iii = 0; iii < kSize; ++iii) {
-        value2[iii] = iii;
-    }
-    std::string key2("test_key");
-    utils::Task test_task2(value2, kSize, &key2, common::enums::operators::GET);
->>>>>>> feature/network
-    bool result2 = tw.AddTask(test_task2);
+    auto conn = create_test_connection(common::enums::operators::SET);
+
+    int result1 = tw.DoTask(conn);
+
+    conn->GetPacket()->command = common::enums::operators::GET;
+    int result2 = tw.DoTask(conn);
 
     EXPECT_EQ(result1, result2);
 
     // clear
-<<<<<<< HEAD
-    utils::Task test_task3(nullptr, size, key, utils::operators::DELETE);
-=======
-    uint8_t value3[kSize];
-    for (size_t iii = 0; iii < kSize; ++iii) {
-        value3[iii] = iii;
-    }
-    std::string key3("test_key");
-    utils::Task test_task3(value3, kSize, &key3, common::enums::operators::DELETE);
->>>>>>> feature/network
-    tw.AddTask(test_task3);
+    conn->GetPacket()->command = common::enums::operators::DELETE;
+    tw.DoTask(conn);
 }
 
 TEST(TaskManager, Calling_Self_Set) {
-    MockTaskWorker mockTaskWorker(kTestDbPath);
-<<<<<<< HEAD
+    common::utils::Queue<std::shared_ptr<network::Connection>> q;
+    MockTaskWorker mockTaskWorker(q, kTestDbPath);
 
-    size_t size = 3;
-    auto key = std::make_shared<std::string>("test_key");
-    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
+    auto conn = create_test_connection(common::enums::operators::SET);
 
-    utils::Task test_task(value, size, key, utils::operators::SET);
-=======
-    std::string key("test_key");
-    size_t size = 3;
-    uint8_t value[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
-    }
-    utils::Task test_task(value, size, &key, common::enums::operators::SET);
->>>>>>> feature/network
-
-    EXPECT_CALL(mockTaskWorker, Set(test_task)).Times(1);
-    EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
+    EXPECT_CALL(mockTaskWorker, Set(conn->GetPacket()->data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
 
 TEST(TaskManager, Calling_Self_Read) {
-    MockTaskWorker mockTaskWorker(kTestDbPath);
-<<<<<<< HEAD
+    common::utils::Queue<std::shared_ptr<network::Connection>> q;
+    MockTaskWorker mockTaskWorker(q, kTestDbPath);
 
-    size_t size = 0;
-    auto key = std::make_shared<std::string>("test_key");
+    auto conn = create_test_connection(common::enums::operators::GET);
 
-    utils::Task test_task(nullptr, size, key, utils::operators::GET);
-=======
-    std::string key("test_key");
-    size_t size = 3;
-    uint8_t value[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
-    }
-    utils::Task test_task(value, size, &key, common::enums::operators::GET);
->>>>>>> feature/network
-
-    EXPECT_CALL(mockTaskWorker, Read(test_task)).Times(1);
-    EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
+    EXPECT_CALL(mockTaskWorker, Read(conn->GetPacket()->data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
 TEST(TaskManager, Calling_Self_Update) {
-    MockTaskWorker mockTaskWorker(kTestDbPath);
-<<<<<<< HEAD
+    common::utils::Queue<std::shared_ptr<network::Connection>> q;
+    MockTaskWorker mockTaskWorker(q, kTestDbPath);
 
-    size_t size = 3;
-    auto key = std::make_shared<std::string>("test_key");
-    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
+    auto conn = create_test_connection(common::enums::operators::UPDATE);
 
-    utils::Task test_task(value, size, key, utils::operators::UPDATE);
-=======
-    std::string key("test_key");
-    size_t size = 3;
-    uint8_t value[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
-    }
-    utils::Task test_task(value, size, &key, common::enums::operators::UPDATE);
->>>>>>> feature/network
-
-    EXPECT_CALL(mockTaskWorker, Update(test_task)).Times(1);
-    EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
+    EXPECT_CALL(mockTaskWorker, Update(conn->GetPacket()->data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
 TEST(TaskManager, Calling_Self_Delete) {
-    MockTaskWorker mockTaskWorker(kTestDbPath);
-<<<<<<< HEAD
+    common::utils::Queue<std::shared_ptr<network::Connection>> q;
+    MockTaskWorker mockTaskWorker(q, kTestDbPath);
 
-    size_t size = 3;
-    auto key = std::make_shared<std::string>("test_key");
-    std::shared_ptr<int8_t> value(new int8_t[size] {1, 2, 3});
+    auto conn = create_test_connection(common::enums::operators::DELETE);
 
-    utils::Task test_task(value, size, key, utils::operators::DELETE);
-=======
-    std::string key("test_key");
-    size_t size = 3;
-    uint8_t value[size];
-    for (size_t iii = 0; iii < size; ++iii) {
-        value[iii] = iii;
-    }
-    utils::Task test_task(value, size, &key, common::enums::operators::DELETE);
->>>>>>> feature/network
-
-    EXPECT_CALL(mockTaskWorker, Delete(test_task)).Times(1);
-    EXPECT_EQ(mockTaskWorker.AddTask(test_task), EXIT_SUCCESS);
+    EXPECT_CALL(mockTaskWorker, Delete(conn->GetPacket()->data)).Times(1);
+    EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
-/// test for loading from local_Storage
 } // namespace failless::db::tests
-*/
-
 
 #endif // TESTS_TESTS_DB_TEST_TASK_WORKER_H

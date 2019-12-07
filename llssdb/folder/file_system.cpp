@@ -1,22 +1,25 @@
-#include "llssdb/folder/file_system.h"
+#include <iostream>
+#include <memory>
 #include <rocksdb/db.h>
 #include <rocksdb/iterator.h>
 #include <rocksdb/options.h>
-#include <iostream>
-#include <memory>
 #include <string>
 
-namespace failless {
-namespace db {
-namespace folder {
+#include "llssdb/folder/file_system.h"
+
+namespace failless::db::folder {
 
 using namespace rocksdb;
 
-FileSystem::FileSystem(const std::string& db_path) : db_(nullptr) { OpenDB_(db_path); }
+FileSystem::FileSystem(const std::string &db_path) {
+    OpenDB_(db_path);
+}
 
-FileSystem::~FileSystem() { CloseDB_(); }
+FileSystem::~FileSystem() {
+    CloseDB_();
+}
 
-bool FileSystem::OpenDB_(const std::string& db_path) {
+bool FileSystem::OpenDB_(const std::string &db_path) {
     Options options;
 
     /// Optimize RocksDB. This is the easiest way to get RocksDB to perform well
@@ -29,27 +32,26 @@ bool FileSystem::OpenDB_(const std::string& db_path) {
     /// Open DB with default ColumnFamily
     Status s = DB::Open(options, db_path, &db_);
     if (!s.ok()) {
+        is_open_ = false;
         std::cerr << "Failed to open a database\n";
         return false;
+    } else {
+        is_open_ = true;
+        return true;
     }
-    return true;
 }
 
 void FileSystem::CloseDB_() {
-    if (DBIsOpen_()) {
+    if (is_open_) {
         /// Close db
-        Status s = db_->Close();
-        if (!s.ok())
-            std::cerr << "Failed to close a database\n"
-                      << "If you're debugging then goto: tests/tests_db/mocks.h" << std::endl;
-
+        is_open_ = false;
         delete db_;
         db_ = nullptr;
     }
 }
 
-size_t FileSystem::Get(const std::string& key, uint8_t* value_out) {
-    if (db_) {
+size_t FileSystem::Get(const std::string &key, uint8_t *value_out) {
+    if (is_open_) {
         PinnableSlice pinnable_value;
         auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
@@ -66,10 +68,14 @@ size_t FileSystem::Get(const std::string& key, uint8_t* value_out) {
     return 0;
 }
 
-bool FileSystem::Set(const std::string& key, uint8_t* value_in, size_t size_in) {
-    if (db_) {
-        // TODO(EgorBedov): !critical! fix byte to string cast
-        std::string string_value = std::to_string(*value_in);
+bool FileSystem::Set(const std::string &key, uint8_t *value_in, size_t size_in) {
+    if (is_open_) {
+        std::string string_value;
+
+        for (size_t iii = 0; iii < size_in; ++iii) {
+            string_value += std::to_string(value_in[iii]);
+        }
+
         auto status = db_->Put(WriteOptions(), key, string_value);
         if (!status.ok()) {
             std::cerr << "Failed to put a value\n";
@@ -81,10 +87,10 @@ bool FileSystem::Set(const std::string& key, uint8_t* value_in, size_t size_in) 
     }
 }
 
-bool FileSystem::Remove(const std::string& key) {
-    if (DBIsOpen_()) {
+bool FileSystem::Remove(const std::string &key) {
+    if (is_open_) {
         /// Find key first
-        std::string* value;
+        auto value = new std::string;
         Status s = db_->Get(ReadOptions(), key, value);
         if (s.IsNotFound()) {
             std::cerr << "Such key doesn't exist" << std::endl;
@@ -102,7 +108,7 @@ bool FileSystem::Remove(const std::string& key) {
     }
 }
 
-void FileSystem::EraseAll(const std::string& db_path) {
+void FileSystem::EraseAll(const std::string &db_path) {
     /// First of all close DB, otherwise it's undefined behaviour
     CloseDB_();
 
@@ -115,7 +121,7 @@ void FileSystem::EraseAll(const std::string& db_path) {
 }
 
 uint64_t FileSystem::AmountOfKeys() {
-    if (DBIsOpen_()) {
+    if (is_open_) {
         uint64_t keys = 0;
         db_->GetAggregatedIntProperty("rocksdb.estimate-num-keys", &keys);
         return keys;
@@ -124,33 +130,25 @@ uint64_t FileSystem::AmountOfKeys() {
     }
 }
 
-void FileSystem::LoadInMemory(std::map<std::string, ValueInfo>& local_storage) {
+void FileSystem::LoadInMemory(std::map<std::string, InMemoryData> &local_storage) {
     // TODO(EgorBedov): map will insert at-runtime-known amount of nodes
     //  but there's no way to allocate memory in advance (boost?)
-    if (DBIsOpen_()) {
-        ReadOptions read_options;
-        Iterator* it = db_->NewIterator(read_options);
+    if (is_open_) {
+        auto it = db_->NewIterator(ReadOptions());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            ValueInfo tmp(nullptr, it->value().size(), true);
-            memcpy(tmp.value, it->value().data(), tmp.size * sizeof(uint8_t));
-            local_storage.at(it->key().ToString()) = tmp;
+            local_storage.emplace(std::make_pair(
+                    it->key().ToString(),
+                    InMemoryData(
+                            std::vector<uint8_t>(it->value()[0], it->value()[it->value().size() - 1]),
+                            it->value().size(),
+                            true)));
         }
     } else {
         return;
     }
 }
 
-bool FileSystem::DBIsOpen_() {
-    if (!db_) {
-        std::cerr << "DB wasn't opened" << std::endl;
-        return false;
-    }
-    return true;
 }
-
-}  // namespace folder
-}  // namespace db
-}  // namespace failless
 
 // https://github.com/facebook/rocksdb/blob/master/examples/column_families_example.cc
 // TODO(EgorBedov): https://github.com/facebook/rocksdb/wiki/A-Tutorial-of-RocksDB-SST-formats
