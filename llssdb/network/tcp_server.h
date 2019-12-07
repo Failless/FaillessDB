@@ -34,7 +34,11 @@ class TcpServer : public ITcpServer {
                         const boost::system::error_code& error);
 
     std::shared_ptr<common::utils::Queue<std::shared_ptr<Connection>>> queue_;
+
+ protected:
     boost::asio::io_service io_service_;
+
+ private:
     std::unique_ptr<ip::tcp::acceptor> acceptor_;
     std::vector<utils::Task> tasks_;
     std::vector<Connection> connections_;

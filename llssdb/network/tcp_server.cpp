@@ -57,6 +57,7 @@ TcpServer::TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, H
     acceptor_ =
         std::make_unique<ip::tcp::acceptor>(io_service_, ip::tcp::endpoint(host_.ip, host_.port));
     queue_ = std::shared_ptr<common::utils::Queue<std::shared_ptr<Connection>>>(&queue);
+    Accept_();
 }
 
 TcpServer::TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, const std::string& ip,
