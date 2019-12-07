@@ -14,7 +14,7 @@ namespace config {
 using boost::asio::ip::tcp;
 
 struct Data {
-    // https://github.com/msgpack/msgpack-c/issues/243
+    // We can not use uint8_t due to https://github.com/msgpack/msgpack-c/issues/243
     std::unique_ptr<std::vector<unsigned char>> value;
     size_t size = 0;
     size_t folder_id = 0;
