@@ -4,10 +4,20 @@
 #include "llssdb/engine/server_manager.h"
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/utils/config_manager.h"
+#include "llssdb/utils/signal_handler.h"
 
 void StartManager(std::shared_ptr<failless::db::engine::IServerManager> manager) { manager->Run(); }
 
 int main(/*int argc, char **argv*/) {
+//    failless::common::utils::Queue<failless::db::utils::Task> task_queue(1000);
+//
+//    std::shared_ptr<failless::db::engine::IServerManager> manager(
+//        new failless::db::engine::ServerManager(task_queue));
+//    std::unique_ptr<failless::db::network::ITcpServer> tcp_server =
+//        std::make_unique<failless::db::network::TcpServer>("127.0.0.1", 11556);
+
+//    failless::db::utils::SignalHandler(manager, tcp_server);
+
     failless::db::utils::Settings settings;
     failless::db::utils::ConfigManager config_manager("../failless.conf");
     config_manager.Initialize(settings);
