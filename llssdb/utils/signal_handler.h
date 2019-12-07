@@ -12,8 +12,9 @@ class SignalHandler {
  public:
     static void Handler(int signal);
     static void SetSignalHandlers();
+    // so call me maybe (in main)
     static void SignalSetter(std::shared_ptr<failless::db::engine::IServerManager> s_m,
-                  std::shared_ptr<failless::db::network::ITcpServer> tcp_s);
+                             std::shared_ptr<failless::db::network::ITcpServer> tcp_s);
     SignalHandler() = default;
     ~SignalHandler() = default;
 
