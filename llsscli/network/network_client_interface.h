@@ -25,8 +25,7 @@ class NetworkClientInterface : boost::noncopyable {
  private:
     virtual void OnConnect_(const boost::system::error_code& error_code,
                             tcp::resolver::iterator end_point_iter,
-                            std::shared_ptr<tcp::socket>& socket,
-                            std::shared_ptr<std::stringstream>& current_task) = 0;
+                            std::shared_ptr<config::NetworkConnectTask>& task) = 0;
     virtual void OnReceive_(const boost::system::error_code& ErrorCode,
                             std::shared_ptr<tcp::socket>& socket) = 0;
     virtual void OnSend_(const boost::system::error_code& error_code,

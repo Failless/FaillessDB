@@ -24,23 +24,22 @@ class NetworkClient : public NetworkClientInterface {
 
  private:
     void OnConnect_(const boost::system::error_code& error_code,
-                    tcp::resolver::iterator end_point_iter, std::shared_ptr<tcp::socket>& socket,
-                    std::shared_ptr<std::stringstream>& current_task) override;
+                    tcp::resolver::iterator end_point_iter,
+                    std::shared_ptr<config::NetworkConnectTask>& task) override;
     void OnReceive_(const boost::system::error_code& ErrorCode,
                     std::shared_ptr<tcp::socket>& socket) override;
     void OnSend_(const boost::system::error_code& error_code, std::shared_ptr<tcp::socket>& socket,
                  std::shared_ptr<std::string>& str_task) override;
     void DoClose_(std::shared_ptr<tcp::socket>& socket) override;
 
-//    std::shared_ptr<std::stringstream> recieve_buffer_;
-//    std::vector<char> content_buffer;
+    std::vector<unsigned char> content_buffer_vector_;
 
     config::NetworkConfig config_;
     std::shared_ptr<common::utils::Queue<std::shared_ptr<config::NetworkConnectTask>>>
         user_socket_queue_;
 
-    static const size_t buflen_ = 100;
-        char recieve_buffer_[buflen_ * 2]{};
+    static const size_t buflen_ = 200;
+    char recieve_buffer_[buflen_ * 2]{};
 };
 
 }  // namespace network
