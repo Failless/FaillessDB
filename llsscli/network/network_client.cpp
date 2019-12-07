@@ -10,7 +10,7 @@ namespace client {
 namespace network {
 
 NetworkClient::NetworkClient(std::shared_ptr<config::NetworkConfig>& config)
-    : config_(config.operator*()) {
+    : config_(*config) {
     content_buffer_vector_.resize(1024);
     user_socket_queue_ =
         std::make_shared<common::utils::Queue<std::shared_ptr<config::NetworkConnectTask>>>();
