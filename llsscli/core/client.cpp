@@ -14,7 +14,7 @@ Client::Client(config::ClientConfig& test_data) : config_(std::move(test_data)) 
     // TODO Check inits' status
     // Init FileSystem and Serializer interfaces
     filesystem_ = std::unique_ptr<filesystem::FileSystemInterface>(new filesystem::FileSystem());
-    serializer_ = std::unique_ptr<serializer::SerializerInterface>(new serializer::Serializer());
+    serializer_ = std::unique_ptr<common::serializer::SerializerInterface<config::Task>>(new common::serializer::Serializer<config::Task>());
 
     // подумать над сверткой в 1 ф-ю
     // Init pointers to main callbacks
@@ -32,6 +32,7 @@ Client::Client(config::ClientConfig& test_data) : config_(std::move(test_data)) 
 
 size_t Client::Run() {
     // Split user request to tokens and check its status
+
     parse_input_status_ = ParseInput_(config_.user_request);
     if (parse_input_status_) {
         return -1;
@@ -61,8 +62,12 @@ size_t Client::Run() {
 
 size_t Client::SerializeQuery_() {
     // Serialize file container to stringstream and get it
-    serializer_->Serialize(current_task_);
+//    serializer_->Serialize(current_task_);
+    serializer_->Serialize(*current_task_);
+
+    serialized_query_ = std::shared_ptr<std::stringstream>(new std::stringstream("хуй"));
     serialized_query_ = serializer_->GetOutStringStream();
+
     return 0;
 }
 

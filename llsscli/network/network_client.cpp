@@ -33,7 +33,7 @@ size_t NetworkClient::AddUserTask(std::shared_ptr<std::stringstream>& current_ta
 size_t NetworkClient::OpenConnection() {
     while (!user_socket_queue_->IsEmpty()) {
         std::shared_ptr<config::NetworkConnectTask> temp = user_socket_queue_->Pop();
-
+        
         std::cout << "Client is starting..." << std::endl;
 
         tcp::resolver Resolver(*temp->io_service.get());
@@ -51,7 +51,6 @@ size_t NetworkClient::OpenConnection() {
 
         boost::thread ClientThread(
             boost::bind(&boost::asio::io_service::run, temp->io_service));
-
         //                network_client_->Close();
         ClientThread.join();
     }

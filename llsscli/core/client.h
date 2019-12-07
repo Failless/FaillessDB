@@ -3,12 +3,11 @@
 
 #include <functional>
 
+#include "llss3p/serialization/serializer.h"
 #include "llsscli/config/config.h"
+#include "llsscli/core/client_interface.h"
 #include "llsscli/filesystem/filesystem.h"
 #include "llsscli/network/network_client.h"
-#include "llsscli/serialization/serializer.h"
-
-#include "llsscli/core/client_interface.h"
 
 namespace failless {
 namespace client {
@@ -41,10 +40,9 @@ class Client : public ClientInterface {
  private:
     std::unique_ptr<network::NetworkClientInterface> network_client_;
     std::unique_ptr<filesystem::FileSystemInterface> filesystem_;
-    std::unique_ptr<serializer::SerializerInterface> serializer_;
+    std::unique_ptr<common::serializer::SerializerInterface<config::Task>> serializer_;
 
     std::shared_ptr<config::NetworkConfig> net_config_;
-
     config::ClientConfig config_;
 
     std::string query_tokens_[4];

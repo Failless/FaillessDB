@@ -8,6 +8,10 @@
 #include <utility>
 // #include <boost/uuid/uuid_io.hpp>
 
+namespace failless {
+namespace db {
+namespace auth {
+
 struct UserInfo {
     std::string login;
     unsigned char pass_hash[SHA256_DIGEST_LENGTH]{};
@@ -24,5 +28,9 @@ struct UserInfo {
 
     UserInfo() = default;
 };
+
+}  // namespace auth
+}  // namespace db
+}  // namespace failless
 
 #endif  // FAILLESS_USER_INFO_H

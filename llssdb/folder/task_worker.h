@@ -4,50 +4,25 @@
 #ifndef FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 #define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 
-#include <boost/noncopyable.hpp>
-#include <queue>
-#include <string>
-#include <map>
-#include <memory>
-
-#include "llssdb/utils/task.h"
-#include "llssdb/folder/value_info.h"
+#include "llss3p/utils/queue.h"
 #include "llssdb/folder/file_system.h"
+#include "llssdb/folder/worker_interface.h"
+#include "llssdb/network/transfer/hookup.h"
 
-namespace failless::db::folder {
-
-class ITaskWorker : boost::noncopyable {
-public:
-    explicit ITaskWorker(const std::string& db_path)
-      : input_queue_(nullptr),
-        output_queue_(nullptr),
-        fs_(db_path) {}
-    virtual ~ITaskWorker() = default;
-    virtual int AddTask(const utils::Task &task) = 0;
-
-protected:
-    virtual int DoTask(const utils::Task &task) = 0;
-    virtual bool Set(const utils::Task &task_in) = 0;
-    virtual bool Read(const utils::Task &task_in) = 0;
-    virtual bool Update(const utils::Task &task_in) = 0;
-    virtual bool Delete(const utils::Task &task_in) = 0;
-    virtual void LoadInMemory() = 0;
-    virtual void UnloadFromMemory() = 0;
-
-    std::map<std::string, ValueInfo> local_storage_;
-    std::queue<utils::Task> *input_queue_;     // TODO: replace these two
-    std::queue<utils::Task> *output_queue_;    //  with our own queues
-    FileSystem fs_;
-};
+namespace failless {
+namespace db {
+namespace folder {
 
 class TaskWorker : public ITaskWorker {
-public:
-    explicit TaskWorker(const std::string& db_path) : ITaskWorker(db_path) {};
-    ~TaskWorker() override;
+ public:
+    TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>> &queue,
+               std::string &db_path);
+    ~TaskWorker() override = default;
 
     int AddTask(const utils::Task &task) override;
+    void Work() override;
 
-protected:
+ protected:
     int DoTask(const utils::Task &task) override;
 
     /// These functions will handle the "cache"
@@ -55,10 +30,16 @@ protected:
     bool Read(const utils::Task &task_in) override;
     bool Update(const utils::Task &task_in) override;
     bool Delete(const utils::Task &task_in) override;
-    void LoadInMemory() override;
-    void UnloadFromMemory() override;
+    void LoadInMemory();
+    void UnloadFromMemory();
+    common::utils::Queue<std::shared_ptr<network::Connection>> &input_queue_;
+    std::map<std::string, ValueInfo> *local_storage_ = nullptr;
+    common::utils::Queue<utils::Task> *output_queue_;
+    std::unique_ptr<FileSystemInterface> fs_;
 };
 
-}  // namespace failless::db::folder
+}  // namespace folder
+}  // namespace db
+}  // namespace failless
 
 #endif  // FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_

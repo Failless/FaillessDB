@@ -8,7 +8,7 @@
 #include "tests/tests_db/test_file_system.h"
 #include "tests/tests_db/test_lockfree_queue.h"
 
-int main(int argc, char** argv) {
-    ::testing::InitGoogleTest(&argc, argv);
+int main(int argc, char **argv) {
+    ::testing::InitGoogleMock(&argc, argv);
     return RUN_ALL_TESTS();
 }

@@ -32,6 +32,7 @@ class NetworkClientInterface : boost::noncopyable {
                          std::shared_ptr<tcp::socket>& socket,
                          std::shared_ptr<std::string>& str_task) = 0;
     virtual void DoClose_(std::shared_ptr<tcp::socket>& socket) = 0;
+
 };
 
 }  // namespace network

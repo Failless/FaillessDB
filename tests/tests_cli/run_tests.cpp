@@ -3,6 +3,7 @@
 #include "tests/tests_cli/serialization/test_client_serializer_integration.h"
 #include "tests/tests_cli/serialization/test_serializer_mock.h"
 #include "tests/tests_cli/serialization/test_serializer_unit.h"
+#include "tests/tests_cli/serialization_tests.h"
 
 namespace failless {
 namespace client {

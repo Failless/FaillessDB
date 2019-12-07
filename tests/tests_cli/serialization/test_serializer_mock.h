@@ -5,22 +5,22 @@
 #include <gtest/gtest.h>
 #include <sstream>
 #include <string>
-
+/*
 #include "llsscli/config/config.h"
-#include "llsscli/serialization/serializer.h"
+#include "llss3p/serialization/serializer.h"
 
 namespace failless {
 namespace client {
 namespace test {
 
-using serializer::Serializer;
+using common::serializer::Serializer;
 using std::string;
 using ::testing::_;
 using ::testing::AtLeast;
 
-class MockSerializer : public Serializer {
+class MockSerializer : public Serializer<config::Task> {
  public:
-    MockSerializer() : Serializer(){};
+    MockSerializer() : Serializer<config::Task>(){};
     MOCK_METHOD1(Serialize, size_t(std::shared_ptr<config::Task>& current_task));
     MOCK_METHOD1(Deserialize, size_t(std::shared_ptr<std::stringstream>& current_task));
 };
@@ -40,5 +40,6 @@ TEST(Serializer, Ser_And_Deser) {
 }  // namespace test
 }  // namespace client
 }  // namespace failless
+ */
 
 #endif  // FAILLESS_TEST_SERIALIZER_MOCK_H

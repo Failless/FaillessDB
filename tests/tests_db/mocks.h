@@ -18,16 +18,16 @@
 ///      2. Comment first one                                                   ///
 ///////////////////////////////////////////////////////////////////////////////////
 
-const std::string test_db_path = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
-//const std::string test_db_path = "./llssdb/storage/test_user";
+const std::string kTestDbPath = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
+//const std::string kTestDbPath = "./llssdb/storage/test_user";
 
 namespace failless::db::tests {
-
+/*
 using ::testing::_;
 
  class MockTaskWorker : public folder::TaskWorker {
  public:
-    explicit MockTaskWorker(const std::string &db_path = test_db_path) : folder::TaskWorker(db_path){};
+    explicit MockTaskWorker(const std::string &db_path = kTestDbPath) : folder::TaskWorker(db_path){};
     MOCK_METHOD1(Set, bool(const utils::Task &task_in));
     MOCK_METHOD1(Read, bool(const utils::Task &task_in));
     MOCK_METHOD1(Update, bool(const utils::Task &task_in));
@@ -44,7 +44,7 @@ public:
 //  MOCK_METHOD1(GetRange, bool(const std::string& key));
   MOCK_METHOD1(Remove, bool(const std::string& key));
 };
-
+*/
 }
 
 #endif  // FAILLESS_MOCKS_H
