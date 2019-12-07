@@ -5,11 +5,12 @@
 #include "llssdb/auth/iauthorization.h"
 #include "llssdb/auth/user_info.h"
 
-bool SimpleSHA256(const std::string &input, unsigned char *md);
 
 namespace failless {
 namespace db {
 namespace auth {
+
+bool SimpleSHA256(const std::string &input, unsigned char *md);
 
 class Authorization : public IAuthorization {
  public:
@@ -17,7 +18,7 @@ class Authorization : public IAuthorization {
 
     explicit Authorization(std::string login);
 
-    bool Registration(const std::string &login, const std::string &pass) override;
+    bool Registration(const std::string &login, const std::string &pass, int folder_id) override;
 
     bool RemoveUser(const std::string &login, const std::string &pass) override;
 

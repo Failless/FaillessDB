@@ -7,6 +7,7 @@
 
 using ::testing::_;
 using ::testing::AtLeast;
+
 namespace failless {
 namespace db {
 namespace tests {
@@ -38,21 +39,27 @@ class RegisterImpl : public ::testing::Test {
     std::string password;
 };
 
+/**
+ * check impossibility of registration two users with one login
+ */
 TEST_F(RegisterImpl, Registration) {
     // TODO: add tests on validation
-    // TODO: add tests on registration with folder_id
     std::string login = "mr_tester";
     std::string pass = "qwerty12345";
-    EXPECT_TRUE(auth->Registration(login, pass));
+    EXPECT_TRUE(auth->Registration(login, pass, -1));
     std::string login2 = "mr_tester";
     std::string pass2 = "qwerty12345";
-    EXPECT_FALSE(auth->Registration(login2, pass2));
+    EXPECT_FALSE(auth->Registration(login2, pass2, -1));
 }
 
+/**
+ * check correct work of IsAuth function
+ */
 TEST_F(RegisterImpl, IsAuth) {
     std::string login = "mr_tester";
     std::string pass = "qwerty12345";
-    int folder_id = 0;
+    int folder_id = -1;
+    auth->Registration(login, pass, -1);
     EXPECT_TRUE(auth->IsAuth(login, pass, folder_id));
     EXPECT_FALSE(auth->IsAuth(login, pass, 1));
     std::string login2 = "mr_tester2";
@@ -60,9 +67,13 @@ TEST_F(RegisterImpl, IsAuth) {
     EXPECT_FALSE(auth->IsAuth(login, pass, 0));
 }
 
+/**
+ * check correct work of RemoveUser function
+ */
 TEST_F(RegisterImpl, RemoveUser) {
     std::string login = "mr_tester";
     std::string pass = "qwerty12345";
+    auth->Registration(login, pass, -1);
     EXPECT_TRUE(auth->RemoveUser(login, pass));
     EXPECT_FALSE(auth->RemoveUser(login, pass));
     std::string login2 = "mr_tester2";
@@ -70,18 +81,21 @@ TEST_F(RegisterImpl, RemoveUser) {
     EXPECT_FALSE(auth->RemoveUser(login, pass));
 }
 
+/**
+ * check correct work of Hasher_ function
+ */
 TEST(Registration, HashFunc) {
     std::string pass = "qwerty12345";
     unsigned char array[SHA256_DIGEST_LENGTH]{};
-    EXPECT_TRUE(SimpleSHA256(pass, array));
+    EXPECT_TRUE(auth::SimpleSHA256(pass, array));
 
     std::string pass2 = "qwerty12345";
     unsigned char array2[SHA256_DIGEST_LENGTH]{};
-    EXPECT_TRUE(SimpleSHA256(pass, array2));
+    EXPECT_TRUE(auth::SimpleSHA256(pass, array2));
 
     std::string pass3 = "qwerty1234567";
     unsigned char array3[SHA256_DIGEST_LENGTH]{};
-    EXPECT_TRUE(SimpleSHA256(pass3, array3));
+    EXPECT_TRUE(auth::SimpleSHA256(pass3, array3));
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         EXPECT_EQ(array[i], array2[i]);
     }
@@ -90,16 +104,18 @@ TEST(Registration, HashFunc) {
     }
 }
 
+// MockTests
+
 TEST(Registration, Registration) {
     MockAuth auth;
     EXPECT_CALL(auth, CheckCollisions_(auth.login)).Times(AtLeast(1));
-    EXPECT_EQ(auth.Registration(auth.login, auth.pass), true);
+    EXPECT_EQ(auth.Registration(auth.login, auth.pass, -1), true);
 }
 
 TEST(Hasher, Registration) {
     MockAuth auth;
     EXPECT_CALL(auth, Hasher_(auth.login, auth.pass, auth.pass_hash)).Times(AtLeast(1));
-    EXPECT_EQ(auth.Registration(auth.login, auth.pass), true);
+    EXPECT_EQ(auth.Registration(auth.login, auth.pass, -1), true);
 }
 
 TEST(Hasher, RemoveUser) {

@@ -33,7 +33,7 @@ void ServerManager::Run() {
         connection->GetMetaData(task);
         if (task.command == common::enums::operators::REG) {
             common::utils::Packet packet;
-            if (users_->Registration(*task.login, *task.password)) {
+            if (users_->Registration(*task.login, *task.password, 0)) {
                 packet.ret_value = common::enums::response_type::OK;
             } else {
                 packet.ret_value = common::enums::response_type::SERVER_ERROR;
