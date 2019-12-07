@@ -13,11 +13,12 @@ class TestTcpServerImpl : public ::testing::Test {
  public:
     void SetUp() {
         network::Host host("127.0.0.1", 11556);
-        tcp_server.reset(new network::TcpServer(host));
+        tcp_server.reset(new network::TcpServer(queue_, host));
         test_client.SetConfig(host);
     }
 
     std::shared_ptr<network::TcpServer> tcp_server{};
+    common::utils::Queue<std::shared_ptr<network::Connection>> queue_;
     SimpleClient test_client{};
 };
 

@@ -3,8 +3,8 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <llss3p/utils/queue.h>
 #include <thread>
+#include "llss3p/utils/queue.h"
 
 using ::testing::_;
 using ::testing::AtLeast;
@@ -26,16 +26,14 @@ class IUseQueue {
             queue_.Push(i);
         }
     }
+
  private:
     common::utils::Queue<int>& queue_;
 };
 
-void RunQueueWorker(IUseQueue user) {
-    user.PushTasks();
-}
-void RunQueueOtherWorker(IUseQueue user) {
-    user.PushOtherTasks();
-}
+void RunQueueWorker(IUseQueue* user) { user->PushTasks(); }
+
+void RunQueueOtherWorker(IUseQueue* user) { user->PushOtherTasks(); }
 
 TEST(Queue, PushPop) {
     common::utils::Queue<int> queue;
@@ -56,23 +54,25 @@ TEST(Queue, PushPop) {
 }
 
 TEST(Queue, ThreadSafe) {
+    ::std::queue<int> normal_queue;
     common::utils::Queue<int> queue;
-    std::queue<int> normal_queue;
     IUseQueue user1(queue);
     IUseQueue user2(queue);
-    std::thread init1(RunQueueWorker, user1);
-    std::thread init2(RunQueueOtherWorker, user2);
-//    EXPECT_EQ(0, queue.Pop());
-//    while (!queue.IsEmpty()) {
-//        queue.Pop();
-//    }
-    init1.join();
-    init2.join();
+//    std::thread init1(RunQueueWorker, &user1);
+//    std::thread init2(RunQueueOtherWorker, &user2);
+//    //    EXPECT_EQ(0, queue.Pop());
+//    //    while (!queue.IsEmpty()) {
+//    //        queue.Pop();
+//    //    }
+//    init1.join();
+//    init2.join();
 }
-
 
 }  // namespace tests
 }  // namespace db
 }  // namespace failless
+
+
+
 
 #endif  // FAILLESS_TESTS_TESTS_DB_SIMPLE_TEST_LOCKFREE_QUEUE_H_

@@ -7,15 +7,17 @@
 
 using ::testing::_;
 using ::testing::AtLeast;
+namespace failless {
+namespace db {
+namespace tests {
 
-class MockAuth : public Authorization {
+class MockAuth : public auth::Authorization {
  public:
     std::string login;
     std::string pass;
-    unsigned char pass_hash[32];
+    unsigned char pass_hash[32]{};
     MOCK_METHOD1(CheckCollisions_, bool(std::string login));
-    MOCK_METHOD3(Hasher_,
-                 void(const std::string &login, std::string pass, unsigned char *md));
+    MOCK_METHOD3(Hasher_, void(const std::string &login, std::string pass, unsigned char *md));
     MockAuth() {
         login = "login";
         pass = "pass";
@@ -26,12 +28,12 @@ class MockAuth : public Authorization {
 class RegisterImpl : public ::testing::Test {
  public:
     void SetUp() override {
-        auth.reset(new Authorization());
+        auth.reset(new auth::Authorization());
         login = "login";
         password = "password";
     }
 
-    std::shared_ptr<Authorization> auth;
+    std::shared_ptr<auth::Authorization> auth;
     std::string login;
     std::string password;
 };
@@ -105,5 +107,9 @@ TEST(Hasher, RemoveUser) {
     EXPECT_CALL(auth, Hasher_(auth.login, auth.pass, auth.pass_hash)).Times(AtLeast(1));
     EXPECT_EQ(auth.RemoveUser(auth.login, auth.pass), false);
 }
+
+}  // namespace tests
+}  // namespace db
+}  // namespace failless
 
 #endif  // TESTS_DB_AUTH_H_

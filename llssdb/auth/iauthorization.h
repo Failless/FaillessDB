@@ -5,6 +5,10 @@
 #include <map>
 #include <string>
 
+namespace failless {
+namespace db {
+namespace auth {
+
 class IAuthorization : boost::noncopyable {
  public:
     virtual bool Registration(const std::string &login, const std::string &pass) = 0;
@@ -15,5 +19,9 @@ class IAuthorization : boost::noncopyable {
 
     virtual ~IAuthorization() = default;
 };
+
+}  // namespace auth
+}  // namespace db
+}  // namespace failless
 
 #endif  // FAILLESS_IAUTHORIZATION_H

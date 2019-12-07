@@ -3,10 +3,8 @@
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
-#include <boost/lockfree/queue.hpp>
-#include "llssdb/network/connection.h"
+#include "llss3p/utils/queue.h"
 #include "llssdb/network/tcp_server_interface.h"
-#include "llssdb/utils/task.h"
 
 namespace failless {
 namespace db {
@@ -17,13 +15,14 @@ namespace ip = boost::asio::ip;
 class TcpServer : public ITcpServer {
  public:
     TcpServer() = delete;
-    explicit TcpServer(Host host);
-    TcpServer(std::string ip, unsigned short port);
+    TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, Host host);
+    TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, const std::string& ip,
+              unsigned short port);
     ~TcpServer() override = default;
     void SetConfig(std::string ip, int port) override;
     void Listen() override;
     Host GetSettings() override;
-    void SetResponseFunction(std::function<Response(Request &)> &generate_response) override;
+    void SetQueue(common::utils::Queue<std::shared_ptr<Connection>>& queue) override;
 
  protected:
     void PushTask_(utils::Task task);
@@ -31,14 +30,12 @@ class TcpServer : public ITcpServer {
 
  private:
     void Accept_();
-    void AcceptHandler_(ConnectionAdapter adaptor, const boost::system::error_code &error);
+    void AcceptHandler_(std::shared_ptr<Connection>& adaptor,
+                        const boost::system::error_code& error);
 
-    boost::lockfree::queue<utils::Task> *queue_ = nullptr;
+    std::shared_ptr<common::utils::Queue<std::shared_ptr<Connection>>> queue_;
     boost::asio::io_service io_service_;
-    //    ip::tcp::socket *socket_;
-    /// The acceptor object used to accept incoming socket connections.
     std::unique_ptr<ip::tcp::acceptor> acceptor_;
-    /// The data to be sent to each client.
     std::vector<utils::Task> tasks_;
     std::vector<Connection> connections_;
     bool is_run_ = false;

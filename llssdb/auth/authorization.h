@@ -7,6 +7,10 @@
 
 bool SimpleSHA256(const std::string &input, unsigned char *md);
 
+namespace failless {
+namespace db {
+namespace auth {
+
 class Authorization : public IAuthorization {
  public:
     Authorization() = default;
@@ -28,5 +32,9 @@ class Authorization : public IAuthorization {
 
     void Hasher_(const std::string &login, std::string pass, unsigned char *md);
 };
+
+}  // namespace auth
+}  // namespace db
+}  // namespace failless
 
 #endif  // LLSSDB_AUTH_AUTHORIZATION_H_

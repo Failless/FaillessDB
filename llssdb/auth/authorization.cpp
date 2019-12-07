@@ -1,11 +1,8 @@
 #include <boost/algorithm/hex.hpp>
 #include <iostream>
-// #include <cstring>
-#include <boost/lexical_cast.hpp>
-#include "llssdb/auth/authorization.h"
 #include <openssl/md5.h>
 #include <openssl/sha.h>
-
+#include "llssdb/auth/authorization.h"
 
 bool SimpleSHA256(const std::string &input, unsigned char *md) {
     if (input.empty()) return false;
@@ -13,15 +10,18 @@ bool SimpleSHA256(const std::string &input, unsigned char *md) {
     return true;
 }
 
-void Authorization::Hasher_(const std::string &login, std::string pass,
-                                      unsigned char *md) {
+namespace failless {
+namespace db {
+namespace auth {
+
+void Authorization::Hasher_(const std::string &login, std::string pass, unsigned char *md) {
     std::string salt(pass);
-    for (int i = login.length() - 1, j = 0; i >= 0; i--) {
+    for (int i = static_cast<int>(login.length()) - 1, j = 0; i >= 0; --i) {
         salt[j++] = login[i];  // salt - reversed login - unique
     }
 
     pass += salt;  // правильно было бы хешировать, а потом солить и снова хешировать,
-    // но даже если солить таким способом, как у нас - нельзя получить доступ к аккаунтам с
+    // но дажеint если солить таким способом, как у нас - нельзя получить доступ к аккаунтам с
     // одинаковыми паролями, взломав лишь один, т.к. итоговые хэши все равно различны
 
     if (!SimpleSHA256(pass, md)) {
@@ -68,3 +68,7 @@ bool Authorization::Registration(const std::string &login, const std::string &pa
 bool Authorization::CheckCollisions_(const std::string &login) { return Users_.count(login) != 0; }
 
 Authorization::Authorization(std::string login) {}
+
+}  // namespace auth
+}  // namespace db
+}  // namespace failless

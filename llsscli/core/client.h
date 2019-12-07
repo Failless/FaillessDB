@@ -1,12 +1,11 @@
 #ifndef LLSSCLIENT_CORE_CLIENT_H_
 #define LLSSCLIENT_CORE_CLIENT_H_
 
+#include "llss3p/serialization/serializer.h"
 #include "llsscli/config/config.h"
+#include "llsscli/core/client_interface.h"
 #include "llsscli/filesystem/filesystem.h"
 #include "llsscli/network/network_client.h"
-#include "llsscli/serialization/serializer.h"
-
-#include "llsscli/core/client_interface.h"
 
 namespace failless {
 namespace client {
@@ -28,15 +27,15 @@ class Client : public ClientInterface {
  private:
     std::unique_ptr<network::NetworkClientInterface> network_client_;
     std::unique_ptr<filesystem::FileSystemInterface> filesystem_;
-    std::unique_ptr<serializer::SerializerInterface> serializer_;
+    std::unique_ptr<common::serializer::SerializerInterface<config::Task>> serializer_;
     config::ClientConfig config_;
 
     std::string query_tokens_[4];
     std::unique_ptr<config::Task> current_task_;
 
-    bool parse_input_status_;
-    bool exec_query_status_;
-    bool serialize_query_status_;
+    bool parse_input_status_{};
+    bool exec_query_status_{};
+    bool serialize_query_status_{};
 };
 
 }  // namespace core

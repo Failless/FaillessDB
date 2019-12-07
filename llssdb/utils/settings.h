@@ -2,6 +2,7 @@
 #define FAILLESS_LLSSDB_UTILS_SETTINGS_H_
 
 #include <string>
+#include <utility>
 
 namespace failless {
 namespace db {
@@ -41,6 +42,13 @@ struct Settings {
           users_to_table(1),
           port(8888) {}
 };
+
+struct WorkerSettings {
+    WorkerSettings() = default;
+    explicit WorkerSettings(std::string  _db_path) : db_path(std::move(_db_path)) {}
+    std::string db_path;
+};
+
 
 }  // namespace utils
 }  // namespace db
