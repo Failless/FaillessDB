@@ -14,11 +14,11 @@ class Serializer : public SerializerInterface<T> {
     size_t Serialize(T& data) override;
     T Deserialize(char* data, size_t size) override;
 
-    std::stringstream* GetOutStringStream() override;
+    std::shared_ptr<std::stringstream> GetOutStringStream() override;
     std::shared_ptr<T> GetInConfig() override;
 
  private:
-    std::stringstream out_buf_{};
+    std::shared_ptr<std::stringstream> out_buf_{};
     std::shared_ptr<T> in_buf_;
 };
 
@@ -37,26 +37,34 @@ class Serializer : public SerializerInterface<T> {
 
 template <class T>
 size_t Serializer<T>::Serialize(T& data) {
-//    out_buf_ = std::make_unique<std::stringstream>();
-    msgpack::pack(out_buf_, data);
+//    out_buf_ = std::shared_ptr<std::stringstream>();
+    out_buf_.reset(new std::stringstream());
+    msgpack::pack(*out_buf_, data);
     return 0;
 }
 
 template <class T>
 T Serializer<T>::Deserialize(char* data, size_t size) {
     // deserialize
+    /*
     msgpack::unpacked result;
     msgpack::unpack(result, data, size, 0);
     msgpack::object object1(result.get());
-    T object;
-    object1.convert(object);
+    */
+//    T object;
+/*
+    in_buf_.reset(new T());
+    object1.convert(*(in_buf_.get()));
+    */
 //    msgpack::object_handle oh = msgpack::unpack(data, size);
 //    msgpack::object deserialized = oh.get();
 //    std::cout << deserialized << std::endl;
 //
-//        in_buf_ = std::make_unique<T>();
+//    in_buf_ = std::shared_ptr<T>(object);
 //    deserialized.convert(object);
-    return std::move(object);
+/*
+    return *in_buf_;
+    */
     //    deserialized.convert(*(in_buf_.get()));
     //
     //    std::stringstream ss;
@@ -68,8 +76,8 @@ T Serializer<T>::Deserialize(char* data, size_t size) {
 }
 
 template <class T>
-std::stringstream* Serializer<T>::GetOutStringStream() {
-    return &out_buf_;
+std::shared_ptr<std::stringstream> Serializer<T>::GetOutStringStream() {
+    return out_buf_;
 }
 
 template <class T>

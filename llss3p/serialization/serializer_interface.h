@@ -17,7 +17,7 @@ class SerializerInterface : boost::noncopyable {
     virtual size_t Serialize(T& data) = 0;
     virtual T Deserialize(char* data, size_t size) = 0;
 
-    virtual std::stringstream* GetOutStringStream() = 0;
+    virtual std::shared_ptr<std::stringstream> GetOutStringStream() = 0;
     virtual std::shared_ptr<T> GetInConfig() = 0;
 };
 

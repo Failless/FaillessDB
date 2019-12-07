@@ -48,7 +48,7 @@ void Connection::SendData(common::utils::Packet& data) {
     std::unique_ptr<srz::SerializerInterface<common::utils::Packet>> serializer(
         new srz::Serializer<common::utils::Packet>());
     serializer->Serialize(data);
-    auto* ser_data = serializer->GetOutStringStream();
+    auto ser_data = serializer->GetOutStringStream();
     ser_data->seekg(0, std::ios::end);
     socket_.async_write_some(boost::asio::buffer(ser_data->str(), ser_data->tellg()),
                              boost::bind(&Connection::Write, this, boost::asio::placeholders::error,

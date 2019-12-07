@@ -2,6 +2,7 @@
 #define LLSSCLI_NETWORK_CLIENT_H_
 
 #include <string>
+#include "llss3p/utils/queue.h"
 #include "llsscli/config/config.h"
 
 #include "llsscli/network/network_client_interface.h"
@@ -13,26 +14,32 @@ namespace network {
 class NetworkClient : public NetworkClientInterface {
  public:
     NetworkClient() = default;
-    NetworkClient(boost::asio::io_service& io_service, config::NetworkConfig config);
-    ~NetworkClient() = default;
+    explicit NetworkClient(std::shared_ptr<config::NetworkConfig>& config);
+    ~NetworkClient() override = default;
 
-    void Close() override;
+    size_t AddUserTask(std::shared_ptr<std::stringstream>& current_task,
+                       std::shared_ptr<std::function<size_t()>>& callback) override;
+    size_t OpenConnection() override;
+    size_t Close() override;
 
  private:
     void OnConnect_(const boost::system::error_code& error_code,
-                    tcp::resolver::iterator end_point_iter) override;
-    void OnReceive_(const boost::system::error_code& error_code) override;
-    void OnSend_(const boost::system::error_code& error_code) override;
-    void DoClose_() override;
+                    tcp::resolver::iterator end_point_iter,
+                    std::shared_ptr<config::NetworkConnectTask>& task) override;
+    void OnReceive_(const boost::system::error_code& ErrorCode,
+                    std::shared_ptr<tcp::socket>& socket) override;
+    void OnSend_(const boost::system::error_code& error_code, std::shared_ptr<tcp::socket>& socket,
+                 std::shared_ptr<std::string>& str_task) override;
+    void DoClose_(std::shared_ptr<tcp::socket>& socket) override;
 
-    boost::asio::io_service& io_service_;
-    tcp::socket socket_;
-
-    std::string send_buffer_;
-    static const size_t buflen_ = 100;
-    char recieve_buffer_[buflen_ * 2];
+    std::vector<unsigned char> content_buffer_vector_;
 
     config::NetworkConfig config_;
+    std::shared_ptr<common::utils::Queue<std::shared_ptr<config::NetworkConnectTask>>>
+        user_socket_queue_;
+
+    static const size_t buflen_ = 200;
+    char recieve_buffer_[buflen_ * 2]{};
 };
 
 }  // namespace network

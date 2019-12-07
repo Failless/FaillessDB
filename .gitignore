@@ -44,3 +44,6 @@
 cmake-build-debug
 .idea
 .DS_Store
+
+# temp [DO NOT MERGE]
+failless_db.cpp

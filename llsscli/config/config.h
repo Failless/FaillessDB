@@ -1,6 +1,8 @@
 #ifndef FAILLESS_CONFIG_CONFIG_H_
 #define FAILLESS_CONFIG_CONFIG_H_
 
+#include <boost/asio.hpp>
+#include <functional>
 #include <msgpack.hpp>
 #include <string>
 #include <utility>
@@ -9,9 +11,11 @@ namespace failless {
 namespace client {
 namespace config {
 
+using boost::asio::ip::tcp;
+
 struct Data {
-    // https://github.com/msgpack/msgpack-c/issues/243
-    std::unique_ptr<std::vector<unsigned char> > value;
+    // We can not use uint8_t due to https://github.com/msgpack/msgpack-c/issues/243
+    std::unique_ptr<std::vector<unsigned char>> value;
     size_t size = 0;
     size_t folder_id = 0;
     std::unique_ptr<std::string> key;
@@ -21,7 +25,7 @@ struct Data {
     MSGPACK_DEFINE_MAP(value, size, folder_id, key);
 
     Data() = default;
-    Data(std::unique_ptr<std::vector<unsigned char> >& v, size_t s, size_t f_id,
+    Data(std::unique_ptr<std::vector<unsigned char>>& v, size_t s, size_t f_id,
          std::unique_ptr<std::string>& k)
         : value(std::move(v)), size(s), folder_id(f_id), key(std::move(k)) {}
 };
@@ -49,24 +53,45 @@ struct ClientConfig {
     std::string db_host{};
     std::string db_port{};
 
+    size_t client_num = 0;
+
+    ClientConfig() = default;
+
     ClientConfig(std::string user_n, std::string user_r, int payload_d, std::string payload_k,
-                 std::string db_h, std::string db_p)
+                 std::string db_h, std::string db_p, size_t c_num)
         : user_name(std::move(user_n)),
           user_request(std::move(user_r)),
           payload_dest_id(payload_d),
           payload_key(std::move(payload_k)),
           db_host(std::move(db_h)),
-          db_port(std::move(db_p)) {}
-
-    ClientConfig() = default;
+          db_port(std::move(db_p)),
+          client_num(std::move(c_num)) {}
 };
 
 struct NetworkConfig {
     std::string db_host{};
     std::string db_port{};
+    size_t client_num = 0;
 
-    NetworkConfig(std::string db_h, std::string db_p)
-        : db_host(std::move(db_h)), db_port(std::move(db_p)) {}
+    NetworkConfig() = default;
+
+    NetworkConfig(std::string db_h, std::string db_p, size_t c_num)
+        : db_host(std::move(db_h)), db_port(std::move(db_p)), client_num(std::move(c_num)) {}
+};
+
+struct NetworkConnectTask {
+    std::shared_ptr<tcp::socket> socket;
+    std::shared_ptr<boost::asio::io_service> io_service;
+    std::shared_ptr<std::stringstream> client_task;
+    std::shared_ptr<std::function<size_t()>> client_callback;
+
+    NetworkConnectTask() = default;
+
+    NetworkConnectTask(std::shared_ptr<tcp::socket>& sock,
+                       std::shared_ptr<boost::asio::io_service>& io_serv,
+                       std::shared_ptr<std::stringstream>& cl_task,
+                       std::shared_ptr<std::function<size_t()>>& callback)
+        : socket(sock), io_service(io_serv), client_task(cl_task), client_callback(callback) {}
 };
 
 }  // namespace config
