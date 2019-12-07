@@ -29,6 +29,10 @@ TEST(ConfigManager, TestDefaultConfig) {
     EXPECT_EQ(settings.port, 8888);
 }
 
+/**
+ * this test checks how config works
+ * in thin dangerous places
+ */
 TEST(ConfigManager, TestCustomConfig) {
     failless::db::utils::Settings settings;
     std::ofstream config;
