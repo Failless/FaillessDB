@@ -19,7 +19,7 @@ class MockAuth : public auth::Authorization {
     unsigned char pass_hash[32]{};
     MOCK_METHOD1(CheckCollisions_, bool(std::string login));
     MOCK_METHOD3(Hasher_, void(const std::string &login, std::string pass, unsigned char *md));
-    MockAuth() {
+    MockAuth() : Authorization() {
         login = "login";
         pass = "pass";
         // pass_hash = "pass_hash";
