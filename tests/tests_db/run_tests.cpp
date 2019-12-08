@@ -2,6 +2,7 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "tests/tests_db/test_auth.h"
+#include "tests/tests_db/test_config.h"
 #include "tests/tests_db/test_file_system.h"
 #include "tests/tests_db/test_lockfree_queue.h"
 #include "tests/tests_db/test_server.h"
