@@ -1,31 +1,20 @@
 #ifndef FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
 #define FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
 
+#include <boost/noncopyable.hpp>
 #include <rocksdb/db.h>
 #include <rocksdb/options.h>
-#include <boost/noncopyable.hpp>
 #include <string>
-#include "llssdb/folder/value_info.h"
+
+#include "llssdb/folder/file_system_interface.h"
+#include "llssdb/folder/in_memory_data.h"
 
 namespace failless {
 namespace db {
 namespace folder {
 
-class FileSystemInterface : boost::noncopyable {
-public:
-    FileSystemInterface() = default;
-    virtual ~FileSystemInterface() = default;
-
-    virtual size_t Get(const std::string &key, uint8_t *value_out) = 0;
-    virtual bool Set(const std::string &key, uint8_t *value_in, size_t size_in) = 0;
-    virtual bool Remove(const std::string &key) = 0;
-    virtual void EraseAll(const std::string& db_path) = 0;
-
-    virtual void LoadInMemory(std::map<std::string, InMemoryData>& local_storage) = 0;
-};
-
 class FileSystem : public FileSystemInterface {
- public:
+public:
     FileSystem() = default;
     explicit FileSystem(const std::string &db_path);
     ~FileSystem() override;
@@ -38,7 +27,7 @@ class FileSystem : public FileSystemInterface {
     uint64_t AmountOfKeys();
     void LoadInMemory(std::map<std::string, InMemoryData>& local_storage) override;
 
- private:
+private:
     bool OpenDB_(const std::string &db_path);
     void CloseDB_();
 

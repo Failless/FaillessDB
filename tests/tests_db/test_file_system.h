@@ -19,8 +19,8 @@ using folder::FileSystem;
 common::utils::Data create_test_data() {
     size_t size = 3;
     std::vector<uint8_t> value = {1, 2, 3};
-    auto key = new std::string("test_key");
-    return {0, size, value, key};
+    std::string key = "test_key";
+    return {0, size, value, &key};
 }
 
 TEST(FileSystem, Set) {

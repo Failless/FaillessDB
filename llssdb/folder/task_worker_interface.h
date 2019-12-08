@@ -1,5 +1,5 @@
-#ifndef FAILLESS_LLSSDB_FOLDER_WORKER_INTERFACE_H_
-#define FAILLESS_LLSSDB_FOLDER_WORKER_INTERFACE_H_
+#ifndef FAILLESS_LLSSDB_FOLDER_TASK_WORKER_INTERFACE_H_
+#define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_INTERFACE_H_
 
 #include <boost/noncopyable.hpp>
 #include <map>
@@ -7,7 +7,7 @@
 #include <queue>
 #include <string>
 #include "llss3p/utils/queue.h"
-#include "llssdb/folder/value_info.h"
+#include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
 #include "llssdb/utils/task.h"
 
@@ -16,22 +16,21 @@ namespace db {
 namespace folder {
 
 class ITaskWorker : boost::noncopyable {
- public:
+public:
     virtual ~ITaskWorker() = default;
     virtual void Work() = 0;
 
- protected:
+protected:
     virtual int DoTask(std::shared_ptr<network::Connection> conn) = 0;
     virtual bool Set(common::utils::Data& data) = 0;
     virtual bool Read(common::utils::Data& data) = 0;
     virtual bool Update(common::utils::Data& data) = 0;
     virtual bool Delete(common::utils::Data& data) = 0;
-
-
+    virtual bool Create(common::utils::Data& data) = 0;
 };
 
 }  // namespace folder
 }  // namespace db
 }  // namespace failless
 
-#endif  // FAILLESS_LLSSDB_FOLDER_WORKER_INTERFACE_H_
+#endif  // FAILLESS_LLSSDB_FOLDER_TASK_WORKER_INTERFACE_H_

@@ -5,7 +5,8 @@
 
 #include "llss3p/utils/queue.h"
 #include "llssdb/folder/file_system.h"
-#include "llssdb/folder/worker_interface.h"
+#include "llssdb/folder/file_system_interface.h"
+#include "llssdb/folder/task_worker_interface.h"
 #include "llssdb/network/transfer/hookup.h"
 
 namespace failless {
@@ -26,12 +27,15 @@ protected:
     bool Read(common::utils::Data& data) override;
     bool Update(common::utils::Data& data) override;
     bool Delete(common::utils::Data& data) override;
+    bool Create(common::utils::Data& data) override;
     void LoadInMemory();
     void UnloadFromMemory();
 
     common::utils::Queue<std::shared_ptr<network::Connection>> &input_queue_;
     std::map<std::string, InMemoryData> local_storage_;
     std::unique_ptr<FileSystemInterface> fs_;
+    std::string path_{};
+    bool alive_ = false;
 };
 
 }  // namespace folder

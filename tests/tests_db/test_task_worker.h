@@ -1,9 +1,10 @@
-#ifndef TESTS_TESTS_DB_TEST_TASK_WORKER_H_
-#define TESTS_TESTS_DB_TEST_TASK_WORKER_H_
+#ifndef FAILLESS_TESTS_TESTS_DB_TEST_TASK_WORKER_H_
+#define FAILLESS_TESTS_TESTS_DB_TEST_TASK_WORKER_H_
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <string>
+#include <thread>
 
 #include "llssdb/utils/task.h"
 #include "llssdb/folder/file_system.h"
@@ -19,8 +20,8 @@ std::shared_ptr<network::TestConnection> create_test_connection(common::enums::o
     packet.command = command;
     size_t size = 3;
     std::vector<uint8_t> value = {1, 2, 3};
-    auto key = new std::string("test_key");
-    packet.data = {0, size, value, key};
+    std::string key = "test_key";
+    packet.data = {0, size, value, &key};
     return std::make_shared<network::TestConnection>(ios, packet);
 }
 
@@ -83,6 +84,25 @@ TEST(TaskManager, Calling_Self_Delete) {
     EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
+// fails to create thread
+/*TEST(TaskManager, WorkingInThread) {
+    common::utils::Queue<std::shared_ptr<network::Connection>> q;
+    db::utils::Settings settings;
+    settings.data_path = kTestDbPath;
+    std::thread worker_run(db::engine::WorkInThread, &q, settings);
+
+    auto conn = create_test_connection(common::enums::operators::SET);
+    q.Push(conn);
+    conn->GetPacket()->command = common::enums::operators::GET;
+    q.Push(conn);
+    conn->GetPacket()->command = common::enums::operators::DELETE;
+    q.Push(conn);
+    conn->GetPacket()->command = common::enums::operators::KILL;
+    q.Push(conn);
+
+    worker_run.join();
+}*/
+
 } // namespace failless::db::tests
 
-#endif // TESTS_TESTS_DB_TEST_TASK_WORKER_H
+#endif // FAILLESS_TESTS_TESTS_DB_TEST_TASK_WORKER_H_

@@ -70,7 +70,7 @@ size_t FileSystem::Get(const std::string &key, uint8_t *value_out) {
 
 bool FileSystem::Set(const std::string &key, uint8_t *value_in, size_t size_in) {
     if (is_open_) {
-        std::string string_value;
+        std::string string_value{};
 
         for (size_t iii = 0; iii < size_in; ++iii) {
             string_value += std::to_string(value_in[iii]);
@@ -136,10 +136,12 @@ void FileSystem::LoadInMemory(std::map<std::string, InMemoryData> &local_storage
     if (is_open_) {
         auto it = db_->NewIterator(ReadOptions());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
+            auto tmp_vector = std::vector<uint8_t>(it->value()[0], it->value()[it->value().size() - 1]);
+            tmp_vector.shrink_to_fit();
             local_storage.emplace(std::make_pair(
                     it->key().ToString(),
                     InMemoryData(
-                            std::vector<uint8_t>(it->value()[0], it->value()[it->value().size() - 1]),
+                            tmp_vector,
                             it->value().size(),
                             true)));
         }
