@@ -1,24 +1,18 @@
-#ifndef FAILLESS_TEST_SERIALIZER_MOCK_H
-#define FAILLESS_TEST_SERIALIZER_MOCK_H
+#ifndef FAILLESS_TESTS_TESTS_CLI_TEST_SERIALIZER_MOCK_H_
+#define FAILLESS_TESTS_TESTS_CLI_TEST_SERIALIZER_MOCK_H_
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-#include <sstream>
-#include <string>
-/*
-#include "llsscli/config/config.h"
 #include "llss3p/serialization/serializer.h"
+#include "llsscli/config/config.h"
 
 namespace failless {
 namespace client {
 namespace test {
 
-using common::serializer::Serializer;
-using std::string;
-using ::testing::_;
-using ::testing::AtLeast;
+namespace srz = common::serializer;
 
-class MockSerializer : public Serializer<config::Task> {
+class MockSerializer : public srz::Serializer<config::Task> {
  public:
     MockSerializer() : Serializer<config::Task>(){};
     MOCK_METHOD1(Serialize, size_t(std::shared_ptr<config::Task>& current_task));
@@ -37,9 +31,9 @@ TEST(Serializer, Ser_And_Deser) {
     EXPECT_CALL(ser, Deserialize(current_task_out)).Times(1);
     EXPECT_EQ(ser.Deserialize(current_task_out), 0);
 }
+
 }  // namespace test
 }  // namespace client
 }  // namespace failless
- */
 
-#endif  // FAILLESS_TEST_SERIALIZER_MOCK_H
+#endif  // FAILLESS_TESTS_TESTS_CLI_TEST_SERIALIZER_MOCK_H_

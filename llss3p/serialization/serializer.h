@@ -1,3 +1,6 @@
+#ifndef FAILLESS_LLSS3P_SERIALIZATION_SERIALIZER_H_
+#define FAILLESS_LLSS3P_SERIALIZATION_SERIALIZER_H_
+
 #include <iostream>
 #include "llss3p/serialization/serializer_interface.h"
 
@@ -12,7 +15,7 @@ class Serializer : public SerializerInterface<T> {
     ~Serializer() = default;
 
     size_t Serialize(T& data) override;
-    T Deserialize(char* data, size_t size) override;
+    T& Deserialize(char* data, size_t size) override;
 
     std::shared_ptr<std::stringstream> GetOutStringStream() override;
     std::shared_ptr<T> GetInConfig() override;
@@ -37,42 +40,21 @@ class Serializer : public SerializerInterface<T> {
 
 template <class T>
 size_t Serializer<T>::Serialize(T& data) {
-//    out_buf_ = std::shared_ptr<std::stringstream>();
+    //    out_buf_ = std::shared_ptr<std::stringstream>();
     out_buf_.reset(new std::stringstream());
     msgpack::pack(*out_buf_, data);
     return 0;
 }
 
 template <class T>
-T Serializer<T>::Deserialize(char* data, size_t size) {
-    // deserialize
-    /*
+T& Serializer<T>::Deserialize(char* data, size_t size) {
     msgpack::unpacked result;
     msgpack::unpack(result, data, size, 0);
     msgpack::object object1(result.get());
-    */
-//    T object;
-/*
+
     in_buf_.reset(new T());
-    object1.convert(*(in_buf_.get()));
-    */
-//    msgpack::object_handle oh = msgpack::unpack(data, size);
-//    msgpack::object deserialized = oh.get();
-//    std::cout << deserialized << std::endl;
-//
-//    in_buf_ = std::shared_ptr<T>(object);
-//    deserialized.convert(object);
-/*
+    object1.convert(*in_buf_);
     return *in_buf_;
-    */
-    //    deserialized.convert(*(in_buf_.get()));
-    //
-    //    std::stringstream ss;
-    //    ss << deserialized;
-    //    // TODO(Shampooh): rewrite it on templates and add docs for this function
-    //    std::cout << in_buf_.get()->payload.get()->value.get()->data() << std::endl;
-    //    std::cout << ss.str().c_str() << std::endl;
-    //    return 0;
 }
 
 template <class T>
@@ -85,6 +67,8 @@ std::shared_ptr<T> Serializer<T>::GetInConfig() {
     return in_buf_;
 }
 
-};  // namespace serializer
-};  // namespace common
-};  // namespace failless
+}  // namespace serializer
+}  // namespace common
+}  // namespace failless
+
+#endif  // FAILLESS_LLSS3P_SERIALIZATION_SERIALIZER_H_

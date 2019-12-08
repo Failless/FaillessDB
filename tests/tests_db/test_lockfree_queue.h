@@ -58,14 +58,14 @@ TEST(Queue, ThreadSafe) {
     common::utils::Queue<int> queue;
     IUseQueue user1(queue);
     IUseQueue user2(queue);
-//    std::thread init1(RunQueueWorker, &user1);
-//    std::thread init2(RunQueueOtherWorker, &user2);
-//    //    EXPECT_EQ(0, queue.Pop());
-//    //    while (!queue.IsEmpty()) {
-//    //        queue.Pop();
-//    //    }
-//    init1.join();
-//    init2.join();
+    std::thread init1(RunQueueWorker, &user1);
+    std::thread init2(RunQueueOtherWorker, &user2);
+    //    EXPECT_EQ(0, queue.Pop());
+    //    while (!queue.IsEmpty()) {
+    //        queue.Pop();
+    //    }
+    init1.join();
+    init2.join();
 }
 
 }  // namespace tests

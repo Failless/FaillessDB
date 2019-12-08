@@ -18,7 +18,7 @@ class Connection {
     Connection() = delete;
     explicit Connection(boost::asio::io_service& io_service);
     ~Connection() = default;
-    Connection(Connection&) = delete;
+//    Connection(Connection&) = delete;
     Connection(Connection&&) = delete;
 
     void Read(const boost::system::error_code& err, size_t bytes_transferred);

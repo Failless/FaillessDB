@@ -16,21 +16,21 @@ namespace failless {
 namespace db {
 namespace engine {
 
-
-void WorkInThread(common::utils::Queue<::std::shared_ptr<network::Connection> >* queue,
+void WorkInThread(common::utils::Queue<::std::shared_ptr<network::Connection>>* queue,
                   const utils::WorkerSettings& settings);
 
 struct VirtualFolder {
     bool exist = false;
     std::thread tread;
-    common::utils::Queue<::std::shared_ptr<network::Connection> > queue;
+    common::utils::Queue<::std::shared_ptr<network::Connection>> queue;
     VirtualFolder() = default;
 };
 
 class ServerManager : public IServerManager {
  public:
     ServerManager() = delete;
-    explicit ServerManager(common::utils::Queue<::std::shared_ptr<network::Connection> >& task_queue);
+    explicit ServerManager(
+        common::utils::Queue<::std::shared_ptr<network::Connection>>& task_queue);
     ~ServerManager() override = default;
 
     void SetTask(utils::Task task) override;
