@@ -13,6 +13,13 @@ namespace failless {
 namespace db {
 namespace folder {
 
+void send_answer(std::shared_ptr<network::Connection>& conn, int result) {
+    // Prepare return_packet
+     conn->GetPacket()->ret_value = result;
+     conn->GetPacket()->data.value = {};
+//     conn->SendData(*(conn->GetPacket()));
+}
+
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
                    const std::string& db_path)
           : input_queue_(queue),
@@ -41,19 +48,19 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             puts("GET worked");
             break;
         case common::enums::operators::SET:
-            Set(conn->GetPacket()->data);
+            send_answer(conn, Set(conn->GetPacket()->data));
             puts("SET worked");
             break;
         case common::enums::operators::UPDATE:
-            Update(conn->GetPacket()->data);
+            send_answer(conn, Update(conn->GetPacket()->data));
             puts("UPDATE worked");
             break;
         case common::enums::operators::DELETE:
-            Delete(conn->GetPacket()->data);
+            send_answer(conn, Delete(conn->GetPacket()->data));
             puts("DELETE worked");
             break;
         case common::enums::operators::CREATE:  // create new folder for the same user
-            Create(conn->GetPacket()->data);
+            send_answer(conn, Create(conn->GetPacket()->data));
             puts("CREATE worked");
             break;
         case common::enums::operators::KILL:    // finish work
@@ -72,8 +79,6 @@ bool TaskWorker::Set(common::utils::Data& data) {
             data.key,
             const_cast<uint8_t *>(data.value.data()),
             data.size);
-
-    // TODO(EgorBedov): Send answer to socket
 
     /// Update in-memory storage
     if (result) {

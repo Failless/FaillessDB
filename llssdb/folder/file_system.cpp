@@ -46,7 +46,6 @@ void FileSystem::CloseDB_() {
         /// Close db
         is_open_ = false;
         delete db_;
-        db_ = nullptr;
     }
 }
 
@@ -130,11 +129,10 @@ uint64_t FileSystem::AmountOfKeys() {
     }
 }
 
-void FileSystem::LoadInMemory(std::map<std::string, InMemoryData> &local_storage) {
-    // TODO(EgorBedov): map will insert at-runtime-known amount of nodes
-    //  but there's no way to allocate memory in advance (boost?)
+void FileSystem::LoadInMemory(std::unordered_map<std::string, InMemoryData> &local_storage) {
     if (is_open_) {
         auto it = db_->NewIterator(ReadOptions());
+        local_storage.reserve(AmountOfKeys());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             auto tmp_vector = std::vector<uint8_t>(it->value()[0], it->value()[it->value().size() - 1]);
             tmp_vector.shrink_to_fit();

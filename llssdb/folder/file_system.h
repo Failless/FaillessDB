@@ -25,7 +25,7 @@ public:
     void EraseAll(const std::string& db_path) override;
 
     uint64_t AmountOfKeys();
-    void LoadInMemory(std::map<std::string, InMemoryData>& local_storage) override;
+    void LoadInMemory(std::unordered_map<std::string, InMemoryData>& local_storage) override;
 
 private:
     bool OpenDB_(const std::string &db_path);

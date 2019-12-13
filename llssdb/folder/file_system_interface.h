@@ -15,7 +15,7 @@ public:
     virtual bool Remove(const std::string &key) = 0;
     virtual void EraseAll(const std::string& db_path) = 0;
 
-    virtual void LoadInMemory(std::map<std::string, failless::db::folder::InMemoryData>& local_storage) = 0;
+    virtual void LoadInMemory(std::unordered_map<std::string, failless::db::folder::InMemoryData>& local_storage) = 0;
 };
 
 #endif // FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_INTERFACE_H_

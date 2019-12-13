@@ -9,6 +9,11 @@
 #include "llssdb/folder/task_worker_interface.h"
 #include "llssdb/network/transfer/hookup.h"
 
+#include <boost/fusion/container/map.hpp>
+#include <boost/fusion/include/map.hpp>
+#include <boost/fusion/container/map/map_fwd.hpp>
+#include <boost/fusion/include/map_fwd.hpp>
+
 namespace failless {
 namespace db {
 namespace folder {
@@ -32,7 +37,7 @@ protected:
     void UnloadFromMemory();
 
     common::utils::Queue<std::shared_ptr<network::Connection>> &input_queue_;
-    std::map<std::string, InMemoryData> local_storage_;
+    std::unordered_map<std::string, InMemoryData> local_storage_;
     std::unique_ptr<FileSystemInterface> fs_;
     std::string path_{};
     bool alive_ = false;

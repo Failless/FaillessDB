@@ -2,14 +2,12 @@
 #define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_INTERFACE_H_
 
 #include <boost/noncopyable.hpp>
-#include <map>
-#include <memory>
-#include <queue>
 #include <string>
-#include "llss3p/utils/queue.h"
+
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
 #include "llssdb/utils/task.h"
+#include "llss3p/utils/queue.h"
 
 namespace failless {
 namespace db {
