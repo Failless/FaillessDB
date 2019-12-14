@@ -16,7 +16,10 @@ Connection::Connection(boost::asio::io_service& io_service) : socket_(io_service
 
 void Connection::Read(const boost::system::error_code& err, size_t bytes_transferred) {
     if (!err) {
-//        std::cout << buffer_ << std::endl;
+        for (int i = 0; i < bytes_transferred; ++i) {
+            std::cout << buffer_[i];
+        }
+        std::cout << std::endl;
         std::unique_ptr<srz::SerializerInterface<utl::Packet>> serializer(
             new srz::Serializer<utl::Packet>);
         try {
