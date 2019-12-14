@@ -140,14 +140,10 @@ size_t Client::SendToDb_() {
 size_t Client::SetDBKey_() {
     // Define file container and its size
     std::unique_ptr<std::vector<unsigned char>> value;
-    std::streampos len;
-
-    // Fill file container with binary bytes
-    std::cout<<query_tokens_[2]<<std::endl;
-    filesystem_->ReadFile(query_tokens_[2], value, len);
 
     // Init user Data struct
-    common::utils::Data data(1, len, *value);
+    value = std::make_unique<std::vector<unsigned char>>(query_tokens_[2].begin(), query_tokens_[2].end());
+    common::utils::Data data(1, value->size(), *value);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
