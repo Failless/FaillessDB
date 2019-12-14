@@ -53,8 +53,6 @@ struct ClientConfig {
     std::string db_host{};
     std::string db_port{};
 
-    size_t client_num = 0;
-
     ClientConfig() = default;
 
     ClientConfig(std::string user_n, std::string user_r, int payload_d, std::string payload_k,
@@ -64,19 +62,17 @@ struct ClientConfig {
           payload_dest_id(payload_d),
           payload_key(std::move(payload_k)),
           db_host(std::move(db_h)),
-          db_port(std::move(db_p)),
-          client_num(std::move(c_num)) {}
+          db_port(std::move(db_p)) {}
 };
 
 struct NetworkConfig {
     std::string db_host{};
     std::string db_port{};
-    size_t client_num = 0;
 
     NetworkConfig() = default;
 
-    NetworkConfig(std::string db_h, std::string db_p, size_t c_num)
-        : db_host(std::move(db_h)), db_port(std::move(db_p)), client_num(std::move(c_num)) {}
+    NetworkConfig(std::string db_h, std::string db_p)
+        : db_host(std::move(db_h)), db_port(std::move(db_p)) {}
 };
 
 struct NetworkConnectTask {

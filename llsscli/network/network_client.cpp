@@ -22,6 +22,7 @@ size_t NetworkClient::AddUserTask(std::shared_ptr<std::stringstream>& current_ta
     std::shared_ptr<boost::asio::io_service> io_svc = std::make_shared<boost::asio::io_service>();
     std::shared_ptr<tcp::socket> socket = std::make_shared<tcp::socket>(*io_svc);
 
+    std::cout << current_task->str() << std::endl;
     // Init network-like task
     std::shared_ptr<config::NetworkConnectTask> task =
         std::make_shared<config::NetworkConnectTask>(socket, io_svc, current_task, callback);
@@ -97,6 +98,8 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode,
         task->socket->async_connect(
             EndPoint, boost::bind(&NetworkClient::OnConnect_, this,
                                   boost::asio::placeholders::error, ++EndPointIter, task));
+    } else {
+        throw std::logic_error("Can not connect to server");
     }
 }
 
