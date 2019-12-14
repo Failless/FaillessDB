@@ -23,7 +23,7 @@ size_t FileSystem::ReadFile(std::string file_path,
     r_file.seekg(0, std::ios::end);
     len = r_file.tellg();
     payload = std::make_unique<std::vector<unsigned char>>();
-    payload->reserve(len);
+    payload->resize(len);
     r_file.seekg(0, std::ios::beg);
     //    r_file.read(reinterpret_cast<char *>(payload->data()), len); // for unique_ptr< uint8_t >
     payload->insert(payload->begin(), std::istream_iterator<unsigned char>(r_file),
