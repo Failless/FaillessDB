@@ -1,17 +1,17 @@
 #ifndef FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
 #define FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
 
+
 #include <boost/noncopyable.hpp>
 #include <rocksdb/db.h>
 #include <rocksdb/options.h>
 #include <string>
 
+#include "llss3p/enums/operators.h"
 #include "llssdb/folder/file_system_interface.h"
 #include "llssdb/folder/in_memory_data.h"
 
-namespace failless {
-namespace db {
-namespace folder {
+namespace failless::db::folder {
 
 class FileSystem : public FileSystemInterface {
 public:
@@ -19,14 +19,13 @@ public:
     explicit FileSystem(const std::string &db_path);
     ~FileSystem() override;
 
-    size_t Get(const std::string &key, uint8_t *value_out) override;
-    bool Set(const std::string &key, uint8_t *value_in, size_t size_in) override;
-    bool Remove(const std::string &key) override;
+    common::enums::response_type Get(const std::string &key, uint8_t *value_out, size_t& size_out) override;
+    common::enums::response_type Set(const std::string &key, uint8_t *value_in, size_t size_in) override;
+    common::enums::response_type Remove(const std::string &key) override;
+
     void EraseAll(const std::string& db_path) override;
-
-    uint64_t AmountOfKeys();
     void LoadInMemory(std::unordered_map<std::string, InMemoryData>& local_storage) override;
-
+    uint64_t AmountOfKeys();
 private:
     bool OpenDB_(const std::string &db_path);
     void CloseDB_();
@@ -35,8 +34,7 @@ private:
     bool is_open_ = false;
 };
 
-}  // namespace folder
-}  // namespace db
-}  // namespace failless
+}  // namespace failless::db::folder
+
 
 #endif  // FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H

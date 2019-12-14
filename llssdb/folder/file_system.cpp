@@ -5,11 +5,13 @@
 #include <rocksdb/options.h>
 #include <string>
 
+#include "llss3p/enums/operators.h"
 #include "llssdb/folder/file_system.h"
 
 namespace failless::db::folder {
 
 using namespace rocksdb;
+using common::enums::response_type;
 
 FileSystem::FileSystem(const std::string &db_path) {
     OpenDB_(db_path);
@@ -49,25 +51,27 @@ void FileSystem::CloseDB_() {
     }
 }
 
-size_t FileSystem::Get(const std::string &key, uint8_t *value_out) {
+response_type FileSystem::Get(const std::string &key, uint8_t *value_out, size_t& size_out) {
     if (is_open_) {
         PinnableSlice pinnable_value;
         auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
-        if (!status.ok()) {
-            return 0;
+        if ( status.IsNotFound() ) {
+            std::cerr << "Such key doesn't exist" << std::endl;
+            return response_type::NOT_FOUND;
         }
-        /// Copy to output arguments
 
-        size_t size = pinnable_value.size();
-        value_out = new uint8_t[size];
-        memcpy(value_out, pinnable_value.data(), size * sizeof(decltype(value_out)));
-        return size;
+        /// Copy to output arguments
+        size_out = pinnable_value.size();
+        value_out = new uint8_t[size_out];
+        memcpy(value_out, pinnable_value.data(), size_out * sizeof(decltype(value_out)));
+        return response_type::OK;
+    } else {
+        return response_type::SERVER_ERROR;
     }
-    return 0;
 }
 
-bool FileSystem::Set(const std::string &key, uint8_t *value_in, size_t size_in) {
+response_type FileSystem::Set(const std::string &key, uint8_t *value_in, size_t size_in) {
     if (is_open_) {
         std::string string_value{};
 
@@ -78,32 +82,34 @@ bool FileSystem::Set(const std::string &key, uint8_t *value_in, size_t size_in) 
         auto status = db_->Put(WriteOptions(), key, string_value);
         if (!status.ok()) {
             std::cerr << "Failed to put a value\n";
-            return false;
+            return response_type::SERVER_ERROR;
         }
-        return true;
+        return response_type::OK;
     } else {
-        return false;
+        return response_type::SERVER_ERROR;
     }
 }
 
-bool FileSystem::Remove(const std::string &key) {
+response_type FileSystem::Remove(const std::string &key) {
     if (is_open_) {
         /// Find key first
         auto value = new std::string;
-        Status s = db_->Get(ReadOptions(), key, value);
-        if (s.IsNotFound()) {
+        auto status = db_->Get(ReadOptions(), key, value);
+
+        if (status.IsNotFound()) {
             std::cerr << "Such key doesn't exist" << std::endl;
-            return false;
+            return response_type::NOT_FOUND;
         }
+
         /// Remove key
-        s = db_->Delete(WriteOptions(), key);
-        if (!s.ok()) {
+        status = db_->Delete(WriteOptions(), key);
+        if (!status.ok()) {
             std::cerr << "Failed to delete a value" << std::endl;
-            return false;
+            return response_type::SERVER_ERROR;
         }
-        return true;
+        return response_type::OK;
     } else {
-        return false;
+        return response_type::SERVER_ERROR;
     }
 }
 

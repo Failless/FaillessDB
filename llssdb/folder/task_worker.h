@@ -1,22 +1,17 @@
 #ifndef FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 #define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 
+
 #include <string>
 
-#include "llss3p/utils/queue.h"
+#include "llss3p/enums/operators.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/file_system_interface.h"
 #include "llssdb/folder/task_worker_interface.h"
 #include "llssdb/network/transfer/hookup.h"
+#include "llss3p/utils/queue.h"
 
-#include <boost/fusion/container/map.hpp>
-#include <boost/fusion/include/map.hpp>
-#include <boost/fusion/container/map/map_fwd.hpp>
-#include <boost/fusion/include/map_fwd.hpp>
-
-namespace failless {
-namespace db {
-namespace folder {
+namespace failless::db::folder {
 
 class TaskWorker : public ITaskWorker {
 public:
@@ -28,13 +23,17 @@ public:
     int DoTask(std::shared_ptr<network::Connection> conn) override;
 
 protected:
-    bool Set(common::utils::Data& data) override;
-    bool Read(common::utils::Data& data) override;
-    bool Update(common::utils::Data& data) override;
-    bool Delete(common::utils::Data& data) override;
-    bool Create(common::utils::Data& data) override;
+    common::enums::response_type Set(common::utils::Data& data) override;
+    common::enums::response_type Read(common::utils::Data& data) override;
+    common::enums::response_type Update(common::utils::Data& data) override;
+    common::enums::response_type Delete(common::utils::Data& data) override;
+    common::enums::response_type Create(common::utils::Data& data) override;
     void LoadInMemory();
     void UnloadFromMemory();
+
+    virtual void SendAnswer(std::shared_ptr<network::Connection>& conn,
+                    common::enums::response_type result,
+                    bool read);
 
     common::utils::Queue<std::shared_ptr<network::Connection>> &input_queue_;
     std::unordered_map<std::string, InMemoryData> local_storage_;
@@ -43,8 +42,6 @@ protected:
     bool alive_ = false;
 };
 
-}  // namespace folder
-}  // namespace db
-}  // namespace failless
+}  // namespace failless::db::folder
 
 #endif  // FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_

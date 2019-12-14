@@ -13,6 +13,7 @@ struct Data {
     std::vector<uint8_t> value{};
     short folder_id = 0;
     std::string key{};
+
     Data(short _folder_id, size_t _size, std::vector<uint8_t>& _value)
         : size(_size), value(_value), folder_id(_folder_id), key(""){};
     Data(short _folder_id, size_t _size)
