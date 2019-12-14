@@ -2,16 +2,11 @@
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 #include "llssdb/auth/authorization.h"
+#include "llss3p/utils/hasher.h"
 
 namespace failless {
 namespace db {
 namespace auth {
-
-bool SimpleSHA256(const std::string &input, unsigned char *md) {
-    if (input.empty()) return false;
-    SHA256(reinterpret_cast<const uint8_t *>(input.data()), input.size(), md);
-    return true;
-}
 
 /**
  * private function for hashing with sha256 and salt
@@ -30,7 +25,7 @@ void Authorization::Hasher_(const std::string &login, std::string pass,
     // но дажеint если солить таким способом, как у нас - нельзя получить доступ к аккаунтам с
     // одинаковыми паролями, взломав лишь один, т.к. итоговые хэши все равно различны
 
-    if (!SimpleSHA256(pass, md)) {
+    if (!failless::common::utils::SimpleSHA256(pass, md)) {
         throw std::logic_error("sha256 failed");
     }
 }

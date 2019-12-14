@@ -12,6 +12,6 @@ file(GLOB SOURCES ${SRC_DIR}/enums/*.cpp
 file(GLOB HEADERS ${SRC_DIR}/enums/*.h
                   ${SRC_DIR}/utils/*.h)
 
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS} utils/hasher.cpp utils/hasher.h)
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINKER_LANGUAGE CXX)

@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "llss3p/utils/hasher.h"
 #include "llssdb/auth/authorization.h"
 
 using ::testing::_;
@@ -87,15 +88,15 @@ TEST_F(RegisterImpl, RemoveUser) {
 TEST(Registration, HashFunc) {
     std::string pass = "qwerty12345";
     unsigned char array[SHA256_DIGEST_LENGTH]{};
-    EXPECT_TRUE(auth::SimpleSHA256(pass, array));
+    EXPECT_TRUE(failless::common::utils::SimpleSHA256(pass, array));
 
     std::string pass2 = "qwerty12345";
     unsigned char array2[SHA256_DIGEST_LENGTH]{};
-    EXPECT_TRUE(auth::SimpleSHA256(pass, array2));
+    EXPECT_TRUE(failless::common::utils::SimpleSHA256(pass, array2));
 
     std::string pass3 = "qwerty1234567";
     unsigned char array3[SHA256_DIGEST_LENGTH]{};
-    EXPECT_TRUE(auth::SimpleSHA256(pass3, array3));
+    EXPECT_TRUE(failless::common::utils::SimpleSHA256(pass3, array3));
     for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
         EXPECT_EQ(array[i], array2[i]);
     }
