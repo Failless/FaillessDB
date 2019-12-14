@@ -15,6 +15,7 @@ namespace failless::db::tests {
 using ::testing::_;
 using ::testing::AtLeast;
 using folder::FileSystem;
+using common::enums::response_type;
 
 common::utils::Data create_test_data() {
     size_t size = 3;
@@ -31,15 +32,14 @@ TEST(FileSystem, Set) {
 
     /// Empty arguments for Get()
     uint8_t* value_out = nullptr;
+    size_t size_out = 0;
 
     fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()),test_data.size);
-    EXPECT_EQ(test_data.size, fs.Get(test_data.key, value_out));
-//    for ( size_t iii = 0; iii < size || iii < size_out; ++iii ) {
-//        EXPECT_EQ(value.get()[iii], value_out.get()[iii]);
-//    } // TODO(EgorBedov): values are the same but they're written differently (1 != x/1)
+    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
+    EXPECT_EQ( size_out, test_data.size);
 
     fs.EraseAll(kTestDbPath);
-    EXPECT_EQ(fs.Get(test_data.key, value_out), 0);
+    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
 }
 
 TEST(FileSystem, Get) {
@@ -50,19 +50,21 @@ TEST(FileSystem, Get) {
 
     /// Empty arguments for Get()
     uint8_t* value_out = nullptr;
+    size_t size_out = 0;
 
     /// Get() from empty db
     fs.EraseAll(kTestDbPath);
-    EXPECT_EQ(fs.Get(test_data.key, value_out), 0);
+    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
 
     fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
 
     /// Get() wrong key
     std::string wrong_key = "wrong_key";
-    EXPECT_EQ(fs.Get(wrong_key, value_out), 0);
+    EXPECT_EQ(fs.Get(wrong_key, value_out, size_out), response_type::NOT_FOUND);
 
     /// Actual Get()
-    EXPECT_EQ(test_data.size, fs.Get(test_data.key, value_out));
+    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
+    EXPECT_EQ( size_out, test_data.size);
 
     fs.EraseAll(kTestDbPath);
 }
@@ -75,20 +77,21 @@ TEST(FileSystem, Remove) {
 
     /// Empty arguments for Get()
     uint8_t* value_out = nullptr;
+    size_t size_out = 0;
 
     /// Remove() from empty db
     fs.EraseAll(kTestDbPath);
-    EXPECT_FALSE(fs.Remove(test_data.key));
+    EXPECT_EQ(fs.Remove(test_data.key), response_type::NOT_FOUND);
 
     fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()),test_data.size);
 
     /// Remove() wrong key
     std::string wrong_key = "wrong_key";
-    EXPECT_FALSE(fs.Remove(wrong_key));
+    EXPECT_EQ(fs.Remove(wrong_key), response_type::NOT_FOUND);
 
     /// Actual Remove()
-    EXPECT_TRUE(fs.Remove(test_data.key));
-    EXPECT_EQ(fs.Get(test_data.key, value_out), 0);
+    EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
+    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
 
     fs.EraseAll(kTestDbPath);
 }
@@ -99,14 +102,18 @@ TEST(FileSystem, Complex_Test) {
     /// Test value
     auto test_data = create_test_data();
 
+    /// Empty arguments for Get()
+    uint8_t* value_out = nullptr;
+    size_t size_out = 0;
+
     // it's important to keep them together
     // so the db won't be filled with same pairs
-    EXPECT_EQ(fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size), true);
-    EXPECT_EQ(fs.Get(test_data.key, nullptr), test_data.size);
-    EXPECT_EQ(fs.Remove(test_data.key), true);
+    EXPECT_EQ(fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size), response_type::OK);
+    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
+    EXPECT_EQ( size_out, test_data.size);
+    EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
     fs.EraseAll(kTestDbPath);
 }
-
 
 }
 

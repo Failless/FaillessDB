@@ -27,7 +27,7 @@ std::shared_ptr<network::TestConnection> create_test_connection(common::enums::o
 
 TEST(TaskManager, Get_and_Set) {
     common::utils::Queue<std::shared_ptr<network::Connection>> q;
-    folder::TaskWorker tw(q, kTestDbPath);
+    TestTaskWorker tw(q, kTestDbPath);
 
     auto conn = create_test_connection(common::enums::operators::SET);
 
