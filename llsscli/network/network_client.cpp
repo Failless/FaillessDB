@@ -105,6 +105,8 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode,
         //                                            boost::asio::placeholders::error, socket));
     } else {
         std::cout << "ERROR! OnReceive..." << std::endl;
+        std::cerr << ErrorCode.message() << std::endl;
+        std::cerr << ErrorCode.value() << std::endl;
         DoClose_(socket);
     }
 }
@@ -116,7 +118,7 @@ void NetworkClient::OnSend_(const boost::system::error_code& error_code,
     if (!error_code) {
         std::cout << "\"" << *str_task << "\" has been sent" << std::endl;
 
-        socket->async_receive(boost::asio::buffer(content_buffer_vector_),
+        socket->async_read_some(boost::asio::buffer(content_buffer_vector_, 1024),
                               boost::bind(&NetworkClient::OnReceive_, this,
                                           boost::asio::placeholders::error, socket));
     } else {

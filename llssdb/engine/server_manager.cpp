@@ -31,13 +31,14 @@ void ServerManager::Run() {
         }
         utils::ServerTask task{};
         connection->GetMetaData(task);
-        if (task.command == common::enums::operators::REG) {
+        if (task.command == common::enums::operators::SET) {
             common::utils::Packet packet;
-            if (users_->Registration(*task.login, *task.password, 0)) {
-                packet.ret_value = common::enums::response_type::OK;
-            } else {
-                packet.ret_value = common::enums::response_type::SERVER_ERROR;
-            }
+            packet.ret_value = common::enums::response_type::OK;
+            //            if (users_->Registration(*task.login, *task.password, 0)) {
+            //                packet.ret_value = common::enums::response_type::OK;
+            //            } else {
+            //                packet.ret_value = common::enums::response_type::SERVER_ERROR;
+            //            }
             connection->SendData(packet);
             continue;
         }
