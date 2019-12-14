@@ -49,7 +49,7 @@ size_t Serializer<T>::Serialize(T& data) {
 template <class T>
 T& Serializer<T>::Deserialize(char* data, size_t size) {
     msgpack::unpacked result;
-    msgpack::unpack(result, data, size, 0);
+    msgpack::unpack(result, data, size);
     msgpack::object object1(result.get());
 
     in_buf_.reset(new T());
