@@ -3,8 +3,8 @@
 #include <iostream>
 #include <memory>
 
-#include "llssdb/folder/task_worker.h"
 #include "llssdb/folder/in_memory_data.h"
+#include "llssdb/folder/task_worker.h"
 #include "llssdb/utils/task.h"
 
 #define MAX_BUFFER 20000
@@ -15,25 +15,24 @@ namespace folder {
 
 void send_answer(std::shared_ptr<network::Connection>& conn, int result) {
     // Prepare return_packet
-     conn->GetPacket()->ret_value = result;
-     conn->GetPacket()->data.value = {};
-//     conn->SendData(*(conn->GetPacket()));
+    conn->GetPacket()->ret_value = result;
+    conn->GetPacket()->data.value = {};
+    conn->SendData(*(conn->GetPacket()));
 }
 
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                   const std::string& db_path)
-          : input_queue_(queue),
-            fs_(std::make_unique<FileSystem>(db_path)),
-            path_(db_path),
-            alive_(true)
-            {
-                LoadInMemory();
-            }
+                       const std::string& db_path)
+    : input_queue_(queue),
+      fs_(std::make_unique<FileSystem>(db_path)),
+      path_(db_path),
+      alive_(true) {
+    LoadInMemory();
+}
 
 void TaskWorker::Work() {
     /// Check input_queue_ for emptiness
-    while ( alive_ ) {
-        if ( !input_queue_.IsEmpty() ) {
+    while (alive_) {
+        if (!input_queue_.IsEmpty()) {
             DoTask(input_queue_.Pop());
         } else {
             sleep(1);
@@ -63,7 +62,7 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             send_answer(conn, Create(conn->GetPacket()->data));
             puts("CREATE worked");
             break;
-        case common::enums::operators::KILL:    // finish work
+        case common::enums::operators::KILL:  // finish work
             puts("KILL worked");
             alive_ = false;
             break;
@@ -75,17 +74,13 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
 
 bool TaskWorker::Set(common::utils::Data& data) {
     /// Create key-value pair(s) on hdd
-    bool result = fs_->Set(
-            data.key,
-            const_cast<uint8_t *>(data.value.data()),
-            data.size);
+    bool result = fs_->Set(data.key, const_cast<uint8_t*>(data.value.data()), data.size);
 
     /// Update in-memory storage
     if (result) {
         // TODO(EgorBedov): check RAM condition before loading in-memory
         local_storage_.emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
-        std::cout << "{" << data.key << ": "
-                  << local_storage_.at(data.key).size
+        std::cout << "{" << data.key << ": " << local_storage_.at(data.key).size
                   << "(size)} was set both in HDD and in memory\n"
                   << std::endl;
     }
@@ -100,7 +95,7 @@ bool TaskWorker::Read(common::utils::Data& data) {
 
     std::cout << "Found it ";
     /// Grab file from memory if it's in there
-    if ( !local_storage_.empty() && (local_storage_.at(data.key).in_memory) ) {
+    if (!local_storage_.empty() && (local_storage_.at(data.key).in_memory)) {
         data_out.size = local_storage_.at(data.key).size;
         data_out.value = local_storage_.at(data.key).value;
         size = true;
@@ -146,28 +141,26 @@ bool TaskWorker::Delete(common::utils::Data& data) {
     return result;
 }
 
-void TaskWorker::LoadInMemory() {
-    fs_->LoadInMemory(local_storage_);
-}
+void TaskWorker::LoadInMemory() { fs_->LoadInMemory(local_storage_); }
 
 void TaskWorker::UnloadFromMemory() {
     /// Clear vector and free space it occupied
-    for (auto &it : local_storage_) {
+    for (auto& it : local_storage_) {
         it.second.value.clear();
         it.second.value.shrink_to_fit();
         it.second.in_memory = false;
     }
 }
 
-bool TaskWorker::Create(common::utils::Data &data) {
+bool TaskWorker::Create(common::utils::Data& data) {
     /// Replacing old folder_id in path
     std::string new_path = path_;
-    while ( new_path.back() != '/' ) {
+    while (new_path.back() != '/') {
         new_path.pop_back();
     }
     new_path += std::to_string(data.folder_id);
 
-    if ( boost::filesystem::exists(new_path) ) {
+    if (boost::filesystem::exists(new_path)) {
         // TODO(EgorBedov): write to socket that folder exists.
         //   is it my area of responsibility tho?
         return false;
