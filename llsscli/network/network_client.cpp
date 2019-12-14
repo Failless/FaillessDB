@@ -74,15 +74,6 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode,
     if (ErrorCode.value() == boost::system::errc::success) {
         std::shared_ptr<std::string> str_task =
             std::shared_ptr<std::string>(new std::string(task->client_task->str()));
-        std::shared_ptr<std::string> str_task_len = std::shared_ptr<std::string>(
-            new std::string(std::to_string(task->client_task->str().length())));
-
-        std::cout << "Entered: " << *str_task_len << std::endl;
-
-        task->socket->async_write_some(
-            boost::asio::buffer(*str_task_len, str_task_len->length()),
-            boost::bind(&NetworkClient::OnSend_, this, boost::asio::placeholders::error,
-                        task->socket, str_task_len));
 
         std::cout << "Entered: " << task->client_task->str() << std::endl;
 
