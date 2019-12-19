@@ -5,27 +5,30 @@
 #include <gmock/gmock.h>
 #include <string>
 
-std::string kTestDbPath;
+std::string kTestDbPath{};
 
 namespace failless::db::tests {
 using ::testing::_;
+using namespace boost::filesystem;
 
 void set_test_db_path() {
-    if ( boost::filesystem::exists("llssdb/CMakeFiles/llssdb.dir") ) {
-        if ( !boost::filesystem::exists("llssdb/CMakeFiles/llssdb.dir/storage") ) {
-            boost::filesystem::detail::create_directories("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
-        } else {
-            if ( boost::filesystem::exists("llssdb/CMakeFiles/llssdb.dir/storage/test_user") ) {
-                boost::filesystem::detail::remove_all("llssdb/CMakeFiles/llssdb.dir/storage/test_user/");
+    /// DEBUG
+    if ( exists("llssdb/CMakeFiles/llssdb.dir") ) {
+        if ( exists("llssdb/CMakeFiles/llssdb.dir/storage") ) {
+            if ( exists("llssdb/CMakeFiles/llssdb.dir/storage/test_user") ) {
+                detail::remove_all("llssdb/CMakeFiles/llssdb.dir/storage/test_user/");
             }
-            boost::filesystem::detail::create_directory("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
+            detail::create_directory("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
+        } else {
+            detail::create_directories("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
         }
         kTestDbPath = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
-    } else if ( boost::filesystem::exists("./llssdb/storage/") ) {
-        if ( boost::filesystem::exists("./llssdb/storage/test_user") ) {
-            boost::filesystem::detail::remove_all("./llssdb/storage/test_user/");
+    }
+    /// DEPLOY
+    else if ( exists("./llssdb/storage/") ) {
+        if ( exists("./llssdb/storage/test_user") ) {
+            detail::remove_all("./llssdb/storage/test_user/");
         }
-        boost::filesystem::detail::create_directory("./llssdb/storage/test_user");
         kTestDbPath = "./llssdb/storage/test_user";
     }
 }
@@ -64,7 +67,7 @@ public:
 
 class MockFileSystem : public folder::FileSystem {
 public:
-    explicit MockFileSystem(const std::string &db_path) : folder::FileSystem(db_path) {};
+    explicit MockFileSystem(const std::string &folder_path) : folder::FileSystem(folder_path) {};
 
     MOCK_METHOD3(Get, common::enums::response_type(
             const std::string &key,

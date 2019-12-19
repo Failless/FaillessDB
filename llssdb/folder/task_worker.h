@@ -2,7 +2,10 @@
 #define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 
 
+#include <climits>
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 #include "llss3p/enums/operators.h"
 #include "llssdb/folder/file_system.h"
@@ -16,7 +19,7 @@ namespace failless::db::folder {
 class TaskWorker : public ITaskWorker {
 public:
     TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>> &queue,
-               const std::string &db_path);
+               const std::string &folder_path);
     ~TaskWorker() override = default;
 
     void Work() override;
@@ -27,7 +30,9 @@ protected:
     common::enums::response_type Read(common::utils::Data& data) override;
     common::enums::response_type Update(common::utils::Data& data) override;
     common::enums::response_type Delete(common::utils::Data& data) override;
-    common::enums::response_type Create(common::utils::Data& data) override;
+    common::enums::response_type Create() override;
+
+
     void LoadInMemory();
     void UnloadFromMemory();
 
@@ -38,7 +43,8 @@ protected:
     common::utils::Queue<std::shared_ptr<network::Connection>> &input_queue_;
     std::unordered_map<std::string, InMemoryData> local_storage_;
     std::unique_ptr<FileSystemInterface> fs_;
-    std::string path_{};
+    std::string user_path_{};
+    std::vector<size_t> dbs_{};
     bool alive_ = false;
 };
 

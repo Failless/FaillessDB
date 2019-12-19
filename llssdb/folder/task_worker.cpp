@@ -23,13 +23,31 @@ void TaskWorker::SendAnswer(std::shared_ptr<network::Connection>& conn, response
 }
 
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                       const std::string& db_path)
+                       const std::string& user_path)
           : input_queue_(queue),
-            fs_(std::make_unique<FileSystem>(db_path)),
-            path_(db_path),
+            user_path_(user_path),
             alive_(true)
             {
-                LoadInMemory();
+                /// Find amount of users' databases TODO(EgorBedov): improve it later
+                for ( size_t folder_id = 0; folder_id < SIZE_T_MAX; ++folder_id ) {
+                    if ( boost::filesystem::exists(user_path + "/" + std::to_string(folder_id)) ) {
+                        std::cout << folder_id << " ";
+                        dbs_.push_back(folder_id);
+                    } else {
+                        break;
+                    }
+                }
+                if ( dbs_.empty() ) {
+                    std::cout << "Welcome, new user!\nWe are creating your first database" << std::endl;
+                    Create();
+                } else {
+                    std::cout << "Welcome back!\nYou have next databases: ";
+                    std::copy(
+                            dbs_.begin(),
+                            dbs_.end(),
+                            std::ostream_iterator<size_t>(std::cout, " " ));
+                    std::cout << "\nType OPEN <id> to open db" << std::endl;
+                }
             }
 
 void TaskWorker::Work() {
@@ -62,7 +80,7 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             puts("DELETE worked");
             break;
         case common::enums::operators::CREATE:  // create new folder for the same user
-            SendAnswer(conn, Create(conn->GetPacket()->data), false);
+            SendAnswer(conn, Create(), false);
             puts("CREATE worked");
             break;
         case common::enums::operators::KILL:    // finish work
@@ -155,26 +173,21 @@ void TaskWorker::UnloadFromMemory() {
     }
 }
 
-response_type TaskWorker::Create(common::utils::Data &data) {
-    /// Replacing old folder_id in path
-    std::string new_path = path_;
-    while ( new_path.back() != '/' ) {
-        new_path.pop_back();
+response_type TaskWorker::Create() {
+    size_t new_id = 0;
+    if ( !dbs_.empty() ) {
+        new_id = dbs_.back() + 1;
     }
-    new_path += std::to_string(data.folder_id);
+    dbs_.push_back(new_id);
+    std::string new_folder_path = user_path_ + "/" + std::to_string(new_id);
 
-    if ( boost::filesystem::exists(new_path) ) {
-        // TODO(EgorBedov): write to socket that folder exists.
-        //   is it my area of responsibility tho?
-        return response_type::EXIST;
-    }
+    boost::filesystem::create_directory(new_folder_path);
+    boost::filesystem::create_directory(new_folder_path + "/db");
+    boost::filesystem::create_directory(new_folder_path + "/backup");
 
-    /// Creating new folder
-    path_ = new_path;
+    /// Switch FileSystem
     fs_.reset();
-    fs_ = std::make_unique<FileSystem>(path_);
-    // could've just called CloseDB() and OpenDB(new_path) but they're private and not in interface
-    // also constructor is pretty light-weight
+    fs_ = std::make_unique<FileSystem>(new_folder_path);
 
     return response_type::OK;
 }

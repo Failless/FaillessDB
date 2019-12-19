@@ -18,7 +18,7 @@ public:
     virtual common::enums::response_type Set(const std::string &key, uint8_t *value_in, size_t size_in) = 0;
     virtual common::enums::response_type Remove(const std::string &key) = 0;
 
-    virtual void EraseAll(const std::string &db_path) = 0;
+    virtual void EraseAll() = 0;
     virtual void LoadInMemory(std::unordered_map<std::string, failless::db::folder::InMemoryData> &local_storage) = 0;
 };
 

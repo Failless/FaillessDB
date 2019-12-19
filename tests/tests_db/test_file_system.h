@@ -17,7 +17,9 @@ using ::testing::AtLeast;
 using folder::FileSystem;
 using common::enums::response_type;
 
-common::utils::Data create_test_data() {
+common::utils::Data prepare_test() {
+    boost::filesystem::create_directory(kTestDbPath + "/0");
+
     size_t size = 3;
     std::vector<uint8_t> value = {1, 2, 3};
     std::string key = "test_key";
@@ -25,10 +27,10 @@ common::utils::Data create_test_data() {
 }
 
 TEST(FileSystem, Set) {
-    FileSystem fs(kTestDbPath);
+    /// Test values
+    auto test_data = prepare_test();
 
-    /// Test value
-    auto test_data = create_test_data();
+    FileSystem fs(kTestDbPath + "/0");
 
     /// Empty arguments for Get()
     uint8_t* value_out = nullptr;
@@ -38,22 +40,23 @@ TEST(FileSystem, Set) {
     EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
     EXPECT_EQ( size_out, test_data.size);
 
-    fs.EraseAll(kTestDbPath);
+    fs.EraseAll();
     EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
+    boost::filesystem::remove_all(kTestDbPath + "/0");
 }
 
 TEST(FileSystem, Get) {
-    FileSystem fs(kTestDbPath);
+    /// Test values
+    auto test_data = prepare_test();
 
-    /// Test value
-    auto test_data = create_test_data();
+    FileSystem fs(kTestDbPath + "/0");
 
     /// Empty arguments for Get()
     uint8_t* value_out = nullptr;
     size_t size_out = 0;
 
     /// Get() from empty db
-    fs.EraseAll(kTestDbPath);
+    fs.EraseAll();
     EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
 
     fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
@@ -66,21 +69,21 @@ TEST(FileSystem, Get) {
     EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
     EXPECT_EQ( size_out, test_data.size);
 
-    fs.EraseAll(kTestDbPath);
+    fs.EraseAll();
+    boost::filesystem::remove_all(kTestDbPath + "/0");
 }
 
 TEST(FileSystem, Remove) {
-    FileSystem fs(kTestDbPath);
-
-    /// Test value
-    auto test_data = create_test_data();
+    /// Test values
+    auto test_data = prepare_test();
+    FileSystem fs(kTestDbPath + "/0");
 
     /// Empty arguments for Get()
     uint8_t* value_out = nullptr;
     size_t size_out = 0;
 
     /// Remove() from empty db
-    fs.EraseAll(kTestDbPath);
+    fs.EraseAll();
     EXPECT_EQ(fs.Remove(test_data.key), response_type::NOT_FOUND);
 
     fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()),test_data.size);
@@ -93,14 +96,15 @@ TEST(FileSystem, Remove) {
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
     EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
 
-    fs.EraseAll(kTestDbPath);
+    fs.EraseAll();
+    boost::filesystem::remove_all(kTestDbPath + "/0");
 }
 
 TEST(FileSystem, Complex_Test) {
-    FileSystem fs(kTestDbPath);
+    /// Test values
+    auto test_data = prepare_test();
 
-    /// Test value
-    auto test_data = create_test_data();
+    FileSystem fs(kTestDbPath + "/0");
 
     /// Empty arguments for Get()
     uint8_t* value_out = nullptr;
@@ -112,7 +116,8 @@ TEST(FileSystem, Complex_Test) {
     EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
     EXPECT_EQ( size_out, test_data.size);
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
-    fs.EraseAll(kTestDbPath);
+    fs.EraseAll();
+    boost::filesystem::remove_all(kTestDbPath + "/0");
 }
 
 }

@@ -2,9 +2,12 @@
 #define FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
 
 
+#include <boost/filesystem.hpp>
 #include <boost/noncopyable.hpp>
-#include <rocksdb/db.h>
-#include <rocksdb/options.h>
+#include "rocksdb/db.h"
+#include "rocksdb/options.h"
+#include "rocksdb/iterator.h"
+#include "rocksdb/utilities/backupable_db.h"
 #include <string>
 
 #include "llss3p/enums/operators.h"
@@ -16,21 +19,28 @@ namespace failless::db::folder {
 class FileSystem : public FileSystemInterface {
 public:
     FileSystem() = default;
-    explicit FileSystem(const std::string &db_path);
+    explicit FileSystem(const std::string &folder_path);
     ~FileSystem() override;
 
     common::enums::response_type Get(const std::string &key, uint8_t *value_out, size_t& size_out) override;
     common::enums::response_type Set(const std::string &key, uint8_t *value_in, size_t size_in) override;
     common::enums::response_type Remove(const std::string &key) override;
 
-    void EraseAll(const std::string& db_path) override;
+    void EraseAll() override;
     void LoadInMemory(std::unordered_map<std::string, InMemoryData>& local_storage) override;
     uint64_t AmountOfKeys();
+    bool RestoreFromBackup();
 private:
-    bool OpenDB_(const std::string &db_path);
+    bool OpenDB_();
     void CloseDB_();
+    void BackUp_();
 
     rocksdb::DB *db_ = nullptr;
+    rocksdb::BackupEngine *backup_engine_ = nullptr;
+
+    std::string folder_path_;
+    std::string db_path_;
+    std::string backup_path_;
     bool is_open_ = false;
 };
 

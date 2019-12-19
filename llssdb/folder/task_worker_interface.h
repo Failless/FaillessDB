@@ -24,7 +24,7 @@ protected:
     virtual common::enums::response_type Read(common::utils::Data& data) = 0;
     virtual common::enums::response_type Update(common::utils::Data& data) = 0;
     virtual common::enums::response_type Delete(common::utils::Data& data) = 0;
-    virtual common::enums::response_type Create(common::utils::Data& data) = 0;
+    virtual common::enums::response_type Create() = 0;
 };
 
 }  // namespace failless
