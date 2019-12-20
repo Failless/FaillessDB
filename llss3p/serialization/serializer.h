@@ -16,6 +16,7 @@ class Serializer : public SerializerInterface<T> {
 
     size_t Serialize(T& data) override;
     T& Deserialize(char* data, size_t size) override;
+    size_t DeserializeVector(std::shared_ptr<std::vector<unsigned char>>& content_vector) override;
 
     std::shared_ptr<std::stringstream> GetOutStringStream() override;
     std::shared_ptr<T> GetInConfig() override;
@@ -48,12 +49,15 @@ size_t Serializer<T>::Serialize(T& data) {
 
 template <class T>
 T& Serializer<T>::Deserialize(char* data, size_t size) {
-    msgpack::unpacked result;
-    msgpack::unpack(result, data, size, 0);
-    msgpack::object object1(result.get());
+    std::cout << "Deserialize=" << data << std::endl;
+//    msgpack::unpacked result;
+//    msgpack::unpack(result, data, size, 0);
+//    msgpack::object object1(result.get());
+    msgpack::object_handle oh = msgpack::unpack(data, size);
+    msgpack::object deserialized = oh.get();
 
     in_buf_.reset(new T());
-    object1.convert(*in_buf_);
+    deserialized.convert(*in_buf_);
     return *in_buf_;
 }
 
