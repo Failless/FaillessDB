@@ -79,6 +79,12 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
         case common::enums::operators::CREATE:  // create new folder for the same user
             SendAnswer_(conn, Create_(), false);
             break;
+        case common::enums::operators::CONNECT: {
+            common::utils::Packet packet;
+            packet.ret_value = common::enums::response_type::OK;
+            conn->SendData(packet);
+            break;
+        }
         case common::enums::operators::KILL:
             BOOST_LOG_TRIVIAL(info) << "TaskWorker finished working";
             alive_ = false;
