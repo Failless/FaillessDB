@@ -159,9 +159,7 @@ size_t Client::SetDBKey_() {
 size_t Client::GetDBKey_() {
     // Init user Data struct
     // ДЛЯ СЛУЧАЕ ЭХО ОТВЕТА В КОЛБЕК ПУСТОЙ VALUE РУИНИТ MSGPACK ПРИ ДЕСЕРИАЛИЗАЦИИ
-    std::vector<unsigned char> value = std::vector<unsigned char>(query_tokens_[1].begin(),
-                                                                  query_tokens_[1].end());
-    common::utils::Data data(1, value.size(), value);
+    common::utils::Data data(1, 228);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
