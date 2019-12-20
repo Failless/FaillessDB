@@ -196,9 +196,9 @@ size_t Client::Connect_() {
         common::utils::Data data;
 
         // Init user Task struct
+        current_task_.reset(new common::utils::Packet());
         current_task_->login = query_tokens_[1];
         current_task_->pass = input;
-        current_task_.reset(new common::utils::Packet());
         current_task_->data = data;
         current_task_->command = common::enums::operators::CONNECT;
         current_task_->ret_value = common::enums::response_type::NOT_SET;
@@ -239,9 +239,9 @@ size_t Client::Register_() {
         common::utils::Data data;
 
         // Init user Task struct
+        current_task_.reset(new common::utils::Packet());
         current_task_->login = query_tokens_[1];
         current_task_->pass = input;
-        current_task_.reset(new common::utils::Packet());
         current_task_->data = data;
         current_task_->command = common::enums::operators::REG;
         current_task_->ret_value = common::enums::response_type::NOT_SET;
@@ -257,9 +257,11 @@ size_t Client::Register_() {
 }
 
 size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
+    std::cout << "[CALLBACK] Raw data response = " << std::endl;
     serializer_->Deserialize(reinterpret_cast<char*>(response_data), bytes_transferred);
     response_task_ = serializer_->GetInConfig();
-    std::cout << "[CALLBACK] "
+    std::cout << "[CALLBACK] Key = " << std::endl;
+    std::cout << "[CALLBACK] Status: "
               << status_map_
                      .find(
                          static_cast<const common::enums::response_type>(response_task_->ret_value))
