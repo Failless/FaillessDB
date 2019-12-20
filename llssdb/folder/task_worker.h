@@ -22,7 +22,7 @@ namespace folder {
 class TaskWorker : public ITaskWorker {
  public:
     TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-               const std::string& folder_path);
+               std::string storage_path);
     ~TaskWorker() override = default;
 
     void Work() override;
@@ -34,6 +34,7 @@ class TaskWorker : public ITaskWorker {
     common::enums::response_type Update_(common::utils::Data& data) override;
     common::enums::response_type Delete_(common::utils::Data& data) override;
     common::enums::response_type Create_() override;
+    common::enums::response_type Connect_(common::utils::Data& data) override;
 
     void LoadInMemory_();
     void UnloadFromMemory_();

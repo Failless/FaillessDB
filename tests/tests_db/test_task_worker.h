@@ -26,6 +26,7 @@ std::shared_ptr<network::TestConnection> create_test_connection(common::enums::o
     packet.data = {0, size, value, &key};
     return std::make_shared<network::TestConnection>(ios, packet);
 }
+/*
 
 TEST(TaskManager, Get_and_Set) {
     common::utils::Queue<std::shared_ptr<network::Connection>> q;
@@ -85,6 +86,7 @@ TEST(TaskManager, Calling_Self_Delete) {
     EXPECT_CALL(mockTaskWorker, Delete_(conn->GetPacket()->data)).Times(1);
     EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
+*/
 
 // fails to create thread
 /*TEST(TaskManager, WorkingInThread) {

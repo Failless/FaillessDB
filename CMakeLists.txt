@@ -6,8 +6,14 @@ set(CMAKE_CXX_STANDARD 17)
 find_package(Boost ${BOOST_VERSION} COMPONENTS serialization log log_setup filesystem chrono thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include ")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include -lboost_log-mt -lboost_thread-mt -lboost_system-mt")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include -lboost_log-mt -lboost_thread-mt -lboost_system-mt")
+else()
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
+endif()
+
 #remove -lrocksdb, -lsnappy and -lrt
 #add -lboost_log-mt -lboost_thread-mt -lboost_system-mt if you want
 #added -lssl -lcrypto for good work of OpenSSL hashing

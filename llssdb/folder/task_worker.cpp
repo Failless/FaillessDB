@@ -29,27 +29,30 @@ void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn,
 }
 
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                       const std::string& user_path)
-    : input_queue_(queue), user_path_(user_path), alive_(true) {
+                       std::string storage_path)
+    : input_queue_(queue), alive_(true) {
+    if ( storage_path.empty() ) {
+        storage_path = "/tmp";
+    }
+    user_path_ = std::move(storage_path) + "/" + input_queue_.Pop()->GetPacket()->login;
+    if ( !boost::filesystem::exists(user_path_) ) {
+        boost::filesystem::create_directory(user_path_);
+        BOOST_LOG_TRIVIAL(debug) << "Created new folder at " << user_path_;
+    }
+
     /// Find amount of users' databases TODO(EgorBedov): improve it later
     for (size_t folder_id = 0; folder_id < UINT_MAX; ++folder_id) {
-        if (boost::filesystem::exists(user_path + "/" + std::to_string(folder_id))) {
-            std::cout << folder_id << " ";
+        if (boost::filesystem::exists(user_path_ + "/" + std::to_string(folder_id))) {
             dbs_.push_back(folder_id);
         } else {
             break;
         }
     }
     if (dbs_.empty()) {
-        std::cout << "Welcome, new user!\nWe are creating your first database" << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Created new db for new user at " << user_path_;
         // Don't invoke virtual member functions from constructor
         // TODO(EgorBedov): rewrite it
         Create_();
-        LoadInMemory_();
-    } else {
-        std::cout << "Welcome back!\nYou have next databases: ";
-        std::copy(dbs_.begin(), dbs_.end(), std::ostream_iterator<size_t>(std::cout, " "));
-        std::cout << "\nType OPEN <id> to open db" << std::endl;
     }
 }
 
@@ -84,15 +87,17 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
         case common::enums::operators::DELETE:
             SendAnswer_(conn, Delete_(conn->GetPacket()->data), false);
             break;
+        case common::enums::operators::CONNECT:
+            SendAnswer_(conn, Connect_(conn->GetPacket()->data), false);
+            break;
+        case common::enums::operators::DISCONNECT:
+            fs_.reset();
+            SendAnswer_(conn, common::enums::response_type::OK, false);
+            BOOST_LOG_TRIVIAL(info) << "Disconnected from DB";
+            break;
         case common::enums::operators::CREATE:  // create new folder for the same user
             SendAnswer_(conn, Create_(), false);
             break;
-        case common::enums::operators::CONNECT: {
-            common::utils::Packet packet;
-            packet.ret_value = common::enums::response_type::OK;
-            conn->SendData(packet);
-            break;
-        }
         case common::enums::operators::KILL:
             BOOST_LOG_TRIVIAL(info) << "TaskWorker finished working";
             alive_ = false;
@@ -183,7 +188,7 @@ void TaskWorker::UnloadFromMemory_() {
 }
 
 enums::response_type TaskWorker::Create_() {
-    size_t new_id = 0;
+    size_t new_id = 1;
     if (!dbs_.empty()) {
         new_id = dbs_.back() + 1;
     }
@@ -195,11 +200,24 @@ enums::response_type TaskWorker::Create_() {
     boost::filesystem::create_directory(new_folder_path + "/backup");
 
     /// Switch FileSystem
-    fs_.reset();
     fs_ = std::make_unique<FileSystem>(new_folder_path);
 
     BOOST_LOG_TRIVIAL(info) << "Created new folder at " << new_folder_path;
     return enums::response_type::OK;
+}
+
+common::enums::response_type TaskWorker::Connect_(common::utils::Data &data) {
+    std::string new_folder_path = user_path_ + "/" + std::to_string(data.folder_id);
+    if ( !boost::filesystem::exists(new_folder_path) ) {
+        BOOST_LOG_TRIVIAL(error) << "Folder is not present at " << new_folder_path;
+        return common::enums::NOT_FOUND;
+    }
+
+    /// Switch FileSystem
+    fs_.reset();
+    fs_ = std::make_unique<FileSystem>(new_folder_path);
+
+    return common::enums::response_type::OK;
 }
 
 }  // namespace folder

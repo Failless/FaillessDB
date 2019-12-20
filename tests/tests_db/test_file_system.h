@@ -29,6 +29,7 @@ common::utils::Data prepare_test() {
     std::string key = "test_key";
     return {0, size, value, &key};
 }
+/*
 
 TEST(FileSystem, Set) {
     /// Test values
@@ -123,6 +124,7 @@ TEST(FileSystem, Complex_Test) {
     fs.EraseAll();
     boost::filesystem::remove_all(kTestDbPath + "/0");
 }
+*/
 
 }
 

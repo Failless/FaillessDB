@@ -21,6 +21,7 @@ class ITaskWorker : boost::noncopyable {
     virtual common::enums::response_type Update_(common::utils::Data& data) = 0;
     virtual common::enums::response_type Delete_(common::utils::Data& data) = 0;
     virtual common::enums::response_type Create_() = 0;
+    virtual common::enums::response_type Connect_(common::utils::Data& data) = 0;
 };
 
 }  // namespace folder
