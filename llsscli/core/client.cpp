@@ -208,7 +208,7 @@ size_t Client::CreateDBFolder_() {
 }
 
 size_t Client::Connect_() {
-    if (query_tokens_.size() == 2) {
+    if (query_tokens_.size() == 3) {
         std::string input;
         std::getline(std::cin, input);
 
@@ -220,6 +220,8 @@ size_t Client::Connect_() {
         current_task_->login = query_tokens_[1];
         current_task_->pass = input;
         current_task_->data = data;
+        std::stringstream folder_ss(query_tokens_[2]);
+        folder_ss >> current_task_->data.folder_id;
         current_task_->command = common::enums::operators::CONNECT;
         current_task_->ret_value = common::enums::response_type::NOT_SET;
         current_task_->request = config_.user_request;
