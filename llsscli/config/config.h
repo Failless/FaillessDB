@@ -79,14 +79,14 @@ struct NetworkConnectTask {
     std::shared_ptr<tcp::socket> socket;
     std::shared_ptr<boost::asio::io_service> io_service;
     std::shared_ptr<std::stringstream> client_task;
-    std::shared_ptr<std::function<size_t(char*)>> client_callback;
+    std::shared_ptr<std::function<size_t(char*, size_t)>> client_callback;
 
     NetworkConnectTask() = default;
 
     NetworkConnectTask(std::shared_ptr<tcp::socket>& sock,
                        std::shared_ptr<boost::asio::io_service>& io_serv,
                        std::shared_ptr<std::stringstream>& cl_task,
-                       std::shared_ptr<std::function<size_t(char*)>>& callback)
+                       std::shared_ptr<std::function<size_t(char*, size_t)>>& callback)
         : socket(sock), io_service(io_serv), client_task(cl_task), client_callback(callback) {}
 };
 
