@@ -1,5 +1,7 @@
 #include "llssdb/folder/task_worker.h"
 
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
@@ -63,6 +65,12 @@ void TaskWorker::Work() {
 }
 
 int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
+    // TODO: remove it
+    if (conn->GetPacket()->data.key.empty()) {
+        std::vector<std::string> words;
+        boost::split(words, conn->GetPacket()->request, boost::is_any_of(" "));
+        conn->GetPacket()->data.key = words[1];
+    }
     switch (conn->GetPacket()->command) {
         case common::enums::operators::GET:
             SendAnswer_(conn, Read_(conn->GetPacket()->data), true);
