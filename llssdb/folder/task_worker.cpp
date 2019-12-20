@@ -1,13 +1,14 @@
 #include "llssdb/folder/task_worker.h"
 
 #include <boost/filesystem.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/trivial.hpp>
 #include <iostream>
 #include <memory>
-#include <utility>
 #include "llss3p/enums/operators.h"
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
-
 
 namespace failless {
 namespace db {
@@ -15,8 +16,8 @@ namespace folder {
 
 namespace enums = common::enums;
 
-void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn, enums::response_type result,
-                            bool read) {
+void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn,
+                             enums::response_type result, bool read) {
     // Prepare return_packet
     conn->GetPacket()->ret_value = static_cast<int>(result);
     if (!read) {
@@ -26,8 +27,8 @@ void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn, enums::
 }
 
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                       std::string user_path)
-    : input_queue_(queue), user_path_(std::move(user_path)), alive_(true) {
+                       const std::string& user_path)
+    : input_queue_(queue), user_path_(user_path), alive_(true) {
     /// Find amount of users' databases TODO(EgorBedov): improve it later
     for (size_t folder_id = 0; folder_id < UINT_MAX; ++folder_id) {
         if (boost::filesystem::exists(user_path + "/" + std::to_string(folder_id))) {
@@ -65,26 +66,21 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
     switch (conn->GetPacket()->command) {
         case common::enums::operators::GET:
             SendAnswer_(conn, Read_(conn->GetPacket()->data), true);
-            std::cout << "GET worked" << std::endl;
             break;
         case common::enums::operators::SET:
             SendAnswer_(conn, Set_(conn->GetPacket()->data), false);
-            std::cout << "SET worked" << std::endl;
             break;
         case common::enums::operators::UPDATE:
             SendAnswer_(conn, Update_(conn->GetPacket()->data), false);
-            std::cout << "UPDATE worked" << std::endl;
             break;
         case common::enums::operators::DELETE:
             SendAnswer_(conn, Delete_(conn->GetPacket()->data), false);
-            std::cout << "DELETE worked" << std::endl;
             break;
         case common::enums::operators::CREATE:  // create new folder for the same user
             SendAnswer_(conn, Create_(), false);
-            std::cout << "CREATE worked" << std::endl;
             break;
-        case common::enums::operators::KILL:  // finish work
-            std::cout << "KILL worked" << std::endl;
+        case common::enums::operators::KILL:
+            BOOST_LOG_TRIVIAL(info) << "TaskWorker finished working";
             alive_ = false;
             break;
         default:
@@ -101,10 +97,14 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
     /// Update_ in-memory storage
     if (result == enums::response_type::OK) {
         // TODO(EgorBedov): check RAM condition before loading in-memory
-        local_storage_.emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
-        std::cout << "{" << data.key << ": " << local_storage_.at(data.key).size
-                  << "(size)} was set both in HDD and in memory\n"
-                  << std::endl;
+        auto valid = local_storage_.emplace(
+            std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
+        if (valid.second) {
+            BOOST_LOG_TRIVIAL(debug) << "Value of size " << data.size << " was loaded into RAM";
+        } else {
+            BOOST_LOG_TRIVIAL(warning)
+                << "Value of size " << data.size << " was not loaded into RAM";
+        }
     }
     return result;
 }
@@ -115,12 +115,11 @@ enums::response_type TaskWorker::Read_(common::utils::Data& data) {
     common::utils::Data data_out;
     data_out.key = data.key;
 
-    std::cout << "Found it ";
     /// Grab file from memory if it's in there
     if (!local_storage_.empty() && (local_storage_.at(data.key).in_memory)) {
         data_out.size = local_storage_.at(data.key).size;
         data_out.value = local_storage_.at(data.key).value;
-        std::cout << "in-memory\n" << std::endl;
+        BOOST_LOG_TRIVIAL(debug) << "\"" << data.key << "\" retrieved from RAM";
         response = enums::response_type::OK;
     } else {
         auto value_out = new uint8_t[kMaxBuffer_];
@@ -128,7 +127,6 @@ enums::response_type TaskWorker::Read_(common::utils::Data& data) {
         response = fs_->Get(data.key, value_out, size_out);
         data_out.value = std::vector(value_out[0], value_out[size_out - 1]);
         data_out.value.shrink_to_fit();
-        std::cout << "On disk\n" << std::endl;
         delete[] value_out;
         // the data is not present in local storage for a reason
         // so first check RAM condition and then load
@@ -153,6 +151,7 @@ enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
     /// Update_ in-memory storage
     if (local_storage_.at(data.key).in_memory) {
         local_storage_.erase(data.key.c_str());  // no, it's not redundant
+        BOOST_LOG_TRIVIAL(debug) << "\"" << data.key << "\" erased from RAM";
     }
     return response;
 }
@@ -165,6 +164,7 @@ void TaskWorker::UnloadFromMemory_() {
         it.second.value.clear();
         it.second.value.shrink_to_fit();
         it.second.in_memory = false;
+        BOOST_LOG_TRIVIAL(debug) << "Unloaded everythin from RAM";
     }
 }
 
@@ -184,6 +184,7 @@ enums::response_type TaskWorker::Create_() {
     fs_.reset();
     fs_ = std::make_unique<FileSystem>(new_folder_path);
 
+    BOOST_LOG_TRIVIAL(info) << "Created new folder at " << new_folder_path;
     return enums::response_type::OK;
 }
 

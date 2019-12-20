@@ -17,8 +17,9 @@ class NetworkClientInterface : boost::noncopyable {
  public:
     virtual ~NetworkClientInterface() = default;
 
-    virtual size_t AddUserTask(std::shared_ptr<std::stringstream>& current_task,
-                               std::shared_ptr<std::function<size_t()>>& callback) = 0;
+    virtual size_t AddUserTask(
+        std::shared_ptr<std::stringstream>& current_task,
+        std::shared_ptr<std::function<size_t(char*)>>& callback) = 0;
     virtual size_t OpenConnection() = 0;
     virtual size_t Close() = 0;
 
@@ -27,12 +28,12 @@ class NetworkClientInterface : boost::noncopyable {
                             tcp::resolver::iterator end_point_iter,
                             std::shared_ptr<config::NetworkConnectTask>& task) = 0;
     virtual void OnReceive_(const boost::system::error_code& ErrorCode,
-                            std::shared_ptr<tcp::socket>& socket) = 0;
+                            std::shared_ptr<tcp::socket>& socket,
+                            std::shared_ptr<config::NetworkConnectTask>& task) = 0;
     virtual void OnSend_(const boost::system::error_code& error_code,
                          std::shared_ptr<tcp::socket>& socket,
-                         std::shared_ptr<std::string>& str_task) = 0;
+                         std::shared_ptr<config::NetworkConnectTask>& task) = 0;
     virtual void DoClose_(std::shared_ptr<tcp::socket>& socket) = 0;
-
 };
 
 }  // namespace network

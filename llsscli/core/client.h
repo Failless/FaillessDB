@@ -17,14 +17,19 @@ namespace core {
 
 class Client : public ClientInterface {
  public:
-    explicit Client(config::ClientConfig& test_data);
+    explicit Client();
     ~Client() = default;
     size_t Run() override;
     size_t ReadInput() override;
+    size_t ReadNetSettings() override;
 
  private:
+
+    size_t InitNetSettings_() override;
+
     size_t SerializeQuery_() override;
     size_t ExecQuery_() override;
+    size_t ExecNet_() override;
     size_t ParseInput_(std::string raw_query) override;
 
     size_t SendToDb_() override;
@@ -33,11 +38,7 @@ class Client : public ClientInterface {
     size_t CreateDBFolder_() override;
     size_t Register_() override;
 
-    size_t SendToDbCallback_() override;
-    size_t SetDBKeyCallback_() override;
-    size_t GetDBKeyCallback_() override;
-    size_t CreateDBFolderCallback_() override;
-    size_t RegisterCallback_() override;
+    size_t GeneralCallback_(char* response_data) override;
 
  private:
     std::unique_ptr<network::NetworkClientInterface> network_client_;
@@ -57,11 +58,9 @@ class Client : public ClientInterface {
     bool exec_query_status_;
     bool serialize_query_status_;
 
-    std::shared_ptr<std::function<size_t()>> send_to_db_callback_;
-    std::shared_ptr<std::function<size_t()>> set_db_callback_;
-    std::shared_ptr<std::function<size_t()>> get_db_callback_;
-    std::shared_ptr<std::function<size_t()>> create_db_folder_callback_;
-    std::shared_ptr<std::function<size_t()>> register_callback_;
+    std::shared_ptr<std::function<size_t(char*)>> general_callback_;
+    std::shared_ptr<common::utils::Packet> response_task_;
+
 };
 
 }  // namespace core

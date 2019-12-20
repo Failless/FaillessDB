@@ -56,7 +56,7 @@ struct ClientConfig {
     ClientConfig() = default;
 
     ClientConfig(std::string user_n, std::string user_r, int payload_d, std::string payload_k,
-                 std::string db_h, std::string db_p, size_t c_num)
+                 std::string db_h, std::string db_p)
         : user_name(std::move(user_n)),
           user_request(std::move(user_r)),
           payload_dest_id(payload_d),
@@ -79,14 +79,14 @@ struct NetworkConnectTask {
     std::shared_ptr<tcp::socket> socket;
     std::shared_ptr<boost::asio::io_service> io_service;
     std::shared_ptr<std::stringstream> client_task;
-    std::shared_ptr<std::function<size_t()>> client_callback;
+    std::shared_ptr<std::function<size_t(char*)>> client_callback;
 
     NetworkConnectTask() = default;
 
     NetworkConnectTask(std::shared_ptr<tcp::socket>& sock,
                        std::shared_ptr<boost::asio::io_service>& io_serv,
                        std::shared_ptr<std::stringstream>& cl_task,
-                       std::shared_ptr<std::function<size_t()>>& callback)
+                       std::shared_ptr<std::function<size_t(char*)>>& callback)
         : socket(sock), io_service(io_serv), client_task(cl_task), client_callback(callback) {}
 };
 

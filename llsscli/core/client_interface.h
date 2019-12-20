@@ -13,10 +13,14 @@ class ClientInterface : boost::noncopyable {
     virtual ~ClientInterface() = default;
     virtual size_t Run() = 0;
     virtual size_t ReadInput() = 0;
+    virtual size_t ReadNetSettings() = 0;
 
  private:
+    virtual size_t InitNetSettings_() = 0;
+
     virtual size_t SerializeQuery_() = 0;
     virtual size_t ExecQuery_() = 0;
+    virtual size_t ExecNet_() = 0;
     virtual size_t ParseInput_(std::string raw_query) = 0;
 
     virtual size_t SendToDb_() = 0;
@@ -25,11 +29,7 @@ class ClientInterface : boost::noncopyable {
     virtual size_t CreateDBFolder_() = 0;
     virtual size_t Register_() = 0;
 
-    virtual size_t SendToDbCallback_() = 0;
-    virtual size_t SetDBKeyCallback_() = 0;
-    virtual size_t GetDBKeyCallback_() = 0;
-    virtual size_t CreateDBFolderCallback_() = 0;
-    virtual size_t RegisterCallback_() = 0;
+    virtual size_t GeneralCallback_(char* response_data) = 0;
 };
 
 }  // namespace core

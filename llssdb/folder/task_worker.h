@@ -22,7 +22,7 @@ namespace folder {
 class TaskWorker : public ITaskWorker {
  public:
     TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-               std::string folder_path);
+               const std::string& folder_path);
     ~TaskWorker() override = default;
 
     void Work() override;
@@ -39,7 +39,7 @@ class TaskWorker : public ITaskWorker {
     void UnloadFromMemory_();
 
     virtual void SendAnswer_(std::shared_ptr<network::Connection>& conn,
-                            common::enums::response_type result, bool read);
+                             common::enums::response_type result, bool read);
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& input_queue_;
     std::unordered_map<std::string, InMemoryData> local_storage_;

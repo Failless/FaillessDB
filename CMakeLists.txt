@@ -3,12 +3,13 @@ cmake_minimum_required(VERSION 3.14)
 project(failless C CXX)
 set(CMAKE_CXX_STANDARD 17)
 
-find_package(Boost ${BOOST_VERSION} COMPONENTS serialization filesystem chrono thread system REQUIRED)
+find_package(Boost ${BOOST_VERSION} COMPONENTS serialization log log_setup filesystem chrono thread system REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -phtread -lpthread -lssl -lcrypto")
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
-#remove -lboost-system, -lrocksdb, -lsnappy and -lrt
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -Werror -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include ")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
+#remove -lrocksdb, -lsnappy and -lrt
+#add -lboost_log-mt -lboost_thread-mt -lboost_system-mt if you want
 #added -lssl -lcrypto for good work of OpenSSL hashing
 
 set(Boost_LIBRARY_DIR /usr/local/lib)
@@ -17,7 +18,7 @@ link_directories(${Boost_LIBRARY_DIR})
 set(OpenSSL_LIBRARY_DIR /usr/local/lib)
 link_directories(${OpenSSL_LIBRARY_DIR})
 
-set(DATABSE_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_db.cpp)
+set(DATABASE_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_db.cpp)
 set(CLIENT_SRC_LIST ${CMAKE_CURRENT_SOURCE_DIR}/failless_cli.cpp)
 
 set(FAILLESS_CLI_LIB "${CMAKE_CURRENT_SOURCE_DIR}/llsscli")
@@ -64,14 +65,13 @@ add_subdirectory(${FAILLESS_CLI_LIB})
 add_subdirectory(${FAILLESS_3P_LIB})
 
 # compile server
-add_executable(failless-server ${DATABSE_SRC_LIST})
+add_executable(failless-server ${DATABASE_SRC_LIST})
 target_link_libraries(failless-server llssdb)
 target_link_libraries(failless-server llss3p)
 target_link_libraries(failless-server ${Boost_LIBRARIES})
 target_link_libraries(failless-server ${msgpack_LIBRARIES})
 target_link_libraries(failless-server ${ROCKSDB_LIBRARY})
 target_link_libraries(failless-server ${OPENSSL_LIBRARIES})
-# maybe we need to add ${OPENSSL_LIBRARY} ??? (Serjio2888)
 
 # compile client
 add_executable(failless-cli ${CLIENT_SRC_LIST})
