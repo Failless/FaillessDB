@@ -250,9 +250,9 @@ size_t Client::Register_() {
         common::utils::Data data;
 
         // Init user Task struct
+        current_task_.reset(new common::utils::Packet());
         current_task_->login = query_tokens_[1];
         current_task_->pass = input;
-        current_task_.reset(new common::utils::Packet());
         current_task_->data = data;
         current_task_->command = common::enums::operators::REG;
         current_task_->ret_value = common::enums::response_type::NOT_SET;

@@ -53,7 +53,7 @@ void ServerManager::Run() {
             case common::enums::operators::CREATE: {
                 //                common::utils::Queue<std::shared_ptr<network::Connection>>
                 //                folder_queue;
-                if (!task.folder_id) {
+                if (!task.folder_id || task.folder_id > 15) {
                     task.folder_id = FindEmpty_();
                     if (task.folder_id == -1) {
                         //                    folders_.emplace_back();
@@ -71,6 +71,8 @@ void ServerManager::Run() {
             case common::enums::operators::CONNECT: {
                 short idx = connection->GetPacket()->data.folder_id;
                 folders_[idx].exist = true;
+                std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_);
+                folders_[task.folder_id].tread = std::move(folder_run);
                 folders_[idx].queue.Push(connection);
                 break;
             }
@@ -79,6 +81,7 @@ void ServerManager::Run() {
                 short idx = connection->GetPacket()->data.folder_id;
                 folders_[idx].queue.Push(connection);
                 folders_[idx].exist = false;
+                folders_[task.folder_id].tread.join();
                 // TODO(rowbotman): check how is it work
                 //                folders_.erase(folders_.begin() + idx);
                 break;
