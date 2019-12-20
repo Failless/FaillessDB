@@ -59,10 +59,6 @@ class Client : public ClientInterface {
 
     std::shared_ptr<std::function<size_t(char*, size_t)>> general_callback_;
     std::shared_ptr<common::utils::Packet> response_task_;
-
-    std::map<common::enums::response_type, std::string> status_map_{
-        {common::enums::response_type::OK, "OK"},
-        {common::enums::response_type::SERVER_ERROR, "ERROR"}};
 };
 
 }  // namespace core

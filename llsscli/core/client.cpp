@@ -11,6 +11,17 @@ namespace failless {
 namespace client {
 namespace core {
 
+const std::map<common::enums::response_type, std::string> kStatusMap {
+    {common::enums::response_type::OK, "OK"},
+    {common::enums::response_type::EXIST, "EXIST"},
+    {common::enums::response_type::SERVER_ERROR, "SERVER ERROR"},
+    {common::enums::response_type::NOT_DONE, "NOT DONE"},
+    {common::enums::response_type::NOT_ALLOWED, "NOT ALLOWED"},
+    {common::enums::response_type::NOT_FOUND, "NOT FOUND"},
+    {common::enums::response_type::NOT_SET, "NOT SET"}
+};
+
+
 Client::Client() {
     // TODO Check inits' status
     // Init FileSystem and Serializer interfaces
@@ -56,8 +67,8 @@ size_t Client::ExecQuery_() {
     // Convert cmd name to upper case
     std::transform(query_tokens_[0].begin(), query_tokens_[0].end(), query_tokens_[0].begin(),
                    [](unsigned char c) { return std::toupper(c); });
-//    std::for_each(query_tokens_[0].begin(), query_tokens_[0].end(),
-//                  [](char& c) { c = std::toupper(c); });
+    //    std::for_each(query_tokens_[0].begin(), query_tokens_[0].end(),
+    //                  [](char& c) { c = std::toupper(c); });
 
     SWITCH(query_tokens_[0]) {
         CASE("SEND") : SendToDb_();
@@ -103,8 +114,8 @@ size_t Client::ReadNetSettings() {
 }
 
 size_t Client::InitNetSettings_() {
-    net_config_ = std::shared_ptr<config::NetworkConfig>(
-        new config::NetworkConfig(config_.db_host, config_.db_port));
+    net_config_ = std::make_shared<config::NetworkConfig>(
+        config_.db_host, config_.db_port);
     network_client_ =
         std::unique_ptr<network::NetworkClientInterface>(new network::NetworkClient(net_config_));
     return 0;
@@ -260,13 +271,14 @@ size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
     std::cout << "[CALLBACK] Raw data response = " << std::endl;
     serializer_->Deserialize(reinterpret_cast<char*>(response_data), bytes_transferred);
     response_task_ = serializer_->GetInConfig();
-    std::cout << "[CALLBACK] Key = " << std::endl;
-    std::cout << "[CALLBACK] Status: "
-              << status_map_
-                     .find(
-                         static_cast<const common::enums::response_type>(response_task_->ret_value))
-                     ->second
-              << std::endl;
+    try {
+        std::cout << "[CALLBACK] "
+                  << kStatusMap.at(
+                         static_cast<common::enums::response_type>(response_task_->ret_value))
+                  << std::endl;
+    } catch (std::out_of_range& e) {
+        std::cerr << "UNKNOWN RETURN STATUS: " << response_task_->ret_value << std::endl;
+    }
     return 0;
 }
 
