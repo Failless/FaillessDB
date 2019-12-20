@@ -9,60 +9,50 @@ namespace failless {
 namespace client {
 namespace network {
 
-NetworkClient::NetworkClient(std::shared_ptr<config::NetworkConfig>& config)
-    : config_(*config) {
-    content_buffer_vector_.resize(1024);
-    user_socket_queue_ =
-        std::make_shared<common::utils::Queue<std::shared_ptr<config::NetworkConnectTask>>>();
+NetworkClient::NetworkClient(std::shared_ptr<config::NetworkConfig>& config) : config_(*config) {
+    content_buffer_vector_ = std::shared_ptr<std::vector<unsigned char>>(new std::vector<unsigned char>());
+    content_buffer_vector_->resize(1024);
 }
 
-size_t NetworkClient::AddUserTask(std::shared_ptr<std::stringstream>& current_task,
-                                  std::shared_ptr<std::function<size_t()>>& callback) {
+size_t NetworkClient::AddUserTask(
+    std::shared_ptr<std::stringstream>& current_task,
+    std::shared_ptr<std::function<size_t(std::shared_ptr<std::vector<unsigned char>>&)>>& callback) {
     // Init io_service & socket for one specific task
     std::shared_ptr<boost::asio::io_service> io_svc = std::make_shared<boost::asio::io_service>();
     std::shared_ptr<tcp::socket> socket = std::make_shared<tcp::socket>(*io_svc);
 
     std::cout << current_task->str() << std::endl;
     // Init network-like task
-    std::shared_ptr<config::NetworkConnectTask> task =
-        std::make_shared<config::NetworkConnectTask>(socket, io_svc, current_task, callback);
+    task_ = std::make_shared<config::NetworkConnectTask>(socket, io_svc, current_task, callback);
+    OpenConnection();
 
-    user_socket_queue_->Push(task);
     return 0;
 }
 
 size_t NetworkClient::OpenConnection() {
-    while (!user_socket_queue_->IsEmpty()) {
-        std::shared_ptr<config::NetworkConnectTask> temp = user_socket_queue_->Pop();
-        
-        std::cout << "Client is starting..." << std::endl;
+    std::cout << "Client is starting..." << std::endl;
 
-        tcp::resolver Resolver(*temp->io_service.get());
+    tcp::resolver Resolver(*task_->io_service.get());
 
-        tcp::resolver::query Query(config_.db_host, config_.db_port);
+    tcp::resolver::query Query(config_.db_host, config_.db_port);
 
-        tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
-        tcp::endpoint end_point = *EndPointIterator;
+    tcp::resolver::iterator EndPointIterator = Resolver.resolve(Query);
+    tcp::endpoint end_point = *EndPointIterator;
 
-        temp->socket->async_connect(
-            end_point, boost::bind(&NetworkClient::OnConnect_, this,
-                                   boost::asio::placeholders::error, ++EndPointIterator, temp));
+    task_->socket->async_connect(
+        end_point, boost::bind(&NetworkClient::OnConnect_, this, boost::asio::placeholders::error,
+                               ++EndPointIterator, task_));
 
-        std::cout << "Client is started!" << std::endl;
+    std::cout << "Client is started!" << std::endl;
 
-        boost::thread ClientThread(
-            boost::bind(&boost::asio::io_service::run, temp->io_service));
-        //                network_client_->Close();
-        ClientThread.join();
-    }
+    boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, task_->io_service));
+    //                network_client_->Close();
+    ClientThread.join();
     return 0;
 }
 
 size_t NetworkClient::Close() {
-    while (!user_socket_queue_->IsEmpty()) {
-        std::shared_ptr<config::NetworkConnectTask> temp = user_socket_queue_->Pop();
-        temp->io_service->post(boost::bind(&NetworkClient::DoClose_, this, temp->socket));
-    }
+    task_->io_service->post(boost::bind(&NetworkClient::DoClose_, this, task_->socket));
     return 0;
 }
 
@@ -80,7 +70,7 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode,
         task->socket->async_write_some(
             boost::asio::buffer(*str_task, str_task->length()),
             boost::bind(&NetworkClient::OnSend_, this, boost::asio::placeholders::error,
-                        task->socket, str_task));
+                        task->socket, task));
 
     } else if (EndPointIter != tcp::resolver::iterator()) {
         task->socket->close();
@@ -95,11 +85,13 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode,
 }
 
 void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode,
-                               std::shared_ptr<tcp::socket>& socket) {
+                               std::shared_ptr<tcp::socket>& socket,
+                               std::shared_ptr<config::NetworkConnectTask>& task) {
     std::cout << "receiving..." << std::endl;
     if (ErrorCode.value() == boost::system::errc::success) {
-        std::cout << content_buffer_vector_.data() << "<-data" << std::endl;
+        std::cout << content_buffer_vector_->data() << "<-data" << std::endl;
 
+        task->client_callback->operator()(content_buffer_vector_);
         //        socket->async_read_some(boost::asio::buffer(recieve_buffer_, buflen_),
         //                                boost::bind(&NetworkClient::OnReceive_, this,
         //                                            boost::asio::placeholders::error, socket));
@@ -111,14 +103,14 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode,
 
 void NetworkClient::OnSend_(const boost::system::error_code& error_code,
                             std::shared_ptr<tcp::socket>& socket,
-                            std::shared_ptr<std::string>& str_task) {
+                            std::shared_ptr<config::NetworkConnectTask>& task) {
     std::cout << "sending..." << std::endl;
     if (!error_code) {
-        std::cout << "\"" << *str_task << "\" has been sent" << std::endl;
+        std::cout << "\"" << task->client_task->str() << "\" has been sent" << std::endl;
 
-        socket->async_receive(boost::asio::buffer(content_buffer_vector_),
+        socket->async_receive(boost::asio::buffer(*content_buffer_vector_),
                               boost::bind(&NetworkClient::OnReceive_, this,
-                                          boost::asio::placeholders::error, socket));
+                                          boost::asio::placeholders::error, socket, task));
     } else {
         std::cout << "OnSend closing" << std::endl;
         DoClose_(socket);
