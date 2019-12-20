@@ -42,9 +42,10 @@ size_t NetworkClient::OpenConnection() {
 
     std::cout << "Client is started!" << std::endl;
 
-    boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, task_->io_service));
-    //                network_client_->Close();
-    ClientThread.join();
+    task_->io_service->run();
+//        boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, task_->io_service));
+//    //                network_client_->Close();
+//    ClientThread.join();
     return 0;
 }
 
@@ -94,7 +95,7 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode,
         //                                boost::bind(&NetworkClient::OnReceive_, this,
         //                                            boost::asio::placeholders::error, socket));
     } else {
-        std::cout << "ERROR! OnReceive..." << std::endl;
+        std::cout << "ERROR! OnReceive... with error = " << ErrorCode.value() << std::endl;
         DoClose_(socket);
     }
 }
@@ -106,7 +107,7 @@ void NetworkClient::OnSend_(const boost::system::error_code& error_code,
     if (!error_code) {
         std::cout << "\"" << task->client_task->str() << "\" has been sent" << std::endl;
 
-        socket->async_receive(boost::asio::buffer(data, max_length),
+        socket->async_read_some(boost::asio::buffer(data, max_length),
                               boost::bind(&NetworkClient::OnReceive_, this,
                                           boost::asio::placeholders::error, socket, task));
     } else {
