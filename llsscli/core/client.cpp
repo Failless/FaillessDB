@@ -17,8 +17,9 @@ Client::Client() {
     serializer_ = std::unique_ptr<common::serializer::SerializerInterface<common::utils::Packet>>(
         new common::serializer::Serializer<common::utils::Packet>());
 
-    general_callback_ = std::shared_ptr<std::function<size_t(char*)>>(
-        new std::function<size_t(char*)>(std::bind(&Client::GeneralCallback_, this, std::placeholders::_1)));
+    general_callback_ = std::shared_ptr<std::function<size_t(char*, size_t)>>(
+        new std::function<size_t(char*, size_t)>(std::bind(
+            &Client::GeneralCallback_, this, std::placeholders::_1, std::placeholders::_2)));
 }
 
 size_t Client::Run() {
@@ -41,8 +42,6 @@ size_t Client::SerializeQuery_() {
     // Serialize file container to stringstream and get it
     serializer_->Serialize(*current_task_);
     serialized_query_ = serializer_->GetOutStringStream();
-    std::cout << "serialized_query_=" << serialized_query_->str() << std::endl;
-
     return 0;
 }
 
@@ -66,6 +65,10 @@ size_t Client::ExecQuery_() {
         break;
         CASE("CREATE") : CreateDBFolder_();
         break;
+        CASE("CONNECT") : Connect_();
+        break;
+        CASE("DISCONNECT") : Disconnect_();
+        break;
         CASE("REGISTER") : Register_();
         break;
     }
@@ -82,20 +85,14 @@ size_t Client::ReadInput() {
     std::string input;
     std::getline(std::cin, input);
     while (input != "exit") {
-        config_.user_name = "user";
-        config_.payload_dest_id = 1;
-        config_.payload_key = "payload_key";
         config_.user_request = input;
         Run();
-
         std::getline(std::cin, input);
     }
     return 0;
 }
 
 size_t Client::ReadNetSettings() {
-    //    std::string input;
-    //    std::getline(std::cin, input);
     config_.db_host = "127.0.0.1";
     config_.db_port = "11556";
     InitNetSettings_();
@@ -136,17 +133,14 @@ size_t Client::SendToDb_() {
 
 size_t Client::SetDBKey_() {
     // Init user Data struct
-    query_tokens_[2] = "\n";
-    std::vector<unsigned char> value = std::vector<unsigned char>(query_tokens_[2].begin(),
-                                                         query_tokens_[2].end());
+    std::vector<unsigned char> value =
+        std::vector<unsigned char>(query_tokens_[2].begin(), query_tokens_[2].end());
     common::utils::Data data(1, value.size(), value);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
     current_task_->data = data;
     current_task_->command = common::enums::operators::SET;
-    current_task_->login = "user";
-    current_task_->pass = "pass";
     current_task_->ret_value = common::enums::response_type::NOT_SET;
     current_task_->request = config_.user_request;
 
@@ -158,15 +152,12 @@ size_t Client::SetDBKey_() {
 }
 size_t Client::GetDBKey_() {
     // Init user Data struct
-    // ДЛЯ СЛУЧАЕ ЭХО ОТВЕТА В КОЛБЕК ПУСТОЙ VALUE РУИНИТ MSGPACK ПРИ ДЕСЕРИАЛИЗАЦИИ
-    common::utils::Data data(1, 228);
+    common::utils::Data data;
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
     current_task_->data = data;
     current_task_->command = common::enums::operators::GET;
-    current_task_->login = "user";
-    current_task_->pass = "pass";
     current_task_->ret_value = common::enums::response_type::NOT_SET;
     current_task_->request = config_.user_request;
 
@@ -184,8 +175,6 @@ size_t Client::CreateDBFolder_() {
     current_task_.reset(new common::utils::Packet());
     current_task_->data = data;
     current_task_->command = common::enums::operators::CREATE;
-    current_task_->login = "user";
-    current_task_->pass = "pass";
     current_task_->ret_value = common::enums::response_type::NOT_SET;
     current_task_->request = config_.user_request;
 
@@ -193,14 +182,86 @@ size_t Client::CreateDBFolder_() {
 
     ExecNet_();
     return 0;
+}
+
+size_t Client::Connect_() {
+    if (query_tokens_.size() == 2) {
+        std::string input;
+        std::getline(std::cin, input);
+
+        // Init user Data struct
+        common::utils::Data data;
+
+        // Init user Task struct
+        current_task_->login = query_tokens_[1];
+        current_task_->pass = input;
+        current_task_.reset(new common::utils::Packet());
+        current_task_->data = data;
+        current_task_->command = common::enums::operators::CONNECT;
+        current_task_->ret_value = common::enums::response_type::NOT_SET;
+        current_task_->request = config_.user_request;
+
+        SerializeQuery_();
+
+        ExecNet_();
+    } else {
+        std::cout << "[CONNECT] Error with command!" << std::endl;
+    }
     return 0;
 }
-size_t Client::Register_() { return 0; }
+size_t Client::Disconnect_() {
+    // Init user Data struct
+    common::utils::Data data;
 
-size_t Client::GeneralCallback_(char* response_data) {
-    serializer_->Deserialize(reinterpret_cast<char*>(response_data), 1024);
+    // Init user Task struct
+    current_task_.reset(new common::utils::Packet());
+    current_task_->data = data;
+    current_task_->command = common::enums::operators::DISCONNECT;
+    current_task_->login = query_tokens_[1];
+    current_task_->ret_value = common::enums::response_type::NOT_SET;
+    current_task_->request = config_.user_request;
+
+    SerializeQuery_();
+
+    ExecNet_();
+    return 0;
+}
+
+size_t Client::Register_() {
+    if (query_tokens_.size() == 2) {
+        std::string input;
+        std::getline(std::cin, input);
+
+        // Init user Data struct
+        common::utils::Data data;
+
+        // Init user Task struct
+        current_task_->login = query_tokens_[1];
+        current_task_->pass = input;
+        current_task_.reset(new common::utils::Packet());
+        current_task_->data = data;
+        current_task_->command = common::enums::operators::REG;
+        current_task_->ret_value = common::enums::response_type::NOT_SET;
+        current_task_->request = config_.user_request;
+
+        SerializeQuery_();
+
+        ExecNet_();
+    } else {
+        std::cout << "[REGISTER] Error with command!" << std::endl;
+    }
+    return 0;
+}
+
+size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
+    serializer_->Deserialize(reinterpret_cast<char*>(response_data), bytes_transferred);
     response_task_ = serializer_->GetInConfig();
-    std::cout << "response_task_=" << response_task_->data.folder_id << std::endl;
+    std::cout << "[CALLBACK] "
+              << status_map_
+                     .find(
+                         static_cast<const common::enums::response_type>(response_task_->ret_value))
+                     ->second
+              << std::endl;
     return 0;
 }
 
