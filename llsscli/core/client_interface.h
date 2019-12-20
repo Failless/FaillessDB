@@ -29,7 +29,7 @@ class ClientInterface : boost::noncopyable {
     virtual size_t CreateDBFolder_() = 0;
     virtual size_t Register_() = 0;
 
-    virtual size_t GeneralCallback_(std::shared_ptr<std::vector<unsigned char>>& content_vector) = 0;
+    virtual size_t GeneralCallback_(char* response_data) = 0;
 };
 
 }  // namespace core

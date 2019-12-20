@@ -38,7 +38,7 @@ class Client : public ClientInterface {
     size_t CreateDBFolder_() override;
     size_t Register_() override;
 
-    size_t GeneralCallback_(std::shared_ptr<std::vector<unsigned char>>& content_vector) override;
+    size_t GeneralCallback_(char* response_data) override;
 
  private:
     std::unique_ptr<network::NetworkClientInterface> network_client_;
@@ -58,8 +58,7 @@ class Client : public ClientInterface {
     bool exec_query_status_;
     bool serialize_query_status_;
 
-    std::shared_ptr<std::function<size_t(std::shared_ptr<std::vector<unsigned char>>&)>> general_callback_;
-    std::shared_ptr<std::vector<unsigned char>> response_;
+    std::shared_ptr<std::function<size_t(char*)>> general_callback_;
     std::shared_ptr<common::utils::Packet> response_task_;
 
 };

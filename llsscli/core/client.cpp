@@ -17,8 +17,8 @@ Client::Client() {
     serializer_ = std::unique_ptr<common::serializer::SerializerInterface<common::utils::Packet>>(
         new common::serializer::Serializer<common::utils::Packet>());
 
-    general_callback_ = std::shared_ptr<std::function<size_t(std::shared_ptr<std::vector<unsigned char>>&)>>(
-        new std::function<size_t(std::shared_ptr<std::vector<unsigned char>>&)>(std::bind(&Client::GeneralCallback_, this, std::placeholders::_1)));
+    general_callback_ = std::shared_ptr<std::function<size_t(char*)>>(
+        new std::function<size_t(char*)>(std::bind(&Client::GeneralCallback_, this, std::placeholders::_1)));
 }
 
 size_t Client::Run() {
@@ -197,9 +197,8 @@ size_t Client::CreateDBFolder_() {
 }
 size_t Client::Register_() { return 0; }
 
-size_t Client::GeneralCallback_(std::shared_ptr<std::vector<unsigned char>>& content_vector) {
-    response_ = content_vector;
-    serializer_->Deserialize(reinterpret_cast<char*>(content_vector->data()), content_vector->size());
+size_t Client::GeneralCallback_(char* response_data) {
+    serializer_->Deserialize(reinterpret_cast<char*>(response_data), 1024);
     response_task_ = serializer_->GetInConfig();
     std::cout << "response_task_=" << response_task_->data.folder_id << std::endl;
     return 0;
