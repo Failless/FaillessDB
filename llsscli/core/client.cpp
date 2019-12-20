@@ -191,7 +191,7 @@ size_t Client::CreateDBFolder_() {
     std::string input;
     std::getline(std::cin, input);
     // Init user Data struct
-    common::utils::Data data(std::stoi(input), 1488);
+    common::utils::Data data(std::stoi(input), 16);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
