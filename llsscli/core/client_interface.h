@@ -27,9 +27,11 @@ class ClientInterface : boost::noncopyable {
     virtual size_t SetDBKey_() = 0;
     virtual size_t GetDBKey_() = 0;
     virtual size_t CreateDBFolder_() = 0;
+    virtual size_t Connect_() = 0;
+    virtual size_t Disconnect_() = 0;
     virtual size_t Register_() = 0;
 
-    virtual size_t GeneralCallback_(char* response_data) = 0;
+    virtual size_t GeneralCallback_(char* response_data, size_t bytes_transferred) = 0;
 };
 
 }  // namespace core
