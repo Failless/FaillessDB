@@ -48,10 +48,6 @@ size_t Serializer<T>::Serialize(T& data) {
 
 template <class T>
 T& Serializer<T>::Deserialize(char* data, size_t size) {
-    std::cout << "Deserialize=" << data << std::endl;
-//    msgpack::unpacked result;
-//    msgpack::unpack(result, data, size, 0);
-//    msgpack::object object1(result.get());
     msgpack::object_handle oh = msgpack::unpack(data, size);
     msgpack::object deserialized = oh.get();
 
