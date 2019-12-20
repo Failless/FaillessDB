@@ -63,6 +63,7 @@ struct ServerTask {
     common::enums::operators command;
     std::string* login;
     std::string* password;
+    short folder_id = 0;
     ServerTask() : command(common::enums::operators::GET), login(nullptr), password(nullptr) {}
     explicit ServerTask(common::utils::Packet& packet)
         : command(static_cast<common::enums::operators>(packet.command)),

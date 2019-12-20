@@ -31,32 +31,41 @@ void ServerManager::Run() {
         }
         utils::ServerTask task{};
         connection->GetMetaData(task);
-        if (task.command == common::enums::operators::SET) {
-            common::utils::Packet packet;
+        common::utils::Packet packet;
+        if (task.command == common::enums::operators::REG) {
             packet.ret_value = common::enums::response_type::OK;
-            //            if (users_->Registration(*task.login, *task.password, 0)) {
-            //                packet.ret_value = common::enums::response_type::OK;
-            //            } else {
-            //                packet.ret_value = common::enums::response_type::SERVER_ERROR;
-            //            }
+            if (users_->Registration(*task.login, *task.password, 0)) {
+                packet.ret_value = common::enums::response_type::OK;
+            } else {
+                packet.ret_value = common::enums::response_type::SERVER_ERROR;
+            }
             connection->SendData(packet);
             continue;
         }
+
+//        if (!users_->IsAuth(*task.login, *task.password, 0)) {
+//            packet.ret_value = common::enums::response_type::NOT_ALLOWED;
+//            connection->SendData(packet);
+//            continue;
+//        }
+
         switch (task.command) {
             case common::enums::operators::CREATE: {
                 //                common::utils::Queue<std::shared_ptr<network::Connection>>
                 //                folder_queue;
-                short idx = FindEmpty_();
-                if (idx == -1) {
-                    //                    folders_.emplace_back();
-                    idx = static_cast<short>(folders_.size() - 1);
+                if (!task.folder_id) {
+                    task.folder_id = FindEmpty_();
+                    if (task.folder_id == -1) {
+                        //                    folders_.emplace_back();
+                        task.folder_id = static_cast<short>(folders_.size() - 1);
+                    }
                 }
-                connection->GetPacket()->data.folder_id = idx;
-                folders_[idx].queue.Push(connection);
-                folders_[idx].exist = true;
-                std::thread folder_run(WorkInThread, &folders_[idx].queue, w_settings_);
-                folders_[idx].tread = std::move(folder_run);
-                std::cout << "Created new folder with id " << idx << std::endl;
+                connection->GetPacket()->data.folder_id = task.folder_id;
+                folders_[task.folder_id].queue.Push(connection);
+                folders_[task.folder_id].exist = true;
+                std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_);
+                folders_[task.folder_id].tread = std::move(folder_run);
+                std::cout << "Created new folder with id " << task.folder_id << std::endl;
                 break;
             }
             case common::enums::operators::CONNECT: {
@@ -78,6 +87,9 @@ void ServerManager::Run() {
                 short idx = connection->GetPacket()->data.folder_id;
                 if (folders_[idx].exist) {
                     folders_[idx].queue.Push(connection);
+                } else {
+                    packet.ret_value = common::enums::response_type::NOT_FOUND;
+                    connection->SendData(packet);
                 }
                 break;
             }

@@ -89,6 +89,7 @@ bool Connection::GetMetaData(utils::ServerTask& task) {
     task.command = static_cast<common::enums::operators>(packet_.command);
     task.login = &packet_.login;
     task.password = &packet_.pass;
+    task.folder_id = packet_.data.folder_id;
     return true;
 }
 

@@ -7,7 +7,7 @@ namespace enums {
 
 enum operators {
     REG = -1,
-    SET = 0,
+    SET = 1,
     GET,
     UPDATE,
     DELETE,
