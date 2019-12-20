@@ -3,6 +3,7 @@
 #include <thread>
 #include "llssdb/engine/server_manager.h"
 #include "llssdb/network/tcp_server.h"
+#include "llss3p/utils/boost_logger.h"
 #include "llssdb/utils/config_manager.h"
 
 void StartManager(std::shared_ptr<failless::db::engine::IServerManager> manager) {
@@ -13,6 +14,8 @@ int main(/*int argc, char **argv*/) {
     failless::db::utils::Settings settings;
     failless::db::utils::ConfigManager config_manager("../failless.conf");
     config_manager.Initialize(settings);
+    failless::common::utils::BoostLogger::filter_logging(boost::log::trivial::info);
+
     failless::common::utils::Queue<std::shared_ptr<failless::db::network::Connection>> queue;
     std::shared_ptr<failless::db::engine::IServerManager> manager(
         new failless::db::engine::ServerManager(queue));

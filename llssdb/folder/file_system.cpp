@@ -1,11 +1,13 @@
 #include "llssdb/folder/file_system.h"
 
 #include <cstdlib>
-#include <iostream>
 #include <string>
 #include <unordered_map>
 
 #include <boost/filesystem.hpp>
+#include <boost/log/core.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/trivial.hpp>
 #include <rocksdb/db.h>
 #include <rocksdb/iterator.h>
 #include <rocksdb/options.h>
@@ -47,10 +49,10 @@ bool FileSystem::OpenDB_() {
     Status s = DB::Open(options, db_path_, &db_);
     if (!s.ok()) {
         is_open_ = false;
-        std::cerr << "Failed to open a db at " << db_path_ << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "Failed to open db at " << db_path_;
     } else {
         is_open_ = true;
-        std::cout << "Successfully opened a db at " << db_path_ << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Successfully opened db at " << db_path_;
         BackUp_();
     }
     return is_open_;
@@ -62,6 +64,7 @@ void FileSystem::CloseDB_() {
         is_open_ = false;
         delete db_;
         delete backup_engine_;
+        BOOST_LOG_TRIVIAL(info) << "Closed db at " << folder_path_;
     }
 }
 
@@ -69,9 +72,13 @@ void FileSystem::BackUp_() {
     Status s = BackupEngine::Open(Env::Default(), BackupableDBOptions(backup_path_), &backup_engine_);
     if (s.ok()) {
         s = backup_engine_->CreateNewBackup(db_);
-        (s.ok() ? std::cout << "Backup-ed " : std::cerr << "Failed to backup ") << backup_path_ << std::endl;
+        if (s.ok()) {
+            BOOST_LOG_TRIVIAL(debug) << "Backed up db at " << backup_path_;
+        } else {
+            BOOST_LOG_TRIVIAL(error) << "Failed to backup db at " << backup_path_;
+        }
     } else {
-        std::cerr << "Failed to start BackupEngine" << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "Failed to start BackupEngine at " << backup_path_;
     }
 }
 
@@ -80,9 +87,9 @@ bool FileSystem::RestoreFromBackup() {
     Status s = BackupEngineReadOnly::Open(Env::Default(), BackupableDBOptions(backup_path_), &r_backup_engine);
     if (s.ok()) {
         r_backup_engine->RestoreDBFromLatestBackup(db_path_, db_path_);
-        std::cout << "Successfully restored db on " << folder_path_ << std::endl;
+        BOOST_LOG_TRIVIAL(info) << "Successfully restored db at " << db_path_;
     } else {
-        std::cerr << "Failed to restore db on" << folder_path_ << std::endl;
+        BOOST_LOG_TRIVIAL(error) << "Failed to restore db at " << db_path_;
     }
     delete r_backup_engine;
     return s.ok();
@@ -94,7 +101,7 @@ response_type FileSystem::Get(const std::string &key, uint8_t *value_out, size_t
         auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
         if ( status.IsNotFound() ) {
-            std::cerr << "Such key doesn't exist" << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "Key \"" << key << "\" doesn't exist";
             return response_type::NOT_FOUND;
         }
 
@@ -102,8 +109,10 @@ response_type FileSystem::Get(const std::string &key, uint8_t *value_out, size_t
         size_out = pinnable_value.size();
         value_out = new uint8_t[size_out];
         memcpy(value_out, pinnable_value.data(), size_out * sizeof(decltype(value_out)));
+        BOOST_LOG_TRIVIAL(debug) << "\"" << key << "\" retrieved from HDD";
         return response_type::OK;
     } else {
+        BOOST_LOG_TRIVIAL(error) << "DB isn't open";
         return response_type::SERVER_ERROR;
     }
 }
@@ -118,11 +127,13 @@ response_type FileSystem::Set(const std::string &key, uint8_t *value_in, size_t 
 
         auto status = db_->Put(WriteOptions(), key, string_value);
         if (!status.ok()) {
-            std::cerr << "Failed to put a value\n";
+            BOOST_LOG_TRIVIAL(error) << "Value of size " << size_in << " was not loaded into HDD";
             return response_type::SERVER_ERROR;
         }
+        BOOST_LOG_TRIVIAL(debug) << "Value of size " << size_in << " was loaded into HDD";
         return response_type::OK;
     } else {
+        BOOST_LOG_TRIVIAL(error) << "DB isn't open";
         return response_type::SERVER_ERROR;
     }
 }
@@ -134,23 +145,26 @@ response_type FileSystem::Remove(const std::string &key) {
         auto status = db_->Get(ReadOptions(), key, value);
 
         if (status.IsNotFound()) {
-            std::cerr << "Such key doesn't exist" << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "Key \"" << key << "\" doesn't exist in db";
             return response_type::NOT_FOUND;
         }
 
         /// Remove key
         status = db_->Delete(WriteOptions(), key);
         if (!status.ok()) {
-            std::cerr << "Failed to delete a value" << std::endl;
+            BOOST_LOG_TRIVIAL(error) << "Failed to delete a key \"" << key << "\"";
             return response_type::SERVER_ERROR;
         }
+        BOOST_LOG_TRIVIAL(debug) << "Key \"" << key << "\" erased from HDD";
         return response_type::OK;
     } else {
+        BOOST_LOG_TRIVIAL(error) << "DB isn't open";
         return response_type::SERVER_ERROR;
     }
 }
 
 void FileSystem::EraseAll() {
+    BOOST_LOG_TRIVIAL(info) << "Erasing db";
     /// First of all close DB, otherwise it's undefined behaviour
     CloseDB_();
 
@@ -172,25 +186,29 @@ uint64_t FileSystem::AmountOfKeys() {
 }
 
 void FileSystem::LoadInMemory(std::unordered_map<std::string, InMemoryData> &local_storage) {
+    bool all = true;
     if (is_open_) {
         auto it = db_->NewIterator(ReadOptions());
         local_storage.reserve(AmountOfKeys());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             auto tmp_vector = std::vector<uint8_t>(it->value()[0], it->value()[it->value().size() - 1]);
             tmp_vector.shrink_to_fit();
-            local_storage.emplace(std::make_pair(
+            all = std::min(all, local_storage.emplace(std::make_pair(
                     it->key().ToString(),
                     InMemoryData(
                             tmp_vector,
                             it->value().size(),
-                            true)));
+                            true))).second);
         }
+    }
+    if (all) {
+        BOOST_LOG_TRIVIAL(info) << "Everything was loaded into RAM";
+    } else {
+        BOOST_LOG_TRIVIAL(info) << "Not everything was loaded into RAM";
     }
 }
 
 }
-
-// TODO(EgorBedov): fix headers https://google.github.io/styleguide/cppguide.html#Names_and_Order_of_Includes
 
 // https://github.com/facebook/rocksdb/blob/master/examples/column_families_example.cc
 // TODO(EgorBedov): https://github.com/facebook/rocksdb/wiki/A-Tutorial-of-RocksDB-SST-formats
