@@ -176,14 +176,32 @@ size_t Client::GetDBKey_() {
     return 0;
 }
 
-size_t Client::CreateDBFolder_() { return 0; }
+size_t Client::CreateDBFolder_() {
+    // Init user Data struct
+    common::utils::Data data(228, 1488);
+
+    // Init user Task struct
+    current_task_.reset(new common::utils::Packet());
+    current_task_->data = data;
+    current_task_->command = common::enums::operators::CREATE;
+    current_task_->login = "user";
+    current_task_->pass = "pass";
+    current_task_->ret_value = common::enums::response_type::NOT_SET;
+    current_task_->request = config_.user_request;
+
+    SerializeQuery_();
+
+    ExecNet_();
+    return 0;
+    return 0;
+}
 size_t Client::Register_() { return 0; }
 
 size_t Client::GeneralCallback_(std::shared_ptr<std::vector<unsigned char>>& content_vector) {
     response_ = content_vector;
     serializer_->Deserialize(reinterpret_cast<char*>(content_vector->data()), content_vector->size());
     response_task_ = serializer_->GetInConfig();
-    std::cout << "response_task_=" << response_task_->login << std::endl;
+    std::cout << "response_task_=" << response_task_->data.folder_id << std::endl;
     return 0;
 }
 
