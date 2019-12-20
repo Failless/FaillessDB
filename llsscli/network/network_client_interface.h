@@ -19,7 +19,7 @@ class NetworkClientInterface : boost::noncopyable {
 
     virtual size_t AddUserTask(
         std::shared_ptr<std::stringstream>& current_task,
-        std::shared_ptr<std::function<size_t(std::shared_ptr<std::vector<unsigned char>>&)>>& callback) = 0;
+        std::shared_ptr<std::function<size_t(char*)>>& callback) = 0;
     virtual size_t OpenConnection() = 0;
     virtual size_t Close() = 0;
 

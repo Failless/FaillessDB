@@ -9,14 +9,11 @@ namespace failless {
 namespace client {
 namespace network {
 
-NetworkClient::NetworkClient(std::shared_ptr<config::NetworkConfig>& config) : config_(*config) {
-    content_buffer_vector_ = std::shared_ptr<std::vector<unsigned char>>(new std::vector<unsigned char>());
-    content_buffer_vector_->resize(1024);
-}
+NetworkClient::NetworkClient(std::shared_ptr<config::NetworkConfig>& config) : config_(*config) {}
 
 size_t NetworkClient::AddUserTask(
     std::shared_ptr<std::stringstream>& current_task,
-    std::shared_ptr<std::function<size_t(std::shared_ptr<std::vector<unsigned char>>&)>>& callback) {
+    std::shared_ptr<std::function<size_t(char*)>>& callback) {
     // Init io_service & socket for one specific task
     std::shared_ptr<boost::asio::io_service> io_svc = std::make_shared<boost::asio::io_service>();
     std::shared_ptr<tcp::socket> socket = std::make_shared<tcp::socket>(*io_svc);
@@ -89,9 +86,10 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode,
                                std::shared_ptr<config::NetworkConnectTask>& task) {
     std::cout << "receiving..." << std::endl;
     if (ErrorCode.value() == boost::system::errc::success) {
-        std::cout << content_buffer_vector_->data() << "<-data" << std::endl;
+//        std::cout << content_buffer_vector_->data() << "<-data" << std::endl;
+        std::cout << data << "<-data" << std::endl;
 
-        task->client_callback->operator()(content_buffer_vector_);
+        task->client_callback->operator()(data);
         //        socket->async_read_some(boost::asio::buffer(recieve_buffer_, buflen_),
         //                                boost::bind(&NetworkClient::OnReceive_, this,
         //                                            boost::asio::placeholders::error, socket));
@@ -108,7 +106,7 @@ void NetworkClient::OnSend_(const boost::system::error_code& error_code,
     if (!error_code) {
         std::cout << "\"" << task->client_task->str() << "\" has been sent" << std::endl;
 
-        socket->async_receive(boost::asio::buffer(*content_buffer_vector_),
+        socket->async_receive(boost::asio::buffer(data, max_length),
                               boost::bind(&NetworkClient::OnReceive_, this,
                                           boost::asio::placeholders::error, socket, task));
     } else {
