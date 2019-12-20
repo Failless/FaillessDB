@@ -19,7 +19,7 @@ public:
     FileSystemInterface() = default;
     virtual ~FileSystemInterface() = default;
 
-    virtual common::enums::response_type Get(const std::string &key, uint8_t *value_out, size_t& size_out) = 0;
+    virtual common::enums::response_type Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) = 0;
     virtual common::enums::response_type Set(const std::string &key, uint8_t *value_in, size_t size_in) = 0;
     virtual common::enums::response_type Remove(const std::string &key) = 0;
 

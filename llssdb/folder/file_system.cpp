@@ -95,7 +95,7 @@ bool FileSystem::RestoreFromBackup() {
     return s.ok();
 }
 
-response_type FileSystem::Get(const std::string &key, uint8_t *value_out, size_t& size_out) {
+response_type FileSystem::Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) {
     if (is_open_) {
         PinnableSlice pinnable_value;
         auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
@@ -107,8 +107,7 @@ response_type FileSystem::Get(const std::string &key, uint8_t *value_out, size_t
 
         /// Copy to output arguments
         size_out = pinnable_value.size();
-        value_out = new uint8_t[size_out];
-        memcpy(value_out, pinnable_value.data(), size_out * sizeof(decltype(value_out)));
+        value_out = std::vector<uint8_t>(pinnable_value.data()[0], pinnable_value.data()[size_out - 1]);
         BOOST_LOG_TRIVIAL(debug) << "\"" << key << "\" retrieved from HDD";
         return response_type::OK;
     } else {

@@ -141,12 +141,7 @@ enums::response_type TaskWorker::Read_(common::utils::Data& data) {
         BOOST_LOG_TRIVIAL(debug) << "\"" << data.key << "\" retrieved from RAM";
         response = enums::response_type::OK;
     } else {
-        auto value_out = new uint8_t[kMaxBuffer_];
-        size_t size_out = 0;
-        response = fs_->Get(data.key, value_out, size_out);
-        data_out.value = std::vector(value_out[0], value_out[size_out - 1]);
-        data_out.value.shrink_to_fit();
-        delete[] value_out;
+        response = fs_->Get(data.key, data.value, data.size);
         // the data is not present in local storage for a reason
         // so first check RAM condition and then load
     }

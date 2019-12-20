@@ -48,7 +48,6 @@ class TaskWorker : public ITaskWorker {
     std::string user_path_{};
     std::vector<size_t> dbs_{};
     bool alive_ = false;
-    const int kMaxBuffer_ = 20000;
 };
 
 }  // namespace folder
