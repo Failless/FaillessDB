@@ -2,6 +2,11 @@
 #define FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_INTERFACE_H_
 
 
+#include <cstdlib>
+#include <map>
+#include <string>
+#include <unordered_map>
+
 #include <boost/noncopyable.hpp>
 
 #include "llss3p/enums/operators.h"

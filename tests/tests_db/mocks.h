@@ -2,8 +2,19 @@
 #define FAILLESS_TESTS_TESTS_DB_MOCKS_H
 
 
-#include <gmock/gmock.h>
+#include "llssdb/folder/file_system.h"
+#include "llssdb/folder/task_worker.h"
+
+#include <cstdlib>
+#include <memory>
 #include <string>
+
+#include <boost/filesystem.hpp>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
+#include "llss3p/enums/operators.h"
+#include "llssdb/network/transfer/hookup.h"
 
 std::string kTestDbPath{};
 
@@ -72,7 +83,7 @@ public:
     MOCK_METHOD3(Get, common::enums::response_type(
             const std::string &key,
             uint8_t *value_out,
-            size_t size_out));
+            size_t& size_out));
 
     MOCK_METHOD3(Set, common::enums::response_type(
             const std::string &key,

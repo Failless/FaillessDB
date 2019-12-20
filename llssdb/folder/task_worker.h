@@ -2,17 +2,19 @@
 #define FAILLESS_LLSSDB_FOLDER_TASK_WORKER_H_
 
 
-#include <climits>
+#include <cstdlib>
+#include <memory>
 #include <string>
-
-#include <boost/filesystem.hpp>
+#include <unordered_map>
+#include <vector>
 
 #include "llss3p/enums/operators.h"
+#include "llss3p/utils/queue.h"
 #include "llssdb/folder/file_system.h"
 #include "llssdb/folder/file_system_interface.h"
+#include "llssdb/folder/in_memory_data.h"
 #include "llssdb/folder/task_worker_interface.h"
 #include "llssdb/network/transfer/hookup.h"
-#include "llss3p/utils/queue.h"
 
 namespace failless::db::folder {
 

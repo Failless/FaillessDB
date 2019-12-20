@@ -1,13 +1,17 @@
+#include "llssdb/folder/file_system.h"
+
+#include <cstdlib>
 #include <iostream>
-#include <memory>
-#include "rocksdb/db.h"
-#include "rocksdb/iterator.h"
-#include "rocksdb/options.h"
-#include "rocksdb/utilities/backupable_db.h"
 #include <string>
+#include <unordered_map>
+
+#include <boost/filesystem.hpp>
+#include <rocksdb/db.h>
+#include <rocksdb/iterator.h>
+#include <rocksdb/options.h>
+#include <rocksdb/utilities/backupable_db.h>
 
 #include "llss3p/enums/operators.h"
-#include "llssdb/folder/file_system.h"
 
 #define BACKUPS 2
 
@@ -181,8 +185,6 @@ void FileSystem::LoadInMemory(std::unordered_map<std::string, InMemoryData> &loc
                             it->value().size(),
                             true)));
         }
-    } else {
-        return;
     }
 }
 

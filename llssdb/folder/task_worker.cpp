@@ -1,11 +1,15 @@
-#include <boost/filesystem.hpp>
+#include "llssdb/folder/task_worker.h"
+
+#include <climits>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
 
-#include "llssdb/folder/task_worker.h"
+#include <boost/filesystem.hpp>
+
+#include "llss3p/enums/operators.h"
 #include "llssdb/folder/in_memory_data.h"
-#include "llssdb/utils/task.h"
+#include "llssdb/network/transfer/hookup.h"
 
 #define MAX_BUFFER 20000
 
@@ -40,6 +44,7 @@ TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>
                 if ( dbs_.empty() ) {
                     std::cout << "Welcome, new user!\nWe are creating your first database" << std::endl;
                     Create();
+                    LoadInMemory();
                 } else {
                     std::cout << "Welcome back!\nYou have next databases: ";
                     std::copy(

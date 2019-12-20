@@ -1,4 +1,3 @@
-#include <boost/filesystem.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "tests/tests_db/test_auth.h"
