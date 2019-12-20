@@ -19,7 +19,7 @@ class IServerManager : boost::noncopyable {
     virtual ~IServerManager() = default;
 
     /**
-     * Set task to utils queue for inside task handler
+     * Set_ task to utils queue for inside task handler
      * @param task
      */
     virtual void SetTask(utils::Task task) = 0;

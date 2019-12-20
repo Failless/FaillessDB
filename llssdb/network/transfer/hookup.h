@@ -3,6 +3,7 @@
 
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/streambuf.hpp>
 #include "llss3p/utils/packet.h"
 #include "llssdb/utils/task.h"
 
@@ -18,7 +19,7 @@ class Connection {
     Connection() = delete;
     explicit Connection(boost::asio::io_service& io_service);
     ~Connection() = default;
-//    Connection(Connection&) = delete;
+    //    Connection(Connection&) = delete;
     Connection(Connection&&) = delete;
 
     void Read(const boost::system::error_code& err, size_t bytes_transferred);
@@ -30,21 +31,22 @@ class Connection {
     ip::tcp::socket& GetSocket();
     [[nodiscard]] bool HasData() const;
 
-protected:
+ protected:
     ip::tcp::socket socket_;
     char buffer_[kMaxSize]{};
+    boost::asio::streambuf input_buffer_;
     bool has_ = false;
     common::utils::Packet packet_;
 };
 
 // this class merely makes testing easier
 class TestConnection : public Connection {
-public:
+ public:
     TestConnection(boost::asio::io_service& io_service, common::utils::Packet& _packet)
-      : Connection(io_service) {
-            packet_ = _packet;
-            has_ = true;
-        };
+        : Connection(io_service) {
+        packet_ = _packet;
+        has_ = true;
+    };
 };
 
 }  // namespace network

@@ -1,4 +1,7 @@
 #include "llsscli/network/network_client.h"
+#include <llss3p/serialization/serializer.h>
+#include <llss3p/serialization/serializer_interface.h>
+#include <llss3p/utils/packet.h>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <iostream>
@@ -9,8 +12,7 @@ namespace failless {
 namespace client {
 namespace network {
 
-NetworkClient::NetworkClient(std::shared_ptr<config::NetworkConfig>& config)
-    : config_(*config) {
+NetworkClient::NetworkClient(std::shared_ptr<config::NetworkConfig>& config) : config_(*config) {
     content_buffer_vector_.resize(1024);
     user_socket_queue_ =
         std::make_shared<common::utils::Queue<std::shared_ptr<config::NetworkConnectTask>>>();
@@ -34,10 +36,10 @@ size_t NetworkClient::AddUserTask(std::shared_ptr<std::stringstream>& current_ta
 size_t NetworkClient::OpenConnection() {
     while (!user_socket_queue_->IsEmpty()) {
         std::shared_ptr<config::NetworkConnectTask> temp = user_socket_queue_->Pop();
-        
+
         std::cout << "Client is starting..." << std::endl;
 
-        tcp::resolver Resolver(*temp->io_service.get());
+        tcp::resolver Resolver(*temp->io_service);
 
         tcp::resolver::query Query(config_.db_host, config_.db_port);
 
@@ -50,8 +52,7 @@ size_t NetworkClient::OpenConnection() {
 
         std::cout << "Client is started!" << std::endl;
 
-        boost::thread ClientThread(
-            boost::bind(&boost::asio::io_service::run, temp->io_service));
+        boost::thread ClientThread(boost::bind(&boost::asio::io_service::run, temp->io_service));
         //                network_client_->Close();
         ClientThread.join();
     }
@@ -73,7 +74,7 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode,
 
     if (ErrorCode.value() == boost::system::errc::success) {
         std::shared_ptr<std::string> str_task =
-            std::shared_ptr<std::string>(new std::string(task->client_task->str()));
+            std::make_shared<std::string>(task->client_task->str());
 
         std::cout << "Entered: " << task->client_task->str() << std::endl;
 
@@ -99,6 +100,13 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode,
     std::cout << "receiving..." << std::endl;
     if (ErrorCode.value() == boost::system::errc::success) {
         std::cout << content_buffer_vector_.data() << "<-data" << std::endl;
+        std::unique_ptr<common::serializer::SerializerInterface<common::utils::Packet>> serializer(
+            new common::serializer::Serializer<common::utils::Packet>());
+        auto packet = serializer->Deserialize(reinterpret_cast<char*>(content_buffer_vector_.data()),
+                                content_buffer_vector_.size());
+        std::cout << "STATUS: " << packet.ret_value << std::endl
+                  << "DATA: "   << packet.data.value.data() << std::endl;
+
 
         //        socket->async_read_some(boost::asio::buffer(recieve_buffer_, buflen_),
         //                                boost::bind(&NetworkClient::OnReceive_, this,
@@ -119,8 +127,8 @@ void NetworkClient::OnSend_(const boost::system::error_code& error_code,
         std::cout << "\"" << *str_task << "\" has been sent" << std::endl;
 
         socket->async_read_some(boost::asio::buffer(content_buffer_vector_, 1024),
-                              boost::bind(&NetworkClient::OnReceive_, this,
-                                          boost::asio::placeholders::error, socket));
+                                boost::bind(&NetworkClient::OnReceive_, this,
+                                            boost::asio::placeholders::error, socket));
     } else {
         std::cout << "OnSend closing" << std::endl;
         DoClose_(socket);

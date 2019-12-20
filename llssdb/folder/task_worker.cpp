@@ -1,32 +1,53 @@
+#include "llssdb/folder/task_worker.h"
+
 #include <boost/filesystem.hpp>
-#include <cstdlib>
 #include <iostream>
 #include <memory>
-
+#include <utility>
+#include "llss3p/enums/operators.h"
 #include "llssdb/folder/in_memory_data.h"
-#include "llssdb/folder/task_worker.h"
-#include "llssdb/utils/task.h"
+#include "llssdb/network/transfer/hookup.h"
 
-#define MAX_BUFFER 20000
 
 namespace failless {
 namespace db {
 namespace folder {
 
-void send_answer(std::shared_ptr<network::Connection>& conn, int result) {
+namespace enums = common::enums;
+
+void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn, enums::response_type result,
+                            bool read) {
     // Prepare return_packet
-    conn->GetPacket()->ret_value = result;
-    conn->GetPacket()->data.value = {};
+    conn->GetPacket()->ret_value = static_cast<int>(result);
+    if (!read) {
+        conn->GetPacket()->data.value = {};
+    }
     conn->SendData(*(conn->GetPacket()));
 }
 
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                       const std::string& db_path)
-    : input_queue_(queue),
-      fs_(std::make_unique<FileSystem>(db_path)),
-      path_(db_path),
-      alive_(true) {
-    LoadInMemory();
+                       std::string user_path)
+    : input_queue_(queue), user_path_(std::move(user_path)), alive_(true) {
+    /// Find amount of users' databases TODO(EgorBedov): improve it later
+    for (size_t folder_id = 0; folder_id < UINT_MAX; ++folder_id) {
+        if (boost::filesystem::exists(user_path + "/" + std::to_string(folder_id))) {
+            std::cout << folder_id << " ";
+            dbs_.push_back(folder_id);
+        } else {
+            break;
+        }
+    }
+    if (dbs_.empty()) {
+        std::cout << "Welcome, new user!\nWe are creating your first database" << std::endl;
+        // Don't invoke virtual member functions from constructor
+        // TODO(EgorBedov): rewrite it
+        Create_();
+        LoadInMemory_();
+    } else {
+        std::cout << "Welcome back!\nYou have next databases: ";
+        std::copy(dbs_.begin(), dbs_.end(), std::ostream_iterator<size_t>(std::cout, " "));
+        std::cout << "\nType OPEN <id> to open db" << std::endl;
+    }
 }
 
 void TaskWorker::Work() {
@@ -43,27 +64,27 @@ void TaskWorker::Work() {
 int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
     switch (conn->GetPacket()->command) {
         case common::enums::operators::GET:
-            Read(conn->GetPacket()->data);
-            puts("GET worked");
+            SendAnswer_(conn, Read_(conn->GetPacket()->data), true);
+            std::cout << "GET worked" << std::endl;
             break;
         case common::enums::operators::SET:
-            send_answer(conn, Set(conn->GetPacket()->data));
-            puts("SET worked");
+            SendAnswer_(conn, Set_(conn->GetPacket()->data), false);
+            std::cout << "SET worked" << std::endl;
             break;
         case common::enums::operators::UPDATE:
-            send_answer(conn, Update(conn->GetPacket()->data));
-            puts("UPDATE worked");
+            SendAnswer_(conn, Update_(conn->GetPacket()->data), false);
+            std::cout << "UPDATE worked" << std::endl;
             break;
         case common::enums::operators::DELETE:
-            send_answer(conn, Delete(conn->GetPacket()->data));
-            puts("DELETE worked");
+            SendAnswer_(conn, Delete_(conn->GetPacket()->data), false);
+            std::cout << "DELETE worked" << std::endl;
             break;
         case common::enums::operators::CREATE:  // create new folder for the same user
-            send_answer(conn, Create(conn->GetPacket()->data));
-            puts("CREATE worked");
+            SendAnswer_(conn, Create_(), false);
+            std::cout << "CREATE worked" << std::endl;
             break;
         case common::enums::operators::KILL:  // finish work
-            puts("KILL worked");
+            std::cout << "KILL worked" << std::endl;
             alive_ = false;
             break;
         default:
@@ -72,12 +93,13 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
     return EXIT_SUCCESS;
 }
 
-bool TaskWorker::Set(common::utils::Data& data) {
-    /// Create key-value pair(s) on hdd
-    bool result = fs_->Set(data.key, const_cast<uint8_t*>(data.value.data()), data.size);
+enums::response_type TaskWorker::Set_(common::utils::Data& data) {
+    /// Create_ key-value pair(s) on hdd
+    enums::response_type result =
+        fs_->Set(data.key, const_cast<uint8_t*>(data.value.data()), data.size);
 
-    /// Update in-memory storage
-    if (result) {
+    /// Update_ in-memory storage
+    if (result == enums::response_type::OK) {
         // TODO(EgorBedov): check RAM condition before loading in-memory
         local_storage_.emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
         std::cout << "{" << data.key << ": " << local_storage_.at(data.key).size
@@ -87,63 +109,57 @@ bool TaskWorker::Set(common::utils::Data& data) {
     return result;
 }
 
-bool TaskWorker::Read(common::utils::Data& data) {
+enums::response_type TaskWorker::Read_(common::utils::Data& data) {
+    auto response = enums::response_type::SERVER_ERROR;
+
     common::utils::Data data_out;
     data_out.key = data.key;
-
-    size_t size = 0;
 
     std::cout << "Found it ";
     /// Grab file from memory if it's in there
     if (!local_storage_.empty() && (local_storage_.at(data.key).in_memory)) {
         data_out.size = local_storage_.at(data.key).size;
         data_out.value = local_storage_.at(data.key).value;
-        size = true;
         std::cout << "in-memory\n" << std::endl;
+        response = enums::response_type::OK;
     } else {
-        auto value_out = new uint8_t[MAX_BUFFER];
-        size = fs_->Get(data.key, value_out);
-        data_out.value = std::vector(value_out[0], value_out[size - 1]);
+        auto value_out = new uint8_t[kMaxBuffer_];
+        size_t size_out = 0;
+        response = fs_->Get(data.key, value_out, size_out);
+        data_out.value = std::vector(value_out[0], value_out[size_out - 1]);
         data_out.value.shrink_to_fit();
         std::cout << "On disk\n" << std::endl;
         delete[] value_out;
         // the data is not present in local storage for a reason
         // so first check RAM condition and then load
     }
-
-    // TODO(EgorBedov): Send data_out to socket
-
-    return size;
+    return response;
 }
 
-bool TaskWorker::Update(common::utils::Data& data) {
+enums::response_type TaskWorker::Update_(common::utils::Data& data) {
     bool result = true;
     // TODO(EgorBedov): Modify key-value pair(s) on hdd
     //   https://github.com/facebook/rocksdb/wiki/Merge-Operator
 
-    // TODO(EgorBedov): Send answer to socket
+    // TODO(EgorBedov): Update_ in-memory storage
 
-    // TODO(EgorBedov): Update in-memory storage
-
-    return result;
+    return enums::response_type::OK;
 }
 
-bool TaskWorker::Delete(common::utils::Data& data) {
-    /// Delete key-value pair(s) on hdd
-    bool result = fs_->Remove(data.key);
+enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
+    /// Delete_ key-value pair(s) on hdd
+    enums::response_type response = fs_->Remove(data.key);
 
-    // TODO(EgorBedov): Send answer to socket
-
-    /// Update in-memory storage
+    /// Update_ in-memory storage
     if (local_storage_.at(data.key).in_memory) {
-        local_storage_.erase(data.key.c_str());
+        local_storage_.erase(data.key.c_str());  // no, it's not redundant
     }
-    return result;
+    return response;
 }
 
-void TaskWorker::LoadInMemory() { fs_->LoadInMemory(local_storage_); }
+void TaskWorker::LoadInMemory_() { fs_->LoadInMemory(local_storage_); }
 
-void TaskWorker::UnloadFromMemory() {
+void TaskWorker::UnloadFromMemory_() {
     /// Clear vector and free space it occupied
     for (auto& it : local_storage_) {
         it.second.value.clear();
@@ -152,28 +168,23 @@ void TaskWorker::UnloadFromMemory() {
     }
 }
 
-bool TaskWorker::Create(common::utils::Data& data) {
-    /// Replacing old folder_id in path
-    std::string new_path = path_;
-    while (new_path.back() != '/') {
-        new_path.pop_back();
+enums::response_type TaskWorker::Create_() {
+    size_t new_id = 0;
+    if (!dbs_.empty()) {
+        new_id = dbs_.back() + 1;
     }
-    new_path += std::to_string(data.folder_id);
+    dbs_.push_back(new_id);
+    std::string new_folder_path = user_path_ + "/" + std::to_string(new_id);
 
-    if (boost::filesystem::exists(new_path)) {
-        // TODO(EgorBedov): write to socket that folder exists.
-        //   is it my area of responsibility tho?
-        return false;
-    }
+    boost::filesystem::create_directory(new_folder_path);
+    boost::filesystem::create_directory(new_folder_path + "/db");
+    boost::filesystem::create_directory(new_folder_path + "/backup");
 
-    /// Creating new folder
-    path_ = new_path;
+    /// Switch FileSystem
     fs_.reset();
-    fs_ = std::make_unique<FileSystem>(path_);
-    // could've just called CloseDB() and OpenDB(new_path) but they're private and not in interface
-    // also constructor is pretty light-weight
+    fs_ = std::make_unique<FileSystem>(new_folder_path);
 
-    return false;
+    return enums::response_type::OK;
 }
 
 }  // namespace folder

@@ -1,9 +1,9 @@
 #ifndef FAILLESS_LLSSDB_FOLDER_VALUE_INFO_H
 #define FAILLESS_LLSSDB_FOLDER_VALUE_INFO_H
 
-#include <memory>
-#include <string>
-#include <utility>
+
+#include <cstdlib>
+#include <vector>
 
 namespace failless {
 namespace db {

@@ -1,16 +1,18 @@
 #ifndef FAILLESS_TESTS_TESTS_DB_TEST_TASK_WORKER_H_
 #define FAILLESS_TESTS_TESTS_DB_TEST_TASK_WORKER_H_
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <string>
-#include <thread>
 
-#include "llssdb/utils/task.h"
-#include "llssdb/folder/file_system.h"
 #include "llssdb/folder/task_worker.h"
+
+#include <cstdlib>
+#include <memory>
+
+#include <boost/asio.hpp>
+#include <gtest/gtest.h>
+
+#include "llss3p/enums/operators.h"
+#include "llssdb/network/transfer/hookup.h"
 #include "tests/tests_db/mocks.h"
-#include "tests/tests_db/test_file_system.h"
 
 namespace failless::db::tests {
 
@@ -27,7 +29,7 @@ std::shared_ptr<network::TestConnection> create_test_connection(common::enums::o
 
 TEST(TaskManager, Get_and_Set) {
     common::utils::Queue<std::shared_ptr<network::Connection>> q;
-    folder::TaskWorker tw(q, kTestDbPath);
+    TestTaskWorker tw(q, kTestDbPath);
 
     auto conn = create_test_connection(common::enums::operators::SET);
 

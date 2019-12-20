@@ -10,7 +10,6 @@ namespace failless {
 namespace db {
 namespace auth {
 
-bool SimpleSHA256(const std::string &input, unsigned char *md);
 
 class Authorization : public IAuthorization {
  public:
