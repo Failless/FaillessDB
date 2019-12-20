@@ -38,6 +38,7 @@ class Client : public ClientInterface {
     size_t Connect_() override;
     size_t Disconnect_() override;
     size_t Register_() override;
+    size_t Kill_() override;
 
     size_t GeneralCallback_(char* response_data, size_t bytes_transferred) override;
 

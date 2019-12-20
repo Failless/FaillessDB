@@ -67,8 +67,6 @@ size_t Client::ExecQuery_() {
     // Convert cmd name to upper case
     std::transform(query_tokens_[0].begin(), query_tokens_[0].end(), query_tokens_[0].begin(),
                    [](unsigned char c) { return std::toupper(c); });
-    //    std::for_each(query_tokens_[0].begin(), query_tokens_[0].end(),
-    //                  [](char& c) { c = std::toupper(c); });
 
     SWITCH(query_tokens_[0]) {
         CASE("SEND") : SendToDb_();
@@ -84,6 +82,8 @@ size_t Client::ExecQuery_() {
         CASE("DISCONNECT") : Disconnect_();
         break;
         CASE("REGISTER") : Register_();
+        break;
+        DEFAULT : std::cout << "[CLIENT] Error with base command!" << std::endl;
         break;
     }
     return 0;
@@ -146,21 +146,25 @@ size_t Client::SendToDb_() {
 }
 
 size_t Client::SetDBKey_() {
-    // Init user Data struct
-    std::vector<unsigned char> value =
-        std::vector<unsigned char>(query_tokens_[2].begin(), query_tokens_[2].end());
-    common::utils::Data data(1, value.size(), value);
+    if (query_tokens_.size() == 3) {
+        // Init user Data struct
+        std::vector<unsigned char> value =
+            std::vector<unsigned char>(query_tokens_[2].begin(), query_tokens_[2].end());
+        common::utils::Data data(1, value.size(), value);
 
-    // Init user Task struct
-    current_task_.reset(new common::utils::Packet());
-    current_task_->data = data;
-    current_task_->command = common::enums::operators::SET;
-    current_task_->ret_value = common::enums::response_type::NOT_SET;
-    current_task_->request = config_.user_request;
+        // Init user Task struct
+        current_task_.reset(new common::utils::Packet());
+        current_task_->data = data;
+        current_task_->command = common::enums::operators::SET;
+        current_task_->ret_value = common::enums::response_type::NOT_SET;
+        current_task_->request = config_.user_request;
 
-    SerializeQuery_();
+        SerializeQuery_();
 
-    ExecNet_();
+        ExecNet_();
+    } else {
+        std::cout << "[CLIENT] Error with SET command!" << std::endl;
+    }
 
     return 0;
 }
@@ -182,8 +186,10 @@ size_t Client::GetDBKey_() {
 }
 
 size_t Client::CreateDBFolder_() {
+    std::string input;
+    std::getline(std::cin, input);
     // Init user Data struct
-    common::utils::Data data(228, 1488);
+    common::utils::Data data(std::stoi(input), 1488);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
@@ -262,7 +268,33 @@ size_t Client::Register_() {
 
         ExecNet_();
     } else {
-        std::cout << "[REGISTER] Error with command!" << std::endl;
+        std::cout << "[CLIENT] Error with REGISTER command!" << std::endl;
+    }
+    return 0;
+}
+
+size_t Client::Kill_() {
+    if (query_tokens_.size() == 2) {
+        std::string input;
+        std::getline(std::cin, input);
+
+        // Init user Data struct
+        common::utils::Data data;
+        data.folder_id = std::stoi(query_tokens_[1]);
+
+        // Init user Task struct
+        current_task_.reset(new common::utils::Packet());
+        current_task_->pass = input;
+        current_task_->data = data;
+        current_task_->command = common::enums::operators::REG;
+        current_task_->ret_value = common::enums::response_type::NOT_SET;
+        current_task_->request = config_.user_request;
+
+        SerializeQuery_();
+
+        ExecNet_();
+    } else {
+        std::cout << "[CLIENT] Error with KILL command!" << std::endl;
     }
     return 0;
 }
