@@ -83,6 +83,8 @@ size_t Client::ExecQuery_() {
         break;
         CASE("REGISTER") : Register_();
         break;
+        CASE("KILL") : Kill_();
+        break;
         DEFAULT : std::cout << "[CLIENT] Error with base command!" << std::endl;
         break;
     }
