@@ -51,7 +51,7 @@ TEST(TaskManager, Calling_Self_Set) {
 
     auto conn = create_test_connection(common::enums::operators::SET);
 
-    EXPECT_CALL(mockTaskWorker, Set(conn->GetPacket()->data)).Times(1);
+    EXPECT_CALL(mockTaskWorker, Set_(conn->GetPacket()->data)).Times(1);
     EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
@@ -62,7 +62,7 @@ TEST(TaskManager, Calling_Self_Read) {
 
     auto conn = create_test_connection(common::enums::operators::GET);
 
-    EXPECT_CALL(mockTaskWorker, Read(conn->GetPacket()->data)).Times(1);
+    EXPECT_CALL(mockTaskWorker, Read_(conn->GetPacket()->data)).Times(1);
     EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
@@ -72,7 +72,7 @@ TEST(TaskManager, Calling_Self_Update) {
 
     auto conn = create_test_connection(common::enums::operators::UPDATE);
 
-    EXPECT_CALL(mockTaskWorker, Update(conn->GetPacket()->data)).Times(1);
+    EXPECT_CALL(mockTaskWorker, Update_(conn->GetPacket()->data)).Times(1);
     EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
@@ -82,7 +82,7 @@ TEST(TaskManager, Calling_Self_Delete) {
 
     auto conn = create_test_connection(common::enums::operators::DELETE);
 
-    EXPECT_CALL(mockTaskWorker, Delete(conn->GetPacket()->data)).Times(1);
+    EXPECT_CALL(mockTaskWorker, Delete_(conn->GetPacket()->data)).Times(1);
     EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
