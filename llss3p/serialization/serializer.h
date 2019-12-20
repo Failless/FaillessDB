@@ -16,7 +16,6 @@ class Serializer : public SerializerInterface<T> {
 
     size_t Serialize(T& data) override;
     T& Deserialize(char* data, size_t size) override;
-    size_t DeserializeVector(std::shared_ptr<std::vector<unsigned char>>& content_vector) override;
 
     std::shared_ptr<std::stringstream> GetOutStringStream() override;
     std::shared_ptr<T> GetInConfig() override;
