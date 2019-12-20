@@ -22,7 +22,7 @@ public:
     explicit FileSystem(const std::string &folder_path);
     ~FileSystem() override;
 
-    common::enums::response_type Get(const std::string &key, uint8_t *value_out, size_t& size_out) override;
+    common::enums::response_type Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) override;
     common::enums::response_type Set(const std::string &key, uint8_t *value_in, size_t size_in) override;
     common::enums::response_type Remove(const std::string &key) override;
 

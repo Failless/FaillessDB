@@ -33,45 +33,39 @@ common::utils::Data prepare_test() {
 TEST(FileSystem, Set) {
     /// Test values
     auto test_data = prepare_test();
+    common::utils::Data data_out;
 
     FileSystem fs(kTestDbPath + "/0");
 
-    /// Empty arguments for Get()
-    uint8_t* value_out = nullptr;
-    size_t size_out = 0;
-
-    fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()),test_data.size);
-    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
-    EXPECT_EQ( size_out, test_data.size);
+    fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
+    EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
+    EXPECT_EQ(data_out.size, test_data.size);
 
     fs.EraseAll();
-    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
+    EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::NOT_FOUND);
     boost::filesystem::remove_all(kTestDbPath + "/0");
 }
 
 TEST(FileSystem, Get) {
     /// Test values
     auto test_data = prepare_test();
+    common::utils::Data data_out;
 
     FileSystem fs(kTestDbPath + "/0");
 
-    /// Empty arguments for Get()
-    uint8_t* value_out = nullptr;
-    size_t size_out = 0;
-
     /// Get() from empty db
     fs.EraseAll();
-    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
+    EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::NOT_FOUND);
 
     fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
 
     /// Get() wrong key
     std::string wrong_key = "wrong_key";
-    EXPECT_EQ(fs.Get(wrong_key, value_out, size_out), response_type::NOT_FOUND);
+    EXPECT_EQ(fs.Get(wrong_key, data_out.value, data_out.size), response_type::NOT_FOUND);
 
     /// Actual Get()
-    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
-    EXPECT_EQ( size_out, test_data.size);
+    EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
+    EXPECT_EQ(data_out.size, test_data.size);
 
     fs.EraseAll();
     boost::filesystem::remove_all(kTestDbPath + "/0");
@@ -80,17 +74,15 @@ TEST(FileSystem, Get) {
 TEST(FileSystem, Remove) {
     /// Test values
     auto test_data = prepare_test();
-    FileSystem fs(kTestDbPath + "/0");
+    common::utils::Data data_out;
 
-    /// Empty arguments for Get()
-    uint8_t* value_out = nullptr;
-    size_t size_out = 0;
+    FileSystem fs(kTestDbPath + "/0");
 
     /// Remove() from empty db
     fs.EraseAll();
     EXPECT_EQ(fs.Remove(test_data.key), response_type::NOT_FOUND);
 
-    fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()),test_data.size);
+    fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
 
     /// Remove() wrong key
     std::string wrong_key = "wrong_key";
@@ -98,7 +90,7 @@ TEST(FileSystem, Remove) {
 
     /// Actual Remove()
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
-    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::NOT_FOUND);
+    EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::NOT_FOUND);
 
     fs.EraseAll();
     boost::filesystem::remove_all(kTestDbPath + "/0");
@@ -107,18 +99,15 @@ TEST(FileSystem, Remove) {
 TEST(FileSystem, Complex_Test) {
     /// Test values
     auto test_data = prepare_test();
+    common::utils::Data data_out;
 
     FileSystem fs(kTestDbPath + "/0");
-
-    /// Empty arguments for Get()
-    uint8_t* value_out = nullptr;
-    size_t size_out = 0;
 
     // it's important to keep them together
     // so the db won't be filled with same pairs
     EXPECT_EQ(fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size), response_type::OK);
-    EXPECT_EQ(fs.Get(test_data.key, value_out, size_out), response_type::OK);
-    EXPECT_EQ( size_out, test_data.size);
+    EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
+    EXPECT_EQ(data_out.size, test_data.size);
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
     fs.EraseAll();
     boost::filesystem::remove_all(kTestDbPath + "/0");

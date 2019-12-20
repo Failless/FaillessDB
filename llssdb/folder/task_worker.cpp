@@ -14,8 +14,6 @@
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
 
-#define MAX_BUFFER 20000
-
 namespace failless::db::folder {
 
 using common::enums::response_type;
@@ -127,12 +125,7 @@ response_type TaskWorker::Read(common::utils::Data& data) {
         BOOST_LOG_TRIVIAL(debug) << "\"" << data.key << "\" retrieved from RAM";
         response = response_type::OK;
     } else {
-        auto value_out = new uint8_t[MAX_BUFFER];
-        size_t size_out = 0;
-        response = fs_->Get(data.key, value_out, size_out);
-        data_out.value = std::vector(value_out[0], value_out[size_out - 1]);
-        data_out.value.shrink_to_fit();
-        delete[] value_out;
+        response = fs_->Get(data.key, data.value, data.size);
         // the data is not present in local storage for a reason
         // so first check RAM condition and then load
     }
