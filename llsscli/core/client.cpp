@@ -83,6 +83,8 @@ size_t Client::ExecQuery_() {
         break;
         CASE("KILL") : Kill_();
         break;
+        CASE("RM") : RemoveKey_();
+        break;
     DEFAULT:
         std::cout << "[CLIENT] Error with base command!" << std::endl;
         break;
@@ -294,7 +296,7 @@ size_t Client::Kill_() {
 
         // Init user Data struct
         common::utils::Data data;
-        std::stringstream folder_ss(query_tokens_[2]);
+        std::stringstream folder_ss(query_tokens_[1]);
         folder_ss >> data.folder_id;
 
         // Init user Task struct
@@ -311,6 +313,32 @@ size_t Client::Kill_() {
         ExecNet_();
     } else {
         std::cout << "[CLIENT] Error with KILL command!" << std::endl;
+    }
+    return 0;
+}
+
+size_t Client::RemoveKey_() {
+    if (query_tokens_.size() == 2) {
+
+        // Init user Data struct
+        common::utils::Data data;
+        std::stringstream folder_ss(query_tokens_[1]);
+        folder_ss >> data.folder_id;
+
+        // Init user Task struct
+        current_task_.reset(new common::utils::Packet());
+        current_task_->login = config_.user_name;
+        current_task_->pass = config_.user_pass;
+        current_task_->data = data;
+        current_task_->command = common::enums::operators::DELETE;
+        current_task_->ret_value = common::enums::response_type::NOT_SET;
+        current_task_->request = config_.user_request;
+
+        SerializeQuery_();
+
+        ExecNet_();
+    } else {
+        std::cout << "[CLIENT] Error with DELETE command!" << std::endl;
     }
     return 0;
 }

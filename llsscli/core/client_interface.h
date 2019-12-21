@@ -31,6 +31,7 @@ class ClientInterface : boost::noncopyable {
     virtual size_t Disconnect_() = 0;
     virtual size_t Register_() = 0;
     virtual size_t Kill_() = 0;
+    virtual size_t RemoveKey_() = 0;
 
     virtual size_t GeneralCallback_(char* response_data, size_t bytes_transferred) = 0;
 };
