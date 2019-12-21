@@ -1,13 +1,16 @@
 #include "llssdb/folder/task_worker.h"
 
+#include <iostream>
+#include <memory>
+
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
-#include <iostream>
-#include <memory>
+
+
 #include "llss3p/enums/operators.h"
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
@@ -31,17 +34,19 @@ void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn,
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
                        std::string storage_path)
     : input_queue_(queue), alive_(true) {
-    if ( storage_path.empty() ) {
+//    if ( storage_path.empty() ) {
         storage_path = "/tmp/storage";
-    }
+//    }
     user_path_ = std::move(storage_path) + "/" + input_queue_.Pop()->GetPacket()->login;
     if ( !boost::filesystem::exists(user_path_) ) {
         boost::filesystem::create_directory(user_path_);
         BOOST_LOG_TRIVIAL(debug) << "Created new folder at " << user_path_;
+    } else {
+        BOOST_LOG_TRIVIAL(debug) << "Found folder at " << user_path_;
     }
 
     /// Find amount of users' databases TODO(EgorBedov): improve it later
-    for (size_t folder_id = 0; folder_id < UINT_MAX; ++folder_id) {
+    for (size_t folder_id = 1; folder_id < UINT_MAX; ++folder_id) {
         if (boost::filesystem::exists(user_path_ + "/" + std::to_string(folder_id))) {
             dbs_.push_back(folder_id);
         } else {
@@ -49,7 +54,7 @@ TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>
         }
     }
     if (dbs_.empty()) {
-        BOOST_LOG_TRIVIAL(info) << "Created new db for new user at " << user_path_;
+        BOOST_LOG_TRIVIAL(info) << "Creating new db for new user at " << user_path_;
         // Don't invoke virtual member functions from constructor
         // TODO(EgorBedov): rewrite it
         Create_();
@@ -76,29 +81,37 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
     }
     switch (conn->GetPacket()->command) {
         case common::enums::operators::GET:
+            BOOST_LOG_TRIVIAL(debug) << "Received command GET";
             SendAnswer_(conn, Read_(conn->GetPacket()->data), true);
             break;
         case common::enums::operators::SET:
+            BOOST_LOG_TRIVIAL(debug) << "Received command SET";
             SendAnswer_(conn, Set_(conn->GetPacket()->data), false);
             break;
         case common::enums::operators::UPDATE:
+            BOOST_LOG_TRIVIAL(debug) << "Received command UPDATE";
             SendAnswer_(conn, Update_(conn->GetPacket()->data), false);
             break;
         case common::enums::operators::DELETE:
+            BOOST_LOG_TRIVIAL(debug) << "Received command DELETE";
             SendAnswer_(conn, Delete_(conn->GetPacket()->data), false);
             break;
         case common::enums::operators::CONNECT:
+            BOOST_LOG_TRIVIAL(debug) << "Received command CONNECT";
             SendAnswer_(conn, Connect_(conn->GetPacket()->data), false);
             break;
         case common::enums::operators::DISCONNECT:
+            BOOST_LOG_TRIVIAL(debug) << "Received command DISCONNECT";
             fs_.reset();
             SendAnswer_(conn, common::enums::response_type::OK, false);
             BOOST_LOG_TRIVIAL(info) << "Disconnected from DB";
             break;
         case common::enums::operators::CREATE:  // create new folder for the same user
+            BOOST_LOG_TRIVIAL(debug) << "Received command CREATE";
             SendAnswer_(conn, Create_(), false);
             break;
         case common::enums::operators::KILL:
+            BOOST_LOG_TRIVIAL(debug) << "Received command KILL";
             BOOST_LOG_TRIVIAL(info) << "TaskWorker finished working";
             alive_ = false;
             break;
@@ -194,10 +207,11 @@ enums::response_type TaskWorker::Create_() {
     boost::filesystem::create_directory(new_folder_path + "/db");
     boost::filesystem::create_directory(new_folder_path + "/backup");
 
+    BOOST_LOG_TRIVIAL(info) << "Created new folder at " << new_folder_path;
+
     /// Switch FileSystem
     fs_ = std::make_unique<FileSystem>(new_folder_path);
 
-    BOOST_LOG_TRIVIAL(info) << "Created new folder at " << new_folder_path;
     return enums::response_type::OK;
 }
 
@@ -211,6 +225,7 @@ common::enums::response_type TaskWorker::Connect_(common::utils::Data &data) {
     /// Switch FileSystem
     fs_.reset();
     fs_ = std::make_unique<FileSystem>(new_folder_path);
+    BOOST_LOG_TRIVIAL(info) << "Connected to db at " << new_folder_path;
 
     return common::enums::response_type::OK;
 }

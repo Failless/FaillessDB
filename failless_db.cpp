@@ -24,6 +24,12 @@ int main(/*int argc, char **argv*/) {
         new failless::db::engine::ServerManager(queue));
     manager->SetSettings(settings);
 
+    std::thread start_manager(StartManager, manager);
+    std::unique_ptr<failless::db::network::ITcpServer> tcp_server(
+        new failless::db::network::TcpServer(queue, "127.0.0.1", 11556));
+    tcp_server->Listen();
+    start_manager.join();
+    /*
     // daemon code goes below
     int pid;
     pid = fork();
@@ -46,6 +52,7 @@ int main(/*int argc, char **argv*/) {
         // close(STDOUT_FILENO);
         // close(STDERR_FILENO);
 
+
         std::thread start_manager(StartManager, manager);
         std::unique_ptr<failless::db::network::ITcpServer> tcp_server(
             new failless::db::network::TcpServer(queue, "127.0.0.1", 11556));
@@ -57,4 +64,5 @@ int main(/*int argc, char **argv*/) {
     {
         return 0;
     }
+    */
 }
