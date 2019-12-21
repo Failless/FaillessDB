@@ -49,10 +49,10 @@ bool FileSystem::OpenDB_() {
     Status s = DB::Open(options, db_path_, &db_);
     if (!s.ok()) {
         is_open_ = false;
-        BOOST_LOG_TRIVIAL(error) << "Failed to open db at " << db_path_;
+        BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to open db at " << db_path_;
     } else {
         is_open_ = true;
-        BOOST_LOG_TRIVIAL(info) << "Successfully opened db at " << db_path_;
+        BOOST_LOG_TRIVIAL(info) << "[FS]: Successfully opened db at " << db_path_;
         BackUp_();
     }
     return is_open_;
@@ -64,7 +64,7 @@ void FileSystem::CloseDB_() {
         is_open_ = false;
         delete db_;
         delete backup_engine_;
-        BOOST_LOG_TRIVIAL(info) << "Closed db at " << folder_path_;
+        BOOST_LOG_TRIVIAL(info) << "[FS]: Closed db at " << folder_path_;
     }
 }
 
@@ -73,12 +73,12 @@ void FileSystem::BackUp_() {
     if (s.ok()) {
         s = backup_engine_->CreateNewBackup(db_);
         if (s.ok()) {
-            BOOST_LOG_TRIVIAL(debug) << "Backed up db at " << backup_path_;
+            BOOST_LOG_TRIVIAL(debug) << "[FS]: Backed up db at " << backup_path_;
         } else {
-            BOOST_LOG_TRIVIAL(error) << "Failed to backup db at " << backup_path_;
+            BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to backup db at " << backup_path_;
         }
     } else {
-        BOOST_LOG_TRIVIAL(error) << "Failed to start BackupEngine at " << backup_path_;
+        BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to start BackupEngine at " << backup_path_;
     }
 }
 
@@ -87,9 +87,9 @@ bool FileSystem::RestoreFromBackup() {
     Status s = BackupEngineReadOnly::Open(Env::Default(), BackupableDBOptions(backup_path_), &r_backup_engine);
     if (s.ok()) {
         r_backup_engine->RestoreDBFromLatestBackup(db_path_, db_path_);
-        BOOST_LOG_TRIVIAL(info) << "Successfully restored db at " << db_path_;
+        BOOST_LOG_TRIVIAL(info) << "[FS]: Successfully restored db at " << db_path_;
     } else {
-        BOOST_LOG_TRIVIAL(error) << "Failed to restore db at " << db_path_;
+        BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to restore db at " << db_path_;
     }
     delete r_backup_engine;
     return s.ok();
@@ -101,17 +101,17 @@ response_type FileSystem::Get(const std::string &key, std::vector<uint8_t>& valu
         auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
         if ( status.IsNotFound() ) {
-            BOOST_LOG_TRIVIAL(error) << "Key \"" << key << "\" doesn't exist";
+            BOOST_LOG_TRIVIAL(error) << "[FS]: Key \"" << key << "\" doesn't exist";
             return response_type::NOT_FOUND;
         }
 
         /// Copy to output arguments
         size_out = pinnable_value.size();
         value_out = std::vector<uint8_t>(pinnable_value.data()[0], pinnable_value.data()[size_out - 1]);
-        BOOST_LOG_TRIVIAL(debug) << "\"" << key << "\" retrieved from HDD";
+        BOOST_LOG_TRIVIAL(debug) << "[FS]: \"" << key << "\" retrieved from HDD";
         return response_type::OK;
     } else {
-        BOOST_LOG_TRIVIAL(error) << "DB isn't open";
+        BOOST_LOG_TRIVIAL(error) << "[FS]: DB isn't open";
         return response_type::SERVER_ERROR;
     }
 }
@@ -126,13 +126,13 @@ response_type FileSystem::Set(common::utils::Data& data) {
 
         auto status = db_->Put(WriteOptions(), data.key, string_value);
         if (!status.ok()) {
-            BOOST_LOG_TRIVIAL(error) << "Value of size " << data.size << " was not loaded into HDD";
+            BOOST_LOG_TRIVIAL(error) << "[FS]: Value of size " << data.size << " was not loaded into HDD";
             return response_type::SERVER_ERROR;
         }
-        BOOST_LOG_TRIVIAL(debug) << "Value of size " << data.size << " was loaded into HDD";
+        BOOST_LOG_TRIVIAL(debug) << "[FS]: Value of size " << data.size << " was loaded into HDD";
         return response_type::OK;
     } else {
-        BOOST_LOG_TRIVIAL(error) << "DB isn't open";
+        BOOST_LOG_TRIVIAL(error) << "[FS]: DB isn't open";
         return response_type::SERVER_ERROR;
     }
 }
@@ -143,26 +143,26 @@ response_type FileSystem::Remove(const std::string &key) {
         auto status = db_->Get(ReadOptions(), key, new std::string);
 
         if (status.IsNotFound()) {
-            BOOST_LOG_TRIVIAL(error) << "Key \"" << key << "\" doesn't exist in db";
+            BOOST_LOG_TRIVIAL(error) << "[FS]: Key \"" << key << "\" doesn't exist in db";
             return response_type::NOT_FOUND;
         }
 
         /// Remove key
         status = db_->Delete(WriteOptions(), key);
         if (!status.ok()) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to delete a key \"" << key << "\"";
+            BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to delete a key \"" << key << "\"";
             return response_type::SERVER_ERROR;
         }
-        BOOST_LOG_TRIVIAL(debug) << "Key \"" << key << "\" erased from HDD";
+        BOOST_LOG_TRIVIAL(debug) << "[FS]: Key \"" << key << "\" erased from HDD";
         return response_type::OK;
     } else {
-        BOOST_LOG_TRIVIAL(error) << "DB isn't open";
+        BOOST_LOG_TRIVIAL(error) << "[FS]: DB isn't open";
         return response_type::SERVER_ERROR;
     }
 }
 
 void FileSystem::EraseAll() {
-    BOOST_LOG_TRIVIAL(info) << "Erasing db";
+    BOOST_LOG_TRIVIAL(info) << "[FS]: Erasing db";
     /// First of all close DB, otherwise it's undefined behaviour
     CloseDB_();
 
@@ -200,9 +200,9 @@ void FileSystem::LoadInMemory(std::unordered_map<std::string, InMemoryData> &loc
         }
     }
     if (all) {
-        BOOST_LOG_TRIVIAL(info) << "Everything was loaded into RAM";
+        BOOST_LOG_TRIVIAL(info) << "[FS]: Everything was loaded into RAM";
     } else {
-        BOOST_LOG_TRIVIAL(info) << "Not everything was loaded into RAM";
+        BOOST_LOG_TRIVIAL(info) << "[FS]: Not everything was loaded into RAM";
     }
 }
 

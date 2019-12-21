@@ -18,7 +18,7 @@ int main(/*int argc, char **argv*/) {
     failless::db::utils::Settings settings;
     failless::db::utils::ConfigManager config_manager("../failless.conf");
     config_manager.Initialize(settings);
-    failless::common::utils::BoostLogger::filter_logging(boost::log::trivial::info);
+    failless::common::utils::BoostLogger::filter_logging(boost::log::trivial::debug);
     failless::common::utils::Queue<std::shared_ptr<failless::db::network::Connection>> queue;
     std::shared_ptr<failless::db::engine::IServerManager> manager(
         new failless::db::engine::ServerManager(queue));

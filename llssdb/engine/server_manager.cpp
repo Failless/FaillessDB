@@ -1,6 +1,8 @@
 #include "llssdb/engine/server_manager.h"
-#include <iostream>
+
 #include <thread>
+
+#include <boost/log/trivial.hpp>
 
 namespace failless {
 namespace db {
@@ -8,6 +10,7 @@ namespace engine {
 
 void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* queue,
                   const utils::WorkerSettings& settings) {
+    BOOST_LOG_TRIVIAL(info) << "[SM]: Starting new thread for TaskWorker";
     std::unique_ptr<folder::ITaskWorker> worker(
         new folder::TaskWorker(*queue, const_cast<std::string&>(settings.db_path)));
     worker->Work();
@@ -33,6 +36,7 @@ void ServerManager::Run() {
         connection->GetMetaData(task);
         common::utils::Packet packet;
         if (task.command == common::enums::operators::REG) {
+            BOOST_LOG_TRIVIAL(debug) << "[SM]: Received command REG";
             packet.ret_value = common::enums::response_type::OK;
             if (users_->Registration(*task.login, *task.password, 0)) {
                 packet.ret_value = common::enums::response_type::OK;
@@ -51,6 +55,7 @@ void ServerManager::Run() {
 
         switch (task.command) {
             case common::enums::operators::CREATE: {
+                BOOST_LOG_TRIVIAL(debug) << "[SM]: Received command CREATE";
                 //                common::utils::Queue<std::shared_ptr<network::Connection>>
                 //                folder_queue;
                 if (!task.folder_id || task.folder_id > 15) {
@@ -63,9 +68,9 @@ void ServerManager::Run() {
                 connection->GetPacket()->data.folder_id = task.folder_id;
                 folders_[task.folder_id].queue.Push(connection);
                 folders_[task.folder_id].exist = true;
+                BOOST_LOG_TRIVIAL(info) << "[SM]: Sending task to create new folder";
                 std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_);
                 folders_[task.folder_id].tread = std::move(folder_run);
-                std::cout << "Created new folder with id " << task.folder_id << std::endl;
                 break;
             }
             case common::enums::operators::CONNECT: {
