@@ -35,6 +35,7 @@ class TaskWorker : public ITaskWorker {
     common::enums::response_type Delete_(common::utils::Data& data) override;
     common::enums::response_type Create_() override;
     common::enums::response_type Connect_(common::utils::Data& data) override;
+//    common::enums::response_type DestroyDB_() override;
 
     void LoadInMemory_();
     void UnloadFromMemory_();

@@ -99,18 +99,19 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command CONNECT";
             SendAnswer_(conn, Connect_(conn->GetPacket()->data), false);
             break;
-        case common::enums::operators::DISCONNECT:
-            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command DISCONNECT";
-            fs_.reset();
-            SendAnswer_(conn, common::enums::response_type::OK, false);
-            BOOST_LOG_TRIVIAL(info) << "[TW]: Disconnected from DB";
+        /// Destroy DB
+        case common::enums::operators::KILL:
+            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command KILL which destroys db (under construction)";
+//            SendAnswer_(conn, Destroy_(conn->GetPacket()->data), false);
+            SendAnswer_(conn, enums::response_type::OK, false);
             break;
         case common::enums::operators::CREATE:  // create new folder for the same user
             BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command CREATE";
             SendAnswer_(conn, Create_(), false);
             break;
-        case common::enums::operators::KILL:
-            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command KILL";
+        /// Kill thread
+        case common::enums::operators::DISCONNECT:
+            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command DISCONNECT which for some reason kills thread";
             BOOST_LOG_TRIVIAL(info) << "[TW]: TaskWorker finished working";
             alive_ = false;
             break;
