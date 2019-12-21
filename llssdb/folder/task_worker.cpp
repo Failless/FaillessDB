@@ -113,6 +113,7 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
         case common::enums::operators::DISCONNECT:
             BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command DISCONNECT which for some reason kills thread";
             BOOST_LOG_TRIVIAL(info) << "[TW]: TaskWorker finished working";
+            SendAnswer_(conn, enums::response_type::OK, false);
             alive_ = false;
             break;
         default:
