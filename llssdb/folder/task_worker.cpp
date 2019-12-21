@@ -128,9 +128,17 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
     /// Update_ in-memory storage
     if (result == enums::response_type::OK) {
         // TODO(EgorBedov): check RAM condition before loading in-memory
-        auto valid = local_storage_.emplace(
-            std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
-        if (valid.second) {
+        auto it = local_storage_.find(data.key);
+        bool valid = false;
+        if ( it != local_storage_.end() ) {
+            it->second.value = data.value;
+            it->second.size = data.size;
+            valid = true;
+        } else {
+            valid = local_storage_.emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true))).second;
+        }
+
+        if (valid) {
             BOOST_LOG_TRIVIAL(debug)
                 << "[TW]: Value of size " << data.size << " was loaded into RAM";
         } else {
