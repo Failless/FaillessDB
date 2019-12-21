@@ -22,6 +22,7 @@ struct Settings {
     bool setonly;
     bool readonly;
     bool lua;
+    bool do_backup;
     int users_to_table;
     int port;
 
@@ -39,6 +40,7 @@ struct Settings {
           setonly(false),
           readonly(false),
           lua(false),
+          do_backup(false),
           users_to_table(1),
           port(8888) {}
 };
