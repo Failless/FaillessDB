@@ -15,14 +15,14 @@ namespace auth {
 struct UserInfo {
     std::string login;
     unsigned char pass_hash[SHA256_DIGEST_LENGTH]{};
-    boost::uuids::uuid client_id{};
+    // boost::uuids::uuid client_id{};
     bool is_conn{};
     int table_id{};
 
     explicit UserInfo(std::string user_login)
         : login(std::move(user_login)),
           pass_hash(""),
-          client_id(boost::uuids::random_generator()()),
+          // client_id(boost::uuids::random_generator()()),
           is_conn(false),
           table_id(-1) {}
 

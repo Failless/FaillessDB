@@ -5,6 +5,9 @@
 #include <map>
 #include <string>
 
+// path to file with users data
+const std::string kUsersPath = "/tmp/users.conf";
+
 namespace failless {
 namespace db {
 namespace auth {

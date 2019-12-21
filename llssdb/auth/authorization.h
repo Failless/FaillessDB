@@ -13,7 +13,7 @@ namespace auth {
 
 class Authorization : public IAuthorization {
  public:
-    Authorization() = default;
+    explicit Authorization();
 
     explicit Authorization(std::string login);
 

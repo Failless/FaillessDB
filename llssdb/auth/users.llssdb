@@ -1,0 +1,12 @@
+login = AAAA
+is_conn = 0
+table_id = 0
+pass_hash = rrrtttffflllaartttffflllrrrtttff
+
+
+login = fuck
+is_conn = 1
+table_id = 1
+pass_hash = rrrtttffflllrrrtttffflllrrrtttff
+
+
