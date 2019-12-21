@@ -123,8 +123,7 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
 
 enums::response_type TaskWorker::Set_(common::utils::Data& data) {
     /// Create_ key-value pair(s) on hdd
-    enums::response_type result =
-        fs_->Set(data.key, const_cast<uint8_t*>(data.value.data()), data.size);
+    enums::response_type result = fs_->Set(data);
 
     /// Update_ in-memory storage
     if (result == enums::response_type::OK) {

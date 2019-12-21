@@ -10,6 +10,7 @@
 #include <boost/noncopyable.hpp>
 
 #include "llss3p/enums/operators.h"
+#include "llss3p/utils/data.h"
 #include "llssdb/folder/in_memory_data.h"
 
 namespace failless::db::folder {
@@ -20,7 +21,7 @@ public:
     virtual ~FileSystemInterface() = default;
 
     virtual common::enums::response_type Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) = 0;
-    virtual common::enums::response_type Set(const std::string &key, uint8_t *value_in, size_t size_in) = 0;
+    virtual common::enums::response_type Set(common::utils::Data& data) = 0;
     virtual common::enums::response_type Remove(const std::string &key) = 0;
 
     virtual void EraseAll() = 0;

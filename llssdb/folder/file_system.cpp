@@ -116,20 +116,20 @@ response_type FileSystem::Get(const std::string &key, std::vector<uint8_t>& valu
     }
 }
 
-response_type FileSystem::Set(const std::string &key, uint8_t *value_in, size_t size_in) {
+response_type FileSystem::Set(common::utils::Data& data) {
     if (is_open_) {
         std::string string_value{};
 
-        for (size_t iii = 0; iii < size_in; ++iii) {
-            string_value += std::to_string(value_in[iii]);
+        for ( const auto& byte: data.value ) {
+            string_value += std::to_string(byte);
         }
 
-        auto status = db_->Put(WriteOptions(), key, string_value);
+        auto status = db_->Put(WriteOptions(), data.key, string_value);
         if (!status.ok()) {
-            BOOST_LOG_TRIVIAL(error) << "Value of size " << size_in << " was not loaded into HDD";
+            BOOST_LOG_TRIVIAL(error) << "Value of size " << data.size << " was not loaded into HDD";
             return response_type::SERVER_ERROR;
         }
-        BOOST_LOG_TRIVIAL(debug) << "Value of size " << size_in << " was loaded into HDD";
+        BOOST_LOG_TRIVIAL(debug) << "Value of size " << data.size << " was loaded into HDD";
         return response_type::OK;
     } else {
         BOOST_LOG_TRIVIAL(error) << "DB isn't open";
@@ -140,8 +140,7 @@ response_type FileSystem::Set(const std::string &key, uint8_t *value_in, size_t 
 response_type FileSystem::Remove(const std::string &key) {
     if (is_open_) {
         /// Find key first
-        auto value = new std::string;
-        auto status = db_->Get(ReadOptions(), key, value);
+        auto status = db_->Get(ReadOptions(), key, new std::string);
 
         if (status.IsNotFound()) {
             BOOST_LOG_TRIVIAL(error) << "Key \"" << key << "\" doesn't exist in db";

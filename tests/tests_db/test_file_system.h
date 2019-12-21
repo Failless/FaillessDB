@@ -37,7 +37,7 @@ TEST(FileSystem, Set) {
 
     FileSystem fs(kTestDbPath + "/1");
 
-    fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
+    fs.Set(test_data);
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
     EXPECT_EQ(data_out.size, test_data.size);
 
@@ -57,7 +57,7 @@ TEST(FileSystem, Get) {
     fs.EraseAll();
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::NOT_FOUND);
 
-    fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
+    fs.Set(test_data);
 
     /// Get() wrong key
     std::string wrong_key = "wrong_key";
@@ -82,7 +82,7 @@ TEST(FileSystem, Remove) {
     fs.EraseAll();
     EXPECT_EQ(fs.Remove(test_data.key), response_type::NOT_FOUND);
 
-    fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size);
+    fs.Set(test_data);
 
     /// Remove() wrong key
     std::string wrong_key = "wrong_key";
@@ -103,7 +103,7 @@ TEST(FileSystem, Complex_Test) {
 
     FileSystem fs(kTestDbPath + "/1");
 
-    EXPECT_EQ(fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size), response_type::OK);
+    EXPECT_EQ(fs.Set(test_data), response_type::OK);
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
     EXPECT_EQ(data_out.size, test_data.size);
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
