@@ -153,7 +153,7 @@ size_t Client::SetDBKey_() {
         // Init user Data struct
         std::vector<unsigned char> value =
             std::vector<unsigned char>(query_tokens_[2].begin(), query_tokens_[2].end());
-        common::utils::Data data(1, value.size(), value);
+        common::utils::Data data(config_.payload_dest_id, value.size(), value);
 
         // Init user Task struct
         current_task_.reset(new common::utils::Packet());
@@ -175,7 +175,7 @@ size_t Client::SetDBKey_() {
 }
 size_t Client::GetDBKey_() {
     // Init user Data struct
-    common::utils::Data data;
+    common::utils::Data data(config_.payload_dest_id, 0);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
@@ -196,7 +196,11 @@ size_t Client::CreateDBFolder_() {
     std::string input;
     std::getline(std::cin, input);
     // Init user Data struct
-    common::utils::Data data(std::stoi(input), 16);
+
+    int payload_id = 0;
+    std::stringstream folder_ss(input);
+    folder_ss >> payload_id;
+    common::utils::Data data(payload_id, 0);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
@@ -220,14 +224,14 @@ size_t Client::Connect_() {
 
         // Init user Data struct
         common::utils::Data data;
+        std::stringstream folder_ss(query_tokens_[2]);
+        folder_ss >> data.folder_id;
 
         // Init user Task struct
         current_task_.reset(new common::utils::Packet());
         current_task_->login = query_tokens_[1];
         current_task_->pass = input;
         current_task_->data = data;
-        std::stringstream folder_ss(query_tokens_[2]);
-        folder_ss >> current_task_->data.folder_id;
         current_task_->command = common::enums::operators::CONNECT;
         current_task_->ret_value = common::enums::response_type::NOT_SET;
         current_task_->request = config_.user_request;
@@ -242,7 +246,7 @@ size_t Client::Connect_() {
 }
 size_t Client::Disconnect_() {
     // Init user Data struct
-    common::utils::Data data;
+    common::utils::Data data(config_.payload_dest_id, 0);
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
@@ -293,7 +297,8 @@ size_t Client::Kill_() {
 
         // Init user Data struct
         common::utils::Data data;
-        data.folder_id = std::stoi(query_tokens_[1]);
+        std::stringstream folder_ss(query_tokens_[2]);
+        folder_ss >> data.folder_id;
 
         // Init user Task struct
         current_task_.reset(new common::utils::Packet());
@@ -326,6 +331,10 @@ size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
             config_.user_name = current_task_->login;
             config_.user_pass = current_task_->pass;
             std::cout << "[CALLBACK] User \"" << config_.user_name << "\" with pass \"" << config_.user_pass <<"\" saved!" << std::endl;
+        }
+        if (static_cast<common::enums::operators>(response_task_->command) == common::enums::operators::GET) {
+            config_.payload_dest_id = current_task_->data.folder_id;
+            std::cout << "[CALLBACK] Received DB key \"" << config_.payload_dest_id << "!" << std::endl;
         }
     } catch (std::out_of_range& e) {
         std::cerr << "UNKNOWN RETURN STATUS: " << response_task_->ret_value << std::endl;
