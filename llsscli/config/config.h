@@ -13,36 +13,6 @@ namespace config {
 
 using boost::asio::ip::tcp;
 
-struct Data {
-    // We can not use uint8_t due to https://github.com/msgpack/msgpack-c/issues/243
-    std::unique_ptr<std::vector<unsigned char>> value;
-    size_t size = 0;
-    size_t folder_id = 0;
-    std::unique_ptr<std::string> key;
-
-    // http://ludwig125.hatenablog.com/entry/2017/12/01/232952
-    // http://ludwig125.hatenablog.com/entry/2017/11/22/234335
-    MSGPACK_DEFINE_MAP(value, size, folder_id, key);
-
-    Data() = default;
-    Data(std::unique_ptr<std::vector<unsigned char>>& v, size_t s, size_t f_id,
-         std::unique_ptr<std::string>& k)
-        : value(std::move(v)), size(s), folder_id(f_id), key(std::move(k)) {}
-};
-
-struct Task {
-    std::unique_ptr<std::string> client_id;
-    std::unique_ptr<std::string> query;
-    std::unique_ptr<Data> payload;
-
-    MSGPACK_DEFINE_MAP(client_id, query, payload);
-
-    Task() = default;
-    Task(std::unique_ptr<std::string>& c_id, std::unique_ptr<std::string>& q,
-         std::unique_ptr<Data>& p)
-        : client_id(std::move(c_id)), query(std::move(q)), payload(std::move(p)) {}
-};
-
 struct ClientConfig {
     std::string user_name{};
     std::string user_pass{};
