@@ -144,13 +144,10 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
 enums::response_type TaskWorker::Read_(common::utils::Data& data) {
     auto response = enums::response_type::SERVER_ERROR;
 
-    common::utils::Data data_out;
-    data_out.key = data.key;
-
     /// Grab file from memory if it's in there
     if (!local_storage_.empty() && (local_storage_.at(data.key).in_memory)) {
-        data_out.size = local_storage_.at(data.key).size;
-        data_out.value = local_storage_.at(data.key).value;
+        data.size = local_storage_.at(data.key).size;
+        data.value = local_storage_.at(data.key).value;
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" retrieved from RAM";
         response = enums::response_type::OK;
     } else {
