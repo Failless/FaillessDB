@@ -61,7 +61,7 @@ void NetworkClient::OnConnect_(const boost::system::error_code& ErrorCode,
         std::shared_ptr<std::string> str_task =
             std::make_shared<std::string>(task->client_task->str());
 
-        std::cout << "[NETWORK] Entered: " << task->client_task->str() << std::endl;
+        std::cout << "[NETWORK] Entered and serialized: " << task->client_task->str() << std::endl;
 
         task->socket->async_write_some(
             boost::asio::buffer(*str_task, str_task->length()),
@@ -85,7 +85,7 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode, size_
                                std::shared_ptr<config::NetworkConnectTask>& task) {
     std::cout << "[NETWORK] receiving..." << std::endl;
     if (ErrorCode.value() == boost::system::errc::success) {
-        std::cout << data << "<-data" << std::endl;
+        std::cout << "[NETWORK] Serialized data received\""<< data << "\"" << std::endl;
         task->client_callback->operator()(data, bytes_transferred);
     } else {
         std::cerr << "[NETWORK] ERROR! OnReceive... with error = " << ErrorCode.value()
