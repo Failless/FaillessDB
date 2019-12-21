@@ -72,7 +72,7 @@ void ServerManager::Run() {
                 BOOST_LOG_TRIVIAL(info) << "[SM]: Sending task to create new folder";
                 std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_,
                                        connection->GetPacket()->login);
-                folders_[task.folder_id].tread = std::move(folder_run);
+                folders_[task.folder_id].thread = std::move(folder_run);
                 break;
             }
             case common::enums::operators::CONNECT: {
@@ -80,7 +80,7 @@ void ServerManager::Run() {
                 folders_[idx].exist = true;
                 std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_,
                                        connection->GetPacket()->login);
-                folders_[task.folder_id].tread = std::move(folder_run);
+                folders_[task.folder_id].thread = std::move(folder_run);
                 folders_[idx].queue.Push(connection);
                 break;
             }
@@ -89,11 +89,12 @@ void ServerManager::Run() {
                 short idx = connection->GetPacket()->data.folder_id;
                 folders_[idx].queue.Push(connection);
                 folders_[idx].exist = false;
-                folders_[task.folder_id].tread.join();
+//                folders_[task.folder_id].thread.detach();
                 // TODO(rowbotman): check how is it work
                 //                folders_.erase(folders_.begin() + idx);
                 break;
             }
+
             default: {
                 short idx = connection->GetPacket()->data.folder_id;
                 if (folders_[idx].exist) {

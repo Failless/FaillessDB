@@ -21,7 +21,7 @@ void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* qu
 
 struct VirtualFolder {
     bool exist = false;
-    std::thread tread;
+    std::thread thread;
     common::utils::Queue<::std::shared_ptr<network::Connection>> queue;
     VirtualFolder() = default;
 };
@@ -50,9 +50,9 @@ class ServerManager : public IServerManager {
     common::enums::operators HandleRequest_(utils::Task& Task);
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue_;
-    ::std::vector<VirtualFolder> folders_;
+    std::vector<VirtualFolder> folders_;
     bool is_run_ = false;
-    ::std::unique_ptr<auth::IAuthorization> users_;
+    std::unique_ptr<auth::IAuthorization> users_;
     utils::WorkerSettings w_settings_;
 };
 

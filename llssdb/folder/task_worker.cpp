@@ -7,6 +7,7 @@
 #include <boost/log/trivial.hpp>
 #include <iostream>
 #include <memory>
+#include <thread>
 #include "llss3p/enums/operators.h"
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
@@ -34,7 +35,7 @@ TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>
     storage_path = "/tmp/failless";
     boost::filesystem::create_directory(storage_path);
     //    }
-//    user_path_ = std::move(storage_path) + "/" + input_queue_.Pop()->GetPacket()->login;
+    //    user_path_ = std::move(storage_path) + "/" + input_queue_.Pop()->GetPacket()->login;
     boost::filesystem::create_directory(user_path_);
     BOOST_LOG_TRIVIAL(debug) << "[TW]: Created new folder at " << user_path_;
 
@@ -66,7 +67,8 @@ void TaskWorker::Work() {
         if (!input_queue_.IsEmpty()) {
             DoTask(input_queue_.Pop());
         } else {
-            sleep(1);
+            std::this_thread::sleep_for(std::chrono::microseconds(10));
+            continue;  // May by it will be better   if I change if-body to all code below here
         }
     }
 }
@@ -76,7 +78,9 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
     if (conn->GetPacket()->data.key.empty()) {
         std::vector<std::string> words;
         boost::split(words, conn->GetPacket()->request, boost::is_any_of(" "));
-        conn->GetPacket()->data.key = words[1];
+        if (words.size() > 1) {
+            conn->GetPacket()->data.key = words[1];
+        }
     }
     switch (conn->GetPacket()->command) {
         case common::enums::operators::GET:
@@ -101,8 +105,9 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             break;
         /// Destroy DB
         case common::enums::operators::KILL:
-            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command KILL which destroys db (under construction)";
-//            SendAnswer_(conn, Destroy_(conn->GetPacket()->data), false);
+            BOOST_LOG_TRIVIAL(debug)
+                << "[TW]: Received command KILL which destroys db (under construction)";
+            //            SendAnswer_(conn, Destroy_(conn->GetPacket()->data), false);
             SendAnswer_(conn, enums::response_type::OK, false);
             break;
         case common::enums::operators::CREATE:  // create new folder for the same user
@@ -111,7 +116,8 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             break;
         /// Kill thread
         case common::enums::operators::DISCONNECT:
-            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command DISCONNECT which for some reason kills thread";
+            BOOST_LOG_TRIVIAL(debug)
+                << "[TW]: Received command DISCONNECT which for some reason kills thread";
             BOOST_LOG_TRIVIAL(info) << "[TW]: TaskWorker finished working";
             SendAnswer_(conn, enums::response_type::OK, false);
             alive_ = false;
@@ -131,12 +137,15 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
         // TODO(EgorBedov): check RAM condition before loading in-memory
         auto it = local_storage_.find(data.key);
         bool valid = false;
-        if ( it != local_storage_.end() ) {
+        if (it != local_storage_.end()) {
             it->second.value = data.value;
             it->second.size = data.size;
             valid = true;
         } else {
-            valid = local_storage_.emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true))).second;
+            valid =
+                local_storage_
+                    .emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)))
+                    .second;
         }
 
         if (valid) {

@@ -253,7 +253,6 @@ size_t Client::Disconnect_() {
     current_task_->pass = config_.user_pass;
     current_task_->data = data;
     current_task_->command = common::enums::operators::DISCONNECT;
-    current_task_->login = query_tokens_[1];
     current_task_->ret_value = common::enums::response_type::NOT_SET;
     current_task_->request = config_.user_request;
 
