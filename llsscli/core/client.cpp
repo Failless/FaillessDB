@@ -321,9 +321,7 @@ size_t Client::RemoveKey_() {
     if (query_tokens_.size() == 2) {
 
         // Init user Data struct
-        common::utils::Data data;
-        std::stringstream folder_ss(query_tokens_[1]);
-        folder_ss >> data.folder_id;
+        common::utils::Data data(config_.payload_dest_id, 0);
 
         // Init user Task struct
         current_task_.reset(new common::utils::Packet());
