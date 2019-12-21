@@ -172,6 +172,7 @@ size_t Client::SetDBKey_() {
 
     return 0;
 }
+
 size_t Client::GetDBKey_() {
     // Init user Data struct
     common::utils::Data data(config_.payload_dest_id, 0);
@@ -243,6 +244,7 @@ size_t Client::Connect_() {
     }
     return 0;
 }
+
 size_t Client::Disconnect_() {
     // Init user Data struct
     common::utils::Data data(config_.payload_dest_id, 0);
@@ -318,7 +320,6 @@ size_t Client::Kill_() {
 
 size_t Client::RemoveKey_() {
     if (query_tokens_.size() == 2) {
-
         // Init user Data struct
         common::utils::Data data(config_.payload_dest_id, 0);
 
@@ -363,10 +364,8 @@ size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
         }
         if (static_cast<common::enums::operators>(response_task_->command) ==
             common::enums::operators::GET) {
-
             std::string str(response_task_->data.value.begin(), response_task_->data.value.end());
-            std::cout << "[CALLBACK] Received value \"" << str << "\"!"
-                      << std::endl;
+            std::cout << "[CALLBACK] Received value \"" << str << "\"!" << std::endl;
         }
     } catch (std::out_of_range& e) {
         std::cerr << "UNKNOWN RETURN STATUS: " << response_task_->ret_value << std::endl;
