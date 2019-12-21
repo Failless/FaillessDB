@@ -333,7 +333,14 @@ size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
         if (static_cast<common::enums::operators>(response_task_->command) ==
             common::enums::operators::CONNECT) {
             config_.payload_dest_id = current_task_->data.folder_id;
-            std::cout << "[CALLBACK] Received DB key \"" << config_.payload_dest_id << "!"
+            std::cout << "[CALLBACK] Received DB key \"" << config_.payload_dest_id << "\"!"
+                      << std::endl;
+        }
+        if (static_cast<common::enums::operators>(response_task_->command) ==
+            common::enums::operators::GET) {
+
+            std::string str(response_task_->data.value.begin(), response_task_->data.value.end());
+            std::cout << "[CALLBACK] Received value \"" << str << "\"!"
                       << std::endl;
         }
     } catch (std::out_of_range& e) {
