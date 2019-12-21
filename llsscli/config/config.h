@@ -45,6 +45,7 @@ struct Task {
 
 struct ClientConfig {
     std::string user_name{};
+    std::string user_pass{};
     std::string user_request{};
 
     int payload_dest_id = 0;
@@ -55,9 +56,10 @@ struct ClientConfig {
 
     ClientConfig() = default;
 
-    ClientConfig(std::string user_n, std::string user_r, int payload_d, std::string payload_k,
+    ClientConfig(std::string user_n, std::string user_p, std::string user_r, int payload_d, std::string payload_k,
                  std::string db_h, std::string db_p)
         : user_name(std::move(user_n)),
+          user_pass(std::move(user_p)),
           user_request(std::move(user_r)),
           payload_dest_id(payload_d),
           payload_key(std::move(payload_k)),
