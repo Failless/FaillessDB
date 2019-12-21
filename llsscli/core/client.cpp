@@ -157,6 +157,8 @@ size_t Client::SetDBKey_() {
 
         // Init user Task struct
         current_task_.reset(new common::utils::Packet());
+        current_task_->login = config_.user_name;
+        current_task_->pass = config_.user_pass;
         current_task_->data = data;
         current_task_->command = common::enums::operators::SET;
         current_task_->ret_value = common::enums::response_type::NOT_SET;
@@ -177,6 +179,8 @@ size_t Client::GetDBKey_() {
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
+    current_task_->login = config_.user_name;
+    current_task_->pass = config_.user_pass;
     current_task_->data = data;
     current_task_->command = common::enums::operators::GET;
     current_task_->ret_value = common::enums::response_type::NOT_SET;
@@ -196,6 +200,8 @@ size_t Client::CreateDBFolder_() {
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
+    current_task_->login = config_.user_name;
+    current_task_->pass = config_.user_pass;
     current_task_->data = data;
     current_task_->command = common::enums::operators::CREATE;
     current_task_->ret_value = common::enums::response_type::NOT_SET;
@@ -240,6 +246,8 @@ size_t Client::Disconnect_() {
 
     // Init user Task struct
     current_task_.reset(new common::utils::Packet());
+    current_task_->login = config_.user_name;
+    current_task_->pass = config_.user_pass;
     current_task_->data = data;
     current_task_->command = common::enums::operators::DISCONNECT;
     current_task_->login = query_tokens_[1];
@@ -289,6 +297,7 @@ size_t Client::Kill_() {
 
         // Init user Task struct
         current_task_.reset(new common::utils::Packet());
+        current_task_->login = config_.user_name;
         current_task_->pass = input;
         current_task_->data = data;
         current_task_->command = common::enums::operators::REG;
@@ -313,6 +322,11 @@ size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
                   << kStatusMap.at(
                          static_cast<common::enums::response_type>(response_task_->ret_value))
                   << std::endl;
+        if (static_cast<common::enums::operators>(response_task_->command) == common::enums::operators::CONNECT) {
+            config_.user_name = current_task_->login;
+            config_.user_pass = current_task_->pass;
+            std::cout << "[CALLBACK] User \"" << config_.user_name << "\" with pass \"" << config_.user_pass <<"\" saved!" << std::endl;
+        }
     } catch (std::out_of_range& e) {
         std::cerr << "UNKNOWN RETURN STATUS: " << response_task_->ret_value << std::endl;
     }
