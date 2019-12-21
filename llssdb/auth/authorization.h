@@ -31,6 +31,8 @@ class Authorization : public IAuthorization {
     bool CheckCollisions_(const std::string &login);
 
     void Hasher_(const std::string &login, std::string pass, unsigned char *md);
+
+    static bool AddingUser_(const UserInfo &User);
 };
 
 }  // namespace auth

@@ -2,16 +2,16 @@
 
 #include <iostream>
 
+#include <string.h>
+#include <algorithm>
 #include <fstream>
 #include <iostream>
-#include <algorithm>
 #include <map>
-#include <string.h>
 
-#include <boost/log/trivial.hpp>
 #include <openssl/md5.h>
 #include <openssl/sha.h>
 #include <boost/filesystem.hpp>
+#include <boost/log/trivial.hpp>
 
 #include "llss3p/utils/hasher.h"
 
@@ -25,8 +25,7 @@ namespace auth {
  * @param pass
  * @param md <- pointer to hash array. Hasher change it.
  */
-void Authorization::Hasher_(const std::string &login, std::string pass,
-                                      unsigned char *md) {
+void Authorization::Hasher_(const std::string &login, std::string pass, unsigned char *md) {
     std::string salt(pass);
     for (int i = static_cast<int>(login.length()) - 1, j = 0; i >= 0; --i) {
         salt[j++] = login[i];  // salt - reversed login - unique
@@ -103,24 +102,34 @@ bool Authorization::Registration(const std::string &login, const std::string &pa
     memcpy(User.pass_hash, pass_hash, SHA256_DIGEST_LENGTH);
     User.table_id = table_id;
     Users_[login] = User;
-
-
-    // this code is for writing new user in user file (in case if db will crash)
-    std::ofstream filer(kUsersPath, std::ios::app);
-        std::cout << "login: " << User.login << std::endl;
-        filer << "login = " << User.login << std::endl;
-        filer << "is_conn = " << User.is_conn << std::endl;
-        filer << "table_id = " << User.table_id << std::endl;
-        filer << "pass_hash = ";
-        for (int j = 0; j < 32; ++j) {
-            filer << User.pass_hash[j];
-        }
-        filer << std::endl;
-        filer << std::endl;
-        filer << std::endl;
-    filer.close();
-
+    AddingUser_(User);
     BOOST_LOG_TRIVIAL(debug) << "[AUTH]: New user '" << login << "' registered";
+    return true;
+}
+
+/**
+ * this func is for writing new user in user file
+ * (in case if db will crash)
+ */
+bool Authorization::AddingUser_(const UserInfo &User) {
+    std::ofstream filer(kUsersPath, std::ios::app);
+    if (!filer.is_open()) {
+        BOOST_LOG_TRIVIAL(error) << "[AUTH]: Can't add user, file '" << kUsersPath
+                                 << "' can't be opened";
+        return false;
+    }
+    std::cout << "login: " << User.login << std::endl;
+    filer << "login = " << User.login << std::endl;
+    filer << "is_conn = " << User.is_conn << std::endl;
+    filer << "table_id = " << User.table_id << std::endl;
+    filer << "pass_hash = ";
+    for (int j = 0; j < 32; ++j) {
+        filer << User.pass_hash[j];
+    }
+    filer << std::endl;
+    filer << std::endl;
+    filer << std::endl;
+    filer.close();
     return true;
 }
 
@@ -132,7 +141,6 @@ bool Authorization::Registration(const std::string &login, const std::string &pa
 bool Authorization::CheckCollisions_(const std::string &login) { return Users_.count(login) != 0; }
 
 Authorization::Authorization(std::string login) {}
-
 
 /*
  * this func loads users from file in tmp
@@ -156,7 +164,7 @@ Authorization::Authorization() {
     int i = 0;
     std::string login = "";
     while (getline(cFile, line)) {
-        if (i==4) {
+        if (i == 4) {
             Users_[login] = UI;
             i = 0;
         }
