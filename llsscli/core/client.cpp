@@ -3,8 +3,8 @@
 #include "llss3p/enums/operators.h"
 
 #include <algorithm>
-#include <memory>
 #include <boost/algorithm/string.hpp>
+#include <memory>
 #include "llsscli/core/client.h"
 #include "llsscli/utils/str_switch.h"
 
@@ -12,16 +12,14 @@ namespace failless {
 namespace client {
 namespace core {
 
-const std::map<common::enums::response_type, std::string> kStatusMap {
+const std::map<common::enums::response_type, std::string> kStatusMap{
     {common::enums::response_type::OK, "OK"},
     {common::enums::response_type::EXIST, "EXIST"},
     {common::enums::response_type::SERVER_ERROR, "SERVER ERROR"},
     {common::enums::response_type::NOT_DONE, "NOT DONE"},
     {common::enums::response_type::NOT_ALLOWED, "NOT ALLOWED"},
     {common::enums::response_type::NOT_FOUND, "NOT FOUND"},
-    {common::enums::response_type::NOT_SET, "NOT SET"}
-};
-
+    {common::enums::response_type::NOT_SET, "NOT SET"}};
 
 Client::Client() {
     // TODO Check inits' status
@@ -31,8 +29,7 @@ Client::Client() {
         new common::serializer::Serializer<common::utils::Packet>());
 
     general_callback_ = std::make_shared<std::function<size_t(char*, size_t)>>(
-        std::bind(
-            &Client::GeneralCallback_, this, std::placeholders::_1, std::placeholders::_2));
+        std::bind(&Client::GeneralCallback_, this, std::placeholders::_1, std::placeholders::_2));
 }
 
 size_t Client::Run() {
@@ -86,7 +83,8 @@ size_t Client::ExecQuery_() {
         break;
         CASE("KILL") : Kill_();
         break;
-        DEFAULT : std::cout << "[CLIENT] Error with base command!" << std::endl;
+    DEFAULT:
+        std::cout << "[CLIENT] Error with base command!" << std::endl;
         break;
     }
     return 0;
@@ -117,8 +115,7 @@ size_t Client::ReadNetSettings() {
 }
 
 size_t Client::InitNetSettings_() {
-    net_config_ = std::make_shared<config::NetworkConfig>(
-        config_.db_host, config_.db_port);
+    net_config_ = std::make_shared<config::NetworkConfig>(config_.db_host, config_.db_port);
     network_client_ =
         std::unique_ptr<network::NetworkClientInterface>(new network::NetworkClient(net_config_));
     return 0;
@@ -327,14 +324,18 @@ size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
                   << kStatusMap.at(
                          static_cast<common::enums::response_type>(response_task_->ret_value))
                   << std::endl;
-        if (static_cast<common::enums::operators>(response_task_->command) == common::enums::operators::CONNECT) {
+        if (static_cast<common::enums::operators>(response_task_->command) ==
+            common::enums::operators::CONNECT) {
             config_.user_name = current_task_->login;
             config_.user_pass = current_task_->pass;
-            std::cout << "[CALLBACK] User \"" << config_.user_name << "\" with pass \"" << config_.user_pass <<"\" saved!" << std::endl;
+            std::cout << "[CALLBACK] User \"" << config_.user_name << "\" with pass \""
+                      << config_.user_pass << "\" saved!" << std::endl;
         }
-        if (static_cast<common::enums::operators>(response_task_->command) == common::enums::operators::GET) {
+        if (static_cast<common::enums::operators>(response_task_->command) ==
+            common::enums::operators::CONNECT) {
             config_.payload_dest_id = current_task_->data.folder_id;
-            std::cout << "[CALLBACK] Received DB key \"" << config_.payload_dest_id << "!" << std::endl;
+            std::cout << "[CALLBACK] Received DB key \"" << config_.payload_dest_id << "!"
+                      << std::endl;
         }
     } catch (std::out_of_range& e) {
         std::cerr << "UNKNOWN RETURN STATUS: " << response_task_->ret_value << std::endl;
