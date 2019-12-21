@@ -1,16 +1,12 @@
 #include "llssdb/folder/task_worker.h"
-
-#include <iostream>
-#include <memory>
-
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
-
-
+#include <iostream>
+#include <memory>
 #include "llss3p/enums/operators.h"
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
@@ -33,17 +29,20 @@ void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn,
 
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
                        std::string storage_path)
-    : input_queue_(queue), alive_(true) {
-//    if ( storage_path.empty() ) {
-        storage_path = "/tmp/storage";
-//    }
-    user_path_ = std::move(storage_path) + "/" + input_queue_.Pop()->GetPacket()->login;
-    if ( !boost::filesystem::exists(user_path_) ) {
-        boost::filesystem::create_directory(user_path_);
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: Created new folder at " << user_path_;
-    } else {
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: Found folder at " << user_path_;
-    }
+    : input_queue_(queue), user_path_(storage_path), alive_(true) {
+    //    if ( storage_path.empty() ) {
+    storage_path = "/tmp/failless";
+    boost::filesystem::create_directory(storage_path);
+    //    }
+//    user_path_ = std::move(storage_path) + "/" + input_queue_.Pop()->GetPacket()->login;
+    boost::filesystem::create_directory(user_path_);
+    BOOST_LOG_TRIVIAL(debug) << "[TW]: Created new folder at " << user_path_;
+
+    //    if (!boost::filesystem::exists(user_path_)) {
+    //        boost::filesystem::create_directory(user_path_);
+    //    } else {
+    //        BOOST_LOG_TRIVIAL(debug) << "[TW]: Found folder at " << user_path_;
+    //    }
 
     /// Find amount of users' databases TODO(EgorBedov): improve it later
     for (size_t folder_id = 1; folder_id < UINT_MAX; ++folder_id) {
@@ -131,7 +130,8 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
         auto valid = local_storage_.emplace(
             std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
         if (valid.second) {
-            BOOST_LOG_TRIVIAL(debug) << "[TW]: Value of size " << data.size << " was loaded into RAM";
+            BOOST_LOG_TRIVIAL(debug)
+                << "[TW]: Value of size " << data.size << " was loaded into RAM";
         } else {
             BOOST_LOG_TRIVIAL(warning)
                 << "[TW]: Value of size " << data.size << " was not loaded into RAM";
@@ -214,9 +214,9 @@ enums::response_type TaskWorker::Create_() {
     return enums::response_type::OK;
 }
 
-common::enums::response_type TaskWorker::Connect_(common::utils::Data &data) {
+common::enums::response_type TaskWorker::Connect_(common::utils::Data& data) {
     std::string new_folder_path = user_path_ + "/" + std::to_string(data.folder_id);
-    if ( !boost::filesystem::exists(new_folder_path) ) {
+    if (!boost::filesystem::exists(new_folder_path)) {
         BOOST_LOG_TRIVIAL(error) << "[TW]: Folder is not present at " << new_folder_path;
         return common::enums::NOT_FOUND;
     }

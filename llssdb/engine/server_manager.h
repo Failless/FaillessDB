@@ -16,8 +16,8 @@ namespace failless {
 namespace db {
 namespace engine {
 
-void WorkInThread(common::utils::Queue<::std::shared_ptr<network::Connection>>* queue,
-                  const utils::WorkerSettings& settings);
+void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* queue,
+                  const utils::WorkerSettings& settings, std::string login);
 
 struct VirtualFolder {
     bool exist = false;

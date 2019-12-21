@@ -9,10 +9,10 @@ namespace db {
 namespace engine {
 
 void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* queue,
-                  const utils::WorkerSettings& settings) {
+                  const utils::WorkerSettings& settings, std::string login) {
     BOOST_LOG_TRIVIAL(info) << "[SM]: Starting new thread for TaskWorker";
     std::unique_ptr<folder::ITaskWorker> worker(
-        new folder::TaskWorker(*queue, const_cast<std::string&>(settings.db_path)));
+        new folder::TaskWorker(*queue, settings.db_path + "/" + login));
     worker->Work();
 }
 
@@ -38,6 +38,7 @@ void ServerManager::Run() {
         if (task.command == common::enums::operators::REG) {
             BOOST_LOG_TRIVIAL(debug) << "[SM]: Received command REG";
             packet.ret_value = common::enums::response_type::OK;
+            packet.command = common::enums::operators::REG;
             if (users_->Registration(*task.login, *task.password, 0)) {
                 packet.ret_value = common::enums::response_type::OK;
             } else {
@@ -47,11 +48,11 @@ void ServerManager::Run() {
             continue;
         }
 
-//        if (!users_->IsAuth(*task.login, *task.password, 0)) {
-//            packet.ret_value = common::enums::response_type::NOT_ALLOWED;
-//            connection->SendData(packet);
-//            continue;
-//        }
+        //        if (!users_->IsAuth(*task.login, *task.password, 0)) {
+        //            packet.ret_value = common::enums::response_type::NOT_ALLOWED;
+        //            connection->SendData(packet);
+        //            continue;
+        //        }
 
         switch (task.command) {
             case common::enums::operators::CREATE: {
@@ -69,14 +70,16 @@ void ServerManager::Run() {
                 folders_[task.folder_id].queue.Push(connection);
                 folders_[task.folder_id].exist = true;
                 BOOST_LOG_TRIVIAL(info) << "[SM]: Sending task to create new folder";
-                std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_);
+                std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_,
+                                       connection->GetPacket()->login);
                 folders_[task.folder_id].tread = std::move(folder_run);
                 break;
             }
             case common::enums::operators::CONNECT: {
                 short idx = connection->GetPacket()->data.folder_id;
                 folders_[idx].exist = true;
-                std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_);
+                std::thread folder_run(WorkInThread, &folders_[task.folder_id].queue, w_settings_,
+                                       connection->GetPacket()->login);
                 folders_[task.folder_id].tread = std::move(folder_run);
                 folders_[idx].queue.Push(connection);
                 break;
