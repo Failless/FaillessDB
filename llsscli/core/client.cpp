@@ -316,7 +316,6 @@ size_t Client::Kill_() {
 }
 
 size_t Client::GeneralCallback_(char* response_data, size_t bytes_transferred) {
-    std::cout << "[CALLBACK] Raw data response = " << std::endl;
     serializer_->Deserialize(reinterpret_cast<char*>(response_data), bytes_transferred);
     response_task_ = serializer_->GetInConfig();
     try {

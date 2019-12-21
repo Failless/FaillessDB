@@ -85,7 +85,7 @@ void NetworkClient::OnReceive_(const boost::system::error_code& ErrorCode, size_
                                std::shared_ptr<config::NetworkConnectTask>& task) {
     std::cout << "[NETWORK] receiving..." << std::endl;
     if (ErrorCode.value() == boost::system::errc::success) {
-        std::cout << "[NETWORK] Serialized data received\""<< data << "\"" << std::endl;
+        std::cout << "[NETWORK] Serialized data received \""<< data << "\"" << std::endl;
         task->client_callback->operator()(data, bytes_transferred);
     } else {
         std::cerr << "[NETWORK] ERROR! OnReceive... with error = " << ErrorCode.value()
