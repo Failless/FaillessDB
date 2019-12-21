@@ -16,7 +16,8 @@
 #include "llss3p/enums/operators.h"
 #include "llssdb/network/transfer/hookup.h"
 
-std::string kTestDbPath{};
+std::string kTestDbPath("/tmp/storage/test_user");
+std::string kStoragePath("/tmp/storage");
 
 namespace failless::db::tests {
 using ::testing::_;
@@ -24,24 +25,9 @@ using namespace boost::filesystem;
 
 void set_test_db_path() {
     /// DEBUG
-    if ( exists("llssdb/CMakeFiles/llssdb.dir") ) {
-        if ( exists("llssdb/CMakeFiles/llssdb.dir/storage") ) {
-            if ( exists("llssdb/CMakeFiles/llssdb.dir/storage/test_user") ) {
-                detail::remove_all("llssdb/CMakeFiles/llssdb.dir/storage/test_user/");
-            }
-            detail::create_directory("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
-        } else {
-            detail::create_directories("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
-        }
-        kTestDbPath = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
-    }
-    /// DEPLOY
-    else if ( exists("./llssdb/storage/") ) {
-        if ( exists("./llssdb/storage/test_user") ) {
-            detail::remove_all("./llssdb/storage/test_user/");
-        }
-        kTestDbPath = "./llssdb/storage/test_user";
-    }
+    remove_all("/tmp/storage/");
+    create_directory("/tmp/storage");
+    create_directory("/tmp/storage/test_user");
 }
 
 class TestTaskWorker : public folder::TaskWorker {
@@ -82,7 +68,7 @@ public:
 
     MOCK_METHOD3(Get, common::enums::response_type(
             const std::string &key,
-            uint8_t *value_out,
+            std::vector<uint8_t>& value_out,
             size_t& size_out));
 
     MOCK_METHOD3(Set, common::enums::response_type(

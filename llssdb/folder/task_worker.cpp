@@ -32,7 +32,7 @@ TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>
                        std::string storage_path)
     : input_queue_(queue), alive_(true) {
     if ( storage_path.empty() ) {
-        storage_path = "/tmp";
+        storage_path = "/tmp/storage";
     }
     user_path_ = std::move(storage_path) + "/" + input_queue_.Pop()->GetPacket()->login;
     if ( !boost::filesystem::exists(user_path_) ) {

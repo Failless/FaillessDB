@@ -101,7 +101,7 @@ TEST(FileSystem, Complex_Test) {
     auto test_data = prepare_test();
     common::utils::Data data_out;
 
-    FileSystem fs(kTestDbPath + "/0");
+    FileSystem fs(kTestDbPath + "/1");
 
     EXPECT_EQ(fs.Set(test_data.key, const_cast<uint8_t *>(test_data.value.data()), test_data.size), response_type::OK);
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
@@ -109,7 +109,7 @@ TEST(FileSystem, Complex_Test) {
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
 
     fs.EraseAll();
-    boost::filesystem::remove_all(kTestDbPath + "/0");
+    boost::filesystem::remove_all(kTestDbPath + "/1");
 }
 
 
