@@ -16,7 +16,8 @@
 #include "llss3p/enums/operators.h"
 #include "llssdb/network/transfer/hookup.h"
 
-std::string kTestDbPath{};
+std::string kTestDbPath("/tmp/failless/storage/test_user");
+std::string kStoragePath("/tmp/failless/storage");
 
 namespace failless::db::tests {
 using ::testing::_;
@@ -24,33 +25,21 @@ using namespace boost::filesystem;
 
 void set_test_db_path() {
     /// DEBUG
-    if ( exists("llssdb/CMakeFiles/llssdb.dir") ) {
-        if ( exists("llssdb/CMakeFiles/llssdb.dir/storage") ) {
-            if ( exists("llssdb/CMakeFiles/llssdb.dir/storage/test_user") ) {
-                detail::remove_all("llssdb/CMakeFiles/llssdb.dir/storage/test_user/");
-            }
-            detail::create_directory("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
-        } else {
-            detail::create_directories("llssdb/CMakeFiles/llssdb.dir/storage/test_user");
-        }
-        kTestDbPath = "llssdb/CMakeFiles/llssdb.dir/storage/test_user";
-    }
-    /// DEPLOY
-    else if ( exists("./llssdb/storage/") ) {
-        if ( exists("./llssdb/storage/test_user") ) {
-            detail::remove_all("./llssdb/storage/test_user/");
-        }
-        kTestDbPath = "./llssdb/storage/test_user";
-    }
+    create_directory("/tmp/failless");
+    create_directory("/tmp/failless/storage");
+    remove_all("/tmp/failless/storage");
+    create_directory("/tmp/failless/storage");
+    create_directory("/tmp/failless/storage/test_user");
 }
 
 class TestTaskWorker : public folder::TaskWorker {
 public:
     explicit TestTaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                            const std::string& kTestDbPath)
-            : folder::TaskWorker(queue, kTestDbPath) {};
+                            const std::string& kTestDbPath,
+                            bool do_backup = false)
+            : folder::TaskWorker(queue, kTestDbPath, do_backup) {};
 protected:
-    void SendAnswer(std::shared_ptr<network::Connection>& conn,
+    void SendAnswer_(std::shared_ptr<network::Connection>& conn,
                     common::enums::response_type result,
                     bool read) override {
         // Prepare return_packet
@@ -65,30 +54,29 @@ protected:
 class MockTaskWorker : public TestTaskWorker {
 public:
     explicit MockTaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                            const std::string& kTestDbPath)
-            : TestTaskWorker(queue, kTestDbPath) {};
+                            const std::string& kTestDbPath,
+                            bool do_backup = false)
+            : TestTaskWorker(queue, kTestDbPath, do_backup) {};
 
-    MOCK_METHOD1(Set, common::enums::response_type(common::utils::Data& data));
-    MOCK_METHOD1(Read, common::enums::response_type(common::utils::Data& data));
-    MOCK_METHOD1(Update, common::enums::response_type(common::utils::Data& data));
-    MOCK_METHOD1(Delete, common::enums::response_type(common::utils::Data& data));
-    MOCK_METHOD0(LoadInMemory, void());
-    MOCK_METHOD0(UnloadFromMemory, void());
+    MOCK_METHOD1(Set_, common::enums::response_type(common::utils::Data& data));
+    MOCK_METHOD1(Read_, common::enums::response_type(common::utils::Data& data));
+    MOCK_METHOD1(Delete_, common::enums::response_type(common::utils::Data& data));
+    MOCK_METHOD0(LoadInMemory_, void());
+    MOCK_METHOD0(UnloadFromMemory_, void());
 };
 
 class MockFileSystem : public folder::FileSystem {
 public:
-    explicit MockFileSystem(const std::string &folder_path) : folder::FileSystem(folder_path) {};
+    explicit MockFileSystem(const std::string &folder_path, bool do_backup)
+      : folder::FileSystem(folder_path, do_backup) {};
 
     MOCK_METHOD3(Get, common::enums::response_type(
             const std::string &key,
-            uint8_t *value_out,
+            std::vector<uint8_t>& value_out,
             size_t& size_out));
 
-    MOCK_METHOD3(Set, common::enums::response_type(
-            const std::string &key,
-            uint8_t *value_in,
-            size_t size_in));
+    MOCK_METHOD1(Set, common::enums::response_type(
+            common::utils::Data& data));
 
     MOCK_METHOD1(Remove, common::enums::response_type(
             const std::string &key));

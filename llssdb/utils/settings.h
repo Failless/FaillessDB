@@ -22,6 +22,7 @@ struct Settings {
     bool setonly;
     bool readonly;
     bool lua;
+    bool do_backup;
     int users_to_table;
     int port;
 
@@ -39,14 +40,18 @@ struct Settings {
           setonly(false),
           readonly(false),
           lua(false),
+          do_backup(false),
           users_to_table(1),
           port(8888) {}
 };
 
 struct WorkerSettings {
     WorkerSettings() = default;
-    explicit WorkerSettings(std::string  _db_path) : db_path(std::move(_db_path)) {}
+    explicit WorkerSettings(std::string _db_path, bool _do_backup)
+      : db_path(std::move(_db_path)),
+        do_backup(_do_backup) {}
     std::string db_path;
+    bool do_backup = false;
 };
 
 

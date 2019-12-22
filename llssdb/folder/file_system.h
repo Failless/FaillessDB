@@ -12,6 +12,7 @@
 #include <rocksdb/utilities/backupable_db.h>
 
 #include "llss3p/enums/operators.h"
+#include "llss3p/utils/data.h"
 #include "llssdb/folder/in_memory_data.h"
 
 namespace failless::db::folder {
@@ -19,11 +20,11 @@ namespace failless::db::folder {
 class FileSystem : public FileSystemInterface {
 public:
     FileSystem() = default;
-    explicit FileSystem(const std::string &folder_path);
+    explicit FileSystem(const std::string &folder_path, bool do_backup = false);
     ~FileSystem() override;
 
-    common::enums::response_type Get(const std::string &key, uint8_t *value_out, size_t& size_out) override;
-    common::enums::response_type Set(const std::string &key, uint8_t *value_in, size_t size_in) override;
+    common::enums::response_type Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) override;
+    common::enums::response_type Set(common::utils::Data& data) override;
     common::enums::response_type Remove(const std::string &key) override;
 
     void EraseAll() override;
@@ -42,6 +43,7 @@ private:
     std::string db_path_;
     std::string backup_path_;
     bool is_open_ = false;
+    bool do_backup_ = false;
 };
 
 }  // namespace failless::db::folder

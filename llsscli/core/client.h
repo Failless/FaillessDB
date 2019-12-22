@@ -4,12 +4,12 @@
 #include <functional>
 
 #include "llss3p/serialization/serializer.h"
+#include "llss3p/utils/data.h"
+#include "llss3p/utils/packet.h"
 #include "llsscli/config/config.h"
 #include "llsscli/core/client_interface.h"
 #include "llsscli/filesystem/filesystem.h"
 #include "llsscli/network/network_client.h"
-#include "llss3p/utils/packet.h"
-#include "llss3p/utils/data.h"
 
 namespace failless {
 namespace client {
@@ -17,39 +17,41 @@ namespace core {
 
 class Client : public ClientInterface {
  public:
-    explicit Client(config::ClientConfig& test_data);
+    explicit Client();
     ~Client() = default;
     size_t Run() override;
     size_t ReadInput() override;
+    size_t ReadNetSettings() override;
 
  private:
+    size_t InitNetSettings_() override;
+
     size_t SerializeQuery_() override;
     size_t ExecQuery_() override;
+    size_t ExecNet_() override;
     size_t ParseInput_(std::string raw_query) override;
 
     size_t SendToDb_() override;
     size_t SetDBKey_() override;
     size_t GetDBKey_() override;
     size_t CreateDBFolder_() override;
+    size_t Connect_() override;
+    size_t Disconnect_() override;
     size_t Register_() override;
+    size_t Kill_() override;
+    size_t RemoveKey_() override;
 
-    size_t SendToDbCallback_() override;
-    size_t SetDBKeyCallback_() override;
-    size_t GetDBKeyCallback_() override;
-    size_t CreateDBFolderCallback_() override;
-    size_t RegisterCallback_() override;
+    size_t GeneralCallback_(char* response_data, size_t bytes_transferred) override;
 
  private:
     std::unique_ptr<network::NetworkClientInterface> network_client_;
     std::unique_ptr<filesystem::FileSystemInterface> filesystem_;
-//    std::unique_ptr<common::serializer::SerializerInterface<config::Task>> serializer_;
     std::unique_ptr<common::serializer::SerializerInterface<common::utils::Packet>> serializer_;
 
     std::shared_ptr<config::NetworkConfig> net_config_;
     config::ClientConfig config_;
 
     std::vector<std::string> query_tokens_;
-//    std::shared_ptr<config::Task> current_task_;
     std::shared_ptr<common::utils::Packet> current_task_;
     std::shared_ptr<std::stringstream> serialized_query_;
 
@@ -57,11 +59,8 @@ class Client : public ClientInterface {
     bool exec_query_status_;
     bool serialize_query_status_;
 
-    std::shared_ptr<std::function<size_t()>> send_to_db_callback_;
-    std::shared_ptr<std::function<size_t()>> set_db_callback_;
-    std::shared_ptr<std::function<size_t()>> get_db_callback_;
-    std::shared_ptr<std::function<size_t()>> create_db_folder_callback_;
-    std::shared_ptr<std::function<size_t()>> register_callback_;
+    std::shared_ptr<std::function<size_t(char*, size_t)>> general_callback_;
+    std::shared_ptr<common::utils::Packet> response_task_;
 };
 
 }  // namespace core

@@ -67,6 +67,10 @@ void ConfigManager::WriteToSettings_(Settings &settings, std::ifstream &cFile) {
             if (std::stoi(value) == 1) {
                 settings.lua = true;
             }
+        } else if (name == "do_backup") {
+            if (std::stoi(value) == 1) {
+                settings.do_backup = true;
+            }
         } else if (name == "users_to_table") {
             settings.users_to_table = std::stoi(value);
         } else if (name == "email") {

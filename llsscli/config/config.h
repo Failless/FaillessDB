@@ -13,38 +13,9 @@ namespace config {
 
 using boost::asio::ip::tcp;
 
-struct Data {
-    // We can not use uint8_t due to https://github.com/msgpack/msgpack-c/issues/243
-    std::unique_ptr<std::vector<unsigned char>> value;
-    size_t size = 0;
-    size_t folder_id = 0;
-    std::unique_ptr<std::string> key;
-
-    // http://ludwig125.hatenablog.com/entry/2017/12/01/232952
-    // http://ludwig125.hatenablog.com/entry/2017/11/22/234335
-    MSGPACK_DEFINE_MAP(value, size, folder_id, key);
-
-    Data() = default;
-    Data(std::unique_ptr<std::vector<unsigned char>>& v, size_t s, size_t f_id,
-         std::unique_ptr<std::string>& k)
-        : value(std::move(v)), size(s), folder_id(f_id), key(std::move(k)) {}
-};
-
-struct Task {
-    std::unique_ptr<std::string> client_id;
-    std::unique_ptr<std::string> query;
-    std::unique_ptr<Data> payload;
-
-    MSGPACK_DEFINE_MAP(client_id, query, payload);
-
-    Task() = default;
-    Task(std::unique_ptr<std::string>& c_id, std::unique_ptr<std::string>& q,
-         std::unique_ptr<Data>& p)
-        : client_id(std::move(c_id)), query(std::move(q)), payload(std::move(p)) {}
-};
-
 struct ClientConfig {
     std::string user_name{};
+    std::string user_pass{};
     std::string user_request{};
 
     int payload_dest_id = 0;
@@ -55,9 +26,10 @@ struct ClientConfig {
 
     ClientConfig() = default;
 
-    ClientConfig(std::string user_n, std::string user_r, int payload_d, std::string payload_k,
-                 std::string db_h, std::string db_p, size_t c_num)
+    ClientConfig(std::string user_n, std::string user_p, std::string user_r, int payload_d, std::string payload_k,
+                 std::string db_h, std::string db_p)
         : user_name(std::move(user_n)),
+          user_pass(std::move(user_p)),
           user_request(std::move(user_r)),
           payload_dest_id(payload_d),
           payload_key(std::move(payload_k)),
@@ -79,14 +51,14 @@ struct NetworkConnectTask {
     std::shared_ptr<tcp::socket> socket;
     std::shared_ptr<boost::asio::io_service> io_service;
     std::shared_ptr<std::stringstream> client_task;
-    std::shared_ptr<std::function<size_t()>> client_callback;
+    std::shared_ptr<std::function<size_t(char*, size_t)>> client_callback;
 
     NetworkConnectTask() = default;
 
     NetworkConnectTask(std::shared_ptr<tcp::socket>& sock,
                        std::shared_ptr<boost::asio::io_service>& io_serv,
                        std::shared_ptr<std::stringstream>& cl_task,
-                       std::shared_ptr<std::function<size_t()>>& callback)
+                       std::shared_ptr<std::function<size_t(char*, size_t)>>& callback)
         : socket(sock), io_service(io_serv), client_task(cl_task), client_callback(callback) {}
 };
 
