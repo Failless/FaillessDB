@@ -9,10 +9,11 @@ namespace db {
 namespace engine {
 
 void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* queue,
-                  const utils::WorkerSettings& settings, std::string login) {
+                  const utils::WorkerSettings& settings,
+                  std::string login) {
     BOOST_LOG_TRIVIAL(info) << "[SM]: Starting new thread for TaskWorker";
     std::unique_ptr<folder::ITaskWorker> worker(
-        new folder::TaskWorker(*queue, settings.db_path + "/" + login));
+        new folder::TaskWorker(*queue, settings.db_path + "/storage/" + login, settings.do_backup));
     worker->Work();
 }
 
@@ -124,7 +125,7 @@ common::enums::operators ServerManager::HandleRequest_(utils::Task& Task) {
 }
 
 void ServerManager::SetSettings(utils::Settings& settings) {
-    w_settings_ = utils::WorkerSettings(settings.data_path);
+    w_settings_ = utils::WorkerSettings(settings.data_path, settings.do_backup);
 }
 
 ServerManager::ServerManager(common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue)

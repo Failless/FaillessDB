@@ -18,7 +18,6 @@ class ITaskWorker : boost::noncopyable {
  protected:
     virtual common::enums::response_type Set_(common::utils::Data& data) = 0;
     virtual common::enums::response_type Read_(common::utils::Data& data) = 0;
-    virtual common::enums::response_type Update_(common::utils::Data& data) = 0;
     virtual common::enums::response_type Delete_(common::utils::Data& data) = 0;
     virtual common::enums::response_type Create_() = 0;
     virtual common::enums::response_type Connect_(common::utils::Data& data) = 0;

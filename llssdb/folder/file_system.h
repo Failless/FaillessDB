@@ -20,7 +20,7 @@ namespace failless::db::folder {
 class FileSystem : public FileSystemInterface {
 public:
     FileSystem() = default;
-    explicit FileSystem(const std::string &folder_path);
+    explicit FileSystem(const std::string &folder_path, bool do_backup = false);
     ~FileSystem() override;
 
     common::enums::response_type Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) override;
@@ -43,6 +43,7 @@ private:
     std::string db_path_;
     std::string backup_path_;
     bool is_open_ = false;
+    bool do_backup_ = false;
 };
 
 }  // namespace failless::db::folder

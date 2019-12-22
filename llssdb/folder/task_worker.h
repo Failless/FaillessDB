@@ -22,7 +22,8 @@ namespace folder {
 class TaskWorker : public ITaskWorker {
  public:
     TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-               std::string storage_path);
+               std::string storage_path,
+               bool do_backup);
     ~TaskWorker() override = default;
 
     void Work() override;
@@ -31,7 +32,6 @@ class TaskWorker : public ITaskWorker {
  protected:
     common::enums::response_type Set_(common::utils::Data& data) override;
     common::enums::response_type Read_(common::utils::Data& data) override;
-    common::enums::response_type Update_(common::utils::Data& data) override;
     common::enums::response_type Delete_(common::utils::Data& data) override;
     common::enums::response_type Create_() override;
     common::enums::response_type Connect_(common::utils::Data& data) override;
@@ -48,6 +48,7 @@ class TaskWorker : public ITaskWorker {
     std::unique_ptr<FileSystemInterface> fs_;
     std::string user_path_{};
     std::vector<size_t> dbs_{};
+    bool do_backup_ = false;
     bool alive_ = false;
 };
 

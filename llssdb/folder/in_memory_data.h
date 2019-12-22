@@ -13,10 +13,8 @@ struct InMemoryData {
     std::vector<uint8_t> value;
     size_t size;
     bool in_memory;
-    //    int16_t calls;    // counts how many times this value was called
     explicit InMemoryData(std::vector<uint8_t> _value, size_t _size = 0, bool flag = false)
         : value(std::move(_value)), size(_size), in_memory(flag) {};
-    // TODO(EgorBedov): i don't think std::move is a right solution
 
     InMemoryData(InMemoryData&& other) noexcept
       : value(std::move(other.value)),

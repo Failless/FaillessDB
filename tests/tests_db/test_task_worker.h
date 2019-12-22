@@ -73,18 +73,6 @@ TEST(TaskManager, Calling_Self_Read) {
     EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
 }
 
-TEST(TaskManager, Calling_Self_Update) {
-    common::utils::Queue<std::shared_ptr<network::Connection>> q;
-    auto conn = create_test_connection(common::enums::operators::CONNECT);
-    q.Push(conn);
-    MockTaskWorker mockTaskWorker(q, kStoragePath);
-
-    conn->GetPacket()->command = common::enums::operators::UPDATE;
-
-    EXPECT_CALL(mockTaskWorker, Update_(conn->GetPacket()->data)).Times(1);
-    EXPECT_EQ(mockTaskWorker.DoTask(conn), EXIT_SUCCESS);
-}
-
 TEST(TaskManager, Calling_Self_Delete) {
     common::utils::Queue<std::shared_ptr<network::Connection>> q;
     auto conn = create_test_connection(common::enums::operators::CONNECT);

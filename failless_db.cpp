@@ -1,9 +1,10 @@
-#include <iostream>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
 #include <memory>
 #include <thread>
 #include <unistd.h>
+
+#include <boost/asio.hpp>
+#include <boost/bind.hpp>
+
 #include "llssdb/auth/iauthorization.h"
 #include "llssdb/engine/server_manager.h"
 #include "llssdb/network/tcp_server.h"
@@ -22,6 +23,7 @@ int main(/*int argc, char **argv*/) {
     failless::common::utils::BoostLogger::filter_logging(boost::log::trivial::debug);
     failless::common::utils::Queue<std::shared_ptr<failless::db::network::Connection>> queue;
     failless::db::auth::Authorization Auth;
+
     std::shared_ptr<failless::db::engine::IServerManager> manager(
         new failless::db::engine::ServerManager(queue));
     manager->SetSettings(settings);

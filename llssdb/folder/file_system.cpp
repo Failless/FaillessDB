@@ -15,7 +15,7 @@
 
 #include "llss3p/enums/operators.h"
 
-#define BACKUPS 2
+#define BACKUPS 1
 
 namespace failless::db::folder {
 
@@ -23,12 +23,13 @@ using namespace rocksdb;
 using namespace boost::filesystem;
 using common::enums::response_type;
 
-FileSystem::FileSystem(const std::string &folder_path)
+FileSystem::FileSystem(const std::string &folder_path, bool do_backup)
       : folder_path_(folder_path),
         db_path_(folder_path + "/db/"),
-        backup_path_(folder_path + "/backup/")
+        backup_path_(folder_path + "/backup/"),
+        do_backup_(do_backup)
         {
-            OpenDB_();
+            if ( OpenDB_() && do_backup_ ) BackUp_();
         }
 
 FileSystem::~FileSystem() {
@@ -53,17 +54,18 @@ bool FileSystem::OpenDB_() {
     } else {
         is_open_ = true;
         BOOST_LOG_TRIVIAL(info) << "[FS]: Successfully opened db at " << db_path_;
-        BackUp_();
     }
     return is_open_;
 }
 
 void FileSystem::CloseDB_() {
     if (is_open_) {
-        backup_engine_->PurgeOldBackups(BACKUPS);
-        is_open_ = false;
+        if ( do_backup_ ) {
+            backup_engine_->PurgeOldBackups(BACKUPS);
+            delete backup_engine_;
+        }
         delete db_;
-        delete backup_engine_;
+        is_open_ = false;
         BOOST_LOG_TRIVIAL(info) << "[FS]: Closed db at " << folder_path_;
     }
 }
