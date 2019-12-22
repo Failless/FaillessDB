@@ -11,7 +11,7 @@ namespace utils {
 struct Settings {
     std::string bind;
     std::string data_path;
-    std::string logfile;
+    std::string log_path;
     std::string email;
     bool using_email;
     int threads;
@@ -29,7 +29,7 @@ struct Settings {
     Settings()
         : bind("localhost"),
           data_path("/data"),
-          logfile("log.txt"),
+          log_path("/tmp/failless/log"),
           email(""),
           using_email(false),
           threads(8),

@@ -9,6 +9,7 @@
 namespace failless::common::utils {
 
 namespace BoostLogger {
+    void set_log_path(std::string log_path);
     void filter_logging(boost::log::trivial::severity_level lvl);
 };
 

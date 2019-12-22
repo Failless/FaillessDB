@@ -4,6 +4,7 @@
 
 #include <boost/asio.hpp>
 #include <boost/bind.hpp>
+#include <boost/filesystem.hpp>
 
 #include "llssdb/auth/iauthorization.h"
 #include "llssdb/engine/server_manager.h"
@@ -20,7 +21,10 @@ int main(/*int argc, char **argv*/) {
     failless::db::utils::Settings settings;
     failless::db::utils::ConfigManager config_manager("../failless.conf");
     config_manager.Initialize(settings);
+    boost::filesystem::create_directory(settings.data_path);
+    boost::filesystem::create_directory(settings.data_path + "/storage");
     failless::common::utils::BoostLogger::filter_logging(boost::log::trivial::debug);
+    failless::common::utils::BoostLogger::set_log_path(settings.log_path);
     failless::common::utils::Queue<std::shared_ptr<failless::db::network::Connection>> queue;
     failless::db::auth::Authorization Auth;
 
