@@ -18,7 +18,7 @@ matrix:
             - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages: &precise_latest_boost_packages
-            - boost1.71
+            - libboost-all-dev
             - g++-8
             - gcc-8
       env:
