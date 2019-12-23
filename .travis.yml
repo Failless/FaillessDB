@@ -2,7 +2,6 @@
 cache:
   directories:
     - "${TRAVIS_BUILD_DIR}/deps"
-sudo: required
 branches:
   only:
     - feature/ci-cd
@@ -10,7 +9,7 @@ branches:
     - develop
 notifications:
   email: false
-matrix:
+jobs:
   include:
     # Ubuntu, g++-8
     - os: linux
