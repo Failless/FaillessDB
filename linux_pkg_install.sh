@@ -33,7 +33,8 @@ cd "${TRAVIS_BUILD_DIR}/deps" || exit
 git clone https://github.com/msgpack/msgpack-c.git
 cd msgpack-c || exit
 cmake -DMSGPACK_CXX17=ON .
-sudo make install -j 8
+sudo make rocksdb-shared -j 8
+sudo make install
 cd "${TRAVIS_BUILD_DIR}" || exit
 
 # install gtest
