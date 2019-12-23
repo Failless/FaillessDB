@@ -20,7 +20,7 @@ namespace db {
 namespace folder {
 
 class TaskWorker : public ITaskWorker {
- public:
+public:
     TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
                std::string storage_path,
                bool do_backup);
@@ -29,7 +29,7 @@ class TaskWorker : public ITaskWorker {
     void Work() override;
     int DoTask(std::shared_ptr<network::Connection> conn) override;
 
- protected:
+protected:
     common::enums::response_type Set_(common::utils::Data& data) override;
     common::enums::response_type Read_(common::utils::Data& data) override;
     common::enums::response_type Delete_(common::utils::Data& data) override;
