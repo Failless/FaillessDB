@@ -42,5 +42,6 @@ git clone https://github.com/google/googletest.git
 cd googletest
 mkdir build && cd build
 "${DEPS_DIR}"/cmake/bin/cmake ..
-make -j 8 && make install
+make -j 8
+sudo make install
 
