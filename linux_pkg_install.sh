@@ -7,12 +7,12 @@ if [ ! -d "$DEPS_DIR" ]; then
 fi
 
 cd "$DEPS_DIR" || exit
-CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6.tar.gz"
+CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6-Linux-x86_64.tar.gz"
 mkdir cmake
 wget ${CMAKE_URL}
-tar xf cmake-3.15.6.tar.gz
-cp cmake-3.15.6/bin/cmake .
-export PATH=${DEPS_DIR}/cmake-3.15.6/bin:${PATH}
+tar xf cmake-3.15.6-Linux-x86_64.tar.gz
+cp cmake-3.15.6-Linux-x86_64/bin/cmake .
+export PATH=${DEPS_DIR}/cmake-3.15.6-Linux-x86_64/bin:${PATH}
 
 # rocksdb installation
 cd "$DEPS_DIR" || exit
