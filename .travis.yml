@@ -1,3 +1,4 @@
+---
 cache: cargo
 sudo: required
 branches:
@@ -29,7 +30,6 @@ matrix:
 #      osx_image: xcode10
 #      compiler: gcc
 #      env:
-#        # Need to uninstall oclint to get newer gcc installed https://github.com/travis-ci/travis-ci/issues/8826
 #        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
 #        - LABEL="osx"
 #        - _DEPLOYABLE="true"
@@ -81,13 +81,14 @@ install:
   - |
     if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
       CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6.tar.gz"
-      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      mkdir cmake
+      travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
       export PATH=${DEPS_DIR}/cmake/bin:${PATH}
     fi
 
   # Go to the Root directory
   - cd ..
-  if [[ "${LABEL:0:3}" == "osx" ]]; then brew cask uninstall --force oclint || true ; fi
+  - if [[ "${LABEL:0:3}" == "osx" ]]; then brew cask uninstall --force oclint || true ; fi
 
   # Install the correct gcc version
   - if [[ "$LABEL" == "osx" ]]; then brew install gcc@8 ; fi
