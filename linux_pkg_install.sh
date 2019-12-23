@@ -38,11 +38,10 @@ cd "${TRAVIS_BUILD_DIR}" || exit
 
 # install gtest
 sudo apt-get install libgtest-dev
-sudo apt-get install cmake
 cd /usr/src/googletest/googletest
 sudo mkdir build
 cd build
-sudo cmake ..
+sudo "${DEPS_DIR}"/cmake/bin/cmake ..
 sudo make
 sudo cp libgtest* /usr/lib/
 cd ..
