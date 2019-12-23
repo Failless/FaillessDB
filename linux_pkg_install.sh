@@ -13,6 +13,15 @@ tar xf cmake-3.15.6-Linux-x86_64.tar.gz
 mv cmake-3.15.6-Linux-x86_64 cmake
 export PATH=${DEPS_DIR}/cmake/bin:${PATH}
 
+# install gtest
+cd "${TRAVIS_BUILD_DIR}/deps" || exit
+git clone https://github.com/google/googletest.git
+cd googletest
+mkdir build && cd build
+"${DEPS_DIR}"/cmake/bin/cmake ..
+make -j 8
+sudo make install
+
 # rocksdb installation
 cd "$DEPS_DIR" || exit
 sudo apt-get install libgflags-dev
@@ -36,13 +45,3 @@ cmake -DMSGPACK_CXX17=ON .
 sudo make rocksdb-shared -j 8
 sudo make install
 cd "${TRAVIS_BUILD_DIR}" || exit
-
-# install gtest
-cd "${TRAVIS_BUILD_DIR}"
-git clone https://github.com/google/googletest.git
-cd googletest
-mkdir build && cd build
-"${DEPS_DIR}"/cmake/bin/cmake ..
-make -j 8
-sudo make install
-
