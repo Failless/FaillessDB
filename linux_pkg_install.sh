@@ -34,7 +34,7 @@ git clone https://github.com/facebook/rocksdb.git
 cd rocksdb || exit
 mkdir build && cd build
 "${DEPS_DIR}"/cmake/bin/cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF -DWITH_TOOLS=OFF
-make all -j 8 # (TODO: change it on core num)
+make rocksdb -j 8 # (TODO: change it on core num)
 sudo make install
 
 # msgpack installation
@@ -42,6 +42,6 @@ cd "${TRAVIS_BUILD_DIR}/deps" || exit
 git clone https://github.com/msgpack/msgpack-c.git
 cd msgpack-c || exit
 cmake -DMSGPACK_CXX17=ON .
-sudo make rocksdb -j 8
-sudo make install rocksdb
+sudo make -j 8
+sudo make install
 cd "${TRAVIS_BUILD_DIR}" || exit
