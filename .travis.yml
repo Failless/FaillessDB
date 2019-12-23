@@ -80,18 +80,18 @@ before_install:
 #  - gcc
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+#  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
 
-  - |
-    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
-      CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6.tar.gz"
-      mkdir cmake
-      travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
-      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
-    fi
+#  - |
+#    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+#      CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6.tar.gz"
+#      mkdir cmake
+#      travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+#      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+#    fi
 
   # Go to the Root directory
-  - cd ..
+  - cd ${TRAVIS_BUILD_DIR}
   - if [[ "${LABEL:0:3}" == "osx" ]]; then brew cask uninstall --force oclint || true ; fi
 
   # Install the correct gcc version
@@ -118,7 +118,7 @@ install:
 script:
   - eval $MATRIX_EVAL
   - mkdir build && cd build
-  - ${DEPS_DIR}/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release -DSTATIC=true .. ${CUSTOM_TOOLCHAIN} ${CUSTOM_BOOST_ROOT} && make -j4
+  - ${DEPS_DIR}/cmake -DCMAKE_BUILD_TYPE=Release -DSTATIC=true .. ${CUSTOM_TOOLCHAIN} ${CUSTOM_BOOST_ROOT} && make -j4
   - ./run-db-tests
   - ./run-cli-tests
 
