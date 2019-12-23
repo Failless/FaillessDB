@@ -1,8 +1,8 @@
 ---
-cache:
-  directories:
-    - "${TRAVIS_BUILD_DIR}/deps/rocksdb"
-    - "${TRAVIS_BUILD_DIR}/deps/msgpack-c"
+#cache:
+#  directories:
+#    - "${TRAVIS_BUILD_DIR}/deps/rocksdb"
+#    - "${TRAVIS_BUILD_DIR}/deps/msgpack-c"
 
 # Enable C++ support
 language: cpp
