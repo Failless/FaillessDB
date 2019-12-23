@@ -1,5 +1,7 @@
 ---
-cache: cargo
+cache:
+  directories:
+    - "${TRAVIS_BUILD_DIR}/deps"
 sudo: required
 branches:
   only:
