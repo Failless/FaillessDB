@@ -13,10 +13,12 @@ matrix:
       compiler: gcc
       addons:
         apt:
+          update: true
           sources:
+            - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages: &precise_latest_boost_packages
-            - libboost1.71-all-dev
+            - boost1.71
             - g++-8
             - gcc-8
       env:
