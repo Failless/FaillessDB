@@ -38,8 +38,8 @@ protected:
 //    common::enums::response_type DestroyDB_() override;
 
     void AdjustCache_();
-    void LoadInMemory_();
-    void UnloadFromMemory_();
+    void LoadCache_();
+    void ClearCache_();
 
     virtual void SendAnswer_(
             std::shared_ptr<network::Connection>& conn,
@@ -51,6 +51,8 @@ protected:
     std::unique_ptr<FileSystemInterface> fs_;
     std::string user_path_{};
     std::vector<size_t> dbs_{};
+    long max_memory_ = 0;
+    long cur_memory_ = 0;
     bool do_backup_ = false;
     bool alive_ = false;
 };

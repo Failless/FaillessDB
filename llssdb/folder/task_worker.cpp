@@ -1,15 +1,9 @@
 #include "llssdb/folder/task_worker.h"
 
+#include <iostream>
 #include <memory>
-#include <sys/types.h>
-
-#ifdef __APPLE__
-    #include <sys/sysctl.h>
-#else
-    #include <sys/sysinfo.h>
-#endif
-
 #include <thread>
+#include <unistd.h>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -40,7 +34,11 @@ void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn,
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
                        std::string storage_path,
                        bool _do_backup = false)
-    : input_queue_(queue), user_path_(storage_path), do_backup_(_do_backup), alive_(true) {
+      : input_queue_(queue),
+        user_path_(storage_path),
+        max_memory_( (sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE) - 1048576 ) / 2 ),
+        do_backup_(_do_backup),
+        alive_(true) {
     boost::filesystem::create_directory("/tmp/failless");
     if ( boost::filesystem::create_directory(user_path_) ) {
         BOOST_LOG_TRIVIAL(debug) << "[TW]: Created new folder at " << user_path_;
@@ -126,7 +124,7 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
 enums::response_type TaskWorker::Set_(common::utils::Data& data) {
     /// Delete existing key
     auto it = local_storage_.find(data.key);
-    if ( it == local_storage_.end() ) {
+    if ( it != local_storage_.end() ) {
         fs_->Remove(data.key);
     }
 
@@ -135,20 +133,34 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
 
     /// Update_ in-memory storage
     if (result == enums::response_type::OK) {
-        // TODO(EgorBedov): check RAM condition before loading in-memory
-        bool valid = false;
+        bool loaded = false;
+        // Key exists
         if (it != local_storage_.end()) {
-            it->second.value = data.value;
-            it->second.size = data.size;
-            valid = true;
+            // Available to insert
+            if ( cur_memory_ + data.size - it->second.size < max_memory_ ) {
+                it->second.value = data.value;
+                it->second.size = data.size;
+                loaded = true;
+                cur_memory_ += data.size - it->second.size;
+            } else {    // Erasing old value
+                it->second.value.clear();
+                it->second.value.shrink_to_fit();
+                it->second.in_memory = false;
+                it->second.size = data.size;
+            }
         } else {
-            valid =
-                local_storage_
+            if ( cur_memory_ + data.size < max_memory_ ) {
+                loaded =
+                    local_storage_
                     .emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)))
-                    .second;
+                        .second;
+                if ( loaded ) {
+                    cur_memory_ += data.size;
+                }
+            }
         }
 
-        if (valid) {
+        if (loaded) {
             BOOST_LOG_TRIVIAL(debug)
                 << "[TW]: Value of size " << data.size << " was loaded into RAM";
         } else {
@@ -170,8 +182,11 @@ enums::response_type TaskWorker::Read_(common::utils::Data& data) {
         response = enums::response_type::OK;
     } else {
         response = fs_->Get(data.key, data.value, data.size);
-        // the data is not present in local storage for a reason
-        // so first check RAM condition and then load
+        if ( cur_memory_ + data.size < max_memory_ ) {
+            local_storage_.at(data.key).value = data.value;
+            local_storage_.at(data.key).size = data.size;
+            local_storage_.at(data.key).in_memory = true;
+        }
     }
     return response;
 }
@@ -182,34 +197,26 @@ enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
 
     /// Update_ in-memory storage
     if (local_storage_.at(data.key).in_memory) {
+        cur_memory_ -= local_storage_.at(data.key).size;
         local_storage_.erase(data.key.c_str());  // no, it's not redundant
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" erased from RAM";
     }
     return response;
 }
 
-void TaskWorker::AdjustCache_() {
-    int CPUs = sysconf(_SC_NPROCESSORS_ONLN);
-
-    int mib [] = { CTL_HW, HW_MEMSIZE };
-    int64_t value = 0;
-    size_t length = sizeof(value);
-
-    if ( -1 == sysctl(mib, 2, &value, &length, NULL, 0) ) {
-        return;
-    }
+void TaskWorker::LoadCache_() {
+    fs_->LoadCache(local_storage_, max_memory_, cur_memory_);
 }
 
-void TaskWorker::LoadInMemory_() { fs_->LoadInMemory(local_storage_); }
-
-void TaskWorker::UnloadFromMemory_() {
+void TaskWorker::ClearCache_() {
     /// Clear vector and free space it occupied
     for (auto& it : local_storage_) {
         it.second.value.clear();
         it.second.value.shrink_to_fit();
         it.second.in_memory = false;
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: Unloaded everything from RAM";
+        cur_memory_ -= it.second.size;
     }
+    BOOST_LOG_TRIVIAL(debug) << "[TW]: Unloaded everything from RAM";
 }
 
 enums::response_type TaskWorker::Create_() {
@@ -247,6 +254,10 @@ common::enums::response_type TaskWorker::Connect_(common::utils::Data& data) {
     return common::enums::response_type::OK;
 }
 
+
+
 }  // namespace folder
 }  // namespace db
 }  // namespace failless
+
+// TODO(EgorBedov): make cache more dynamic

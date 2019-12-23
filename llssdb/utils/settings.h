@@ -47,7 +47,7 @@ struct Settings {
 
 struct WorkerSettings {
     WorkerSettings() = default;
-    explicit WorkerSettings(std::string _db_path, bool _do_backup)
+    explicit WorkerSettings(std::string _db_path, bool _do_backup = false)
       : db_path(std::move(_db_path)),
         do_backup(_do_backup) {}
     std::string db_path;

@@ -28,7 +28,10 @@ public:
     common::enums::response_type Remove(const std::string &key) override;
 
     void EraseAll() override;
-    void LoadInMemory(std::unordered_map<std::string, InMemoryData>& local_storage) override;
+    void LoadCache(
+            std::unordered_map<std::string, InMemoryData>& local_storage,
+            long max_bytes,
+            long& cur_bytes) override;
     uint64_t AmountOfKeys();
     bool RestoreFromBackup();
 private:

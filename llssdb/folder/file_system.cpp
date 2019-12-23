@@ -4,7 +4,6 @@
 #include <string>
 #include <unordered_map>
 
-#include <boost/filesystem.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
@@ -20,7 +19,6 @@
 namespace failless::db::folder {
 
 using namespace rocksdb;
-using namespace boost::filesystem;
 using common::enums::response_type;
 
 FileSystem::FileSystem(const std::string &folder_path, bool do_backup)
@@ -185,26 +183,43 @@ uint64_t FileSystem::AmountOfKeys() {
     }
 }
 
-void FileSystem::LoadInMemory(std::unordered_map<std::string, InMemoryData> &local_storage) {
-    bool all = true;
+// This func meant to be called only after ClearCache()
+void FileSystem::LoadCache(std::unordered_map<std::string, InMemoryData> &local_storage, long max_bytes, long& cur_bytes) {
+    long byte_counter = 0;
     if (is_open_) {
         auto it = db_->NewIterator(ReadOptions());
         local_storage.reserve(AmountOfKeys());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            std::vector<uint8_t> tmp_vector(it->value().data_, it->value().data_ + it->value().size());
-            all = std::min(all, local_storage.emplace(std::make_pair(
-                    it->key().ToString(),
-                    InMemoryData(
-                            tmp_vector,
-                            it->value().size(),
-                            true))).second);
+            std::vector<uint8_t> tmp_vector;
+            // if max capacity is reached - insert empty value but keep the size
+            if ( byte_counter + it->value().size() < max_bytes ) {
+                tmp_vector.assign(it->value().data_, it->value().data_ + it->value().size());
+                byte_counter += it->value().size();
+                local_storage.emplace(std::make_pair(
+                        it->key().ToString(),
+                        InMemoryData(
+                                tmp_vector,
+                                it->value().size(),
+                                true)));
+            } else {    // TODO(EgorBedov): fix this duplicated garbage
+                local_storage.emplace(std::make_pair(
+                        it->key().ToString(),
+                        InMemoryData(
+                                tmp_vector,
+                                it->value().size(),
+                                false)));
+            }
+
         }
     }
-    if (all) {
-        BOOST_LOG_TRIVIAL(info) << "[FS]: Everything was loaded into RAM";
+    if ( byte_counter < 1024 ) {
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter << " bytes was loaded into RAM";
+    } else if ( byte_counter > 1024 && byte_counter < 1048576 ) {
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter / 1024 << "MB was loaded into RAM";
     } else {
-        BOOST_LOG_TRIVIAL(info) << "[FS]: Not everything was loaded into RAM";
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter / 1048576 << "GB was loaded into RAM";
     }
+    cur_bytes += byte_counter;
 }
 
 }

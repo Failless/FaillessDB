@@ -20,12 +20,17 @@ public:
     FileSystemInterface() = default;
     virtual ~FileSystemInterface() = default;
 
-    virtual common::enums::response_type Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) = 0;
+    virtual common::enums::response_type Get(
+            const std::string &key, std::vector<uint8_t>& value_out,
+            size_t& size_out) = 0;
     virtual common::enums::response_type Set(common::utils::Data& data) = 0;
     virtual common::enums::response_type Remove(const std::string &key) = 0;
 
     virtual void EraseAll() = 0;
-    virtual void LoadInMemory(std::unordered_map<std::string, failless::db::folder::InMemoryData> &local_storage) = 0;
+    virtual void LoadCache(
+            std::unordered_map<std::string, failless::db::folder::InMemoryData> &local_storage,
+            long max_bytes,
+            long& cur_bytes) = 0;
 };
 
 }
