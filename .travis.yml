@@ -1,5 +1,10 @@
+cache: cargo
 sudo: required
-
+branches:
+  only:
+    - feature/ci-cd
+    - master
+    - develop
 matrix:
   include:
     # Ubuntu, g++-8
