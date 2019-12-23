@@ -119,9 +119,9 @@ install:
 script:
   - eval $MATRIX_EVAL
   - mkdir build && cd build
-  - ${DEPS_DIR}/cmake -DCMAKE_BUILD_TYPE=Release -DSTATIC=true .. ${CUSTOM_TOOLCHAIN} ${CUSTOM_BOOST_ROOT} && make -j4
+  - ${DEPS_DIR}/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release .. ${CUSTOM_TOOLCHAIN} ${CUSTOM_BOOST_ROOT} && make -j4
   - ./run-db-tests
   - ./run-cli-tests
 
 after_success:
-  - echo 'success'
+  - echo 'success'git
