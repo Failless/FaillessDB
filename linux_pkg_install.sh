@@ -10,8 +10,9 @@ cd "$DEPS_DIR" || exit
 CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6-Linux-x86_64.tar.gz"
 wget ${CMAKE_URL}
 tar xf cmake-3.15.6-Linux-x86_64.tar.gz
-cp cmake-3.15.6-Linux-x86_64/bin/cmake .
-export PATH=${DEPS_DIR}/cmake-3.15.6-Linux-x86_64/bin:${PATH}
+#cp cmake-3.15.6-Linux-x86_64/bin/cmake .
+mv cmake-3.15.6-Linux-x86_64 cmake
+export PATH=${DEPS_DIR}/cmake/bin:${PATH}
 
 # rocksdb installation
 cd "$DEPS_DIR" || exit

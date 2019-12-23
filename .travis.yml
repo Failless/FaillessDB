@@ -31,6 +31,7 @@ jobs:
         - LABEL="linux"
         - _DEPLOYABLE="true"
         - STRIP="strip"
+        - CMAKE_ROOT=${TRAVIS_BUILD_DIR}/deps/cmake
 #travis_retry
 #    ## OSX, g++-8
 #    - os: osx
