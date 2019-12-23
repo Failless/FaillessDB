@@ -25,7 +25,7 @@ sudo apt-get install libzstd-dev
 git clone https://github.com/facebook/rocksdb.git
 cd rocksdb || exit
 mkdir build && cd build
-"${DEPS_DIR}"/cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF -DWITH_TOOLS=OFF
+"${DEPS_DIR}"/cmake/bin/cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF -DWITH_TOOLS=OFF
 make all -j 8 # (TODO: change it on core num)
 sudo make install
 
