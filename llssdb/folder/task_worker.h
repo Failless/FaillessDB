@@ -20,7 +20,7 @@ namespace db {
 namespace folder {
 
 class TaskWorker : public ITaskWorker {
- public:
+public:
     TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
                std::string storage_path,
                bool do_backup);
@@ -29,7 +29,7 @@ class TaskWorker : public ITaskWorker {
     void Work() override;
     int DoTask(std::shared_ptr<network::Connection> conn) override;
 
- protected:
+protected:
     common::enums::response_type Set_(common::utils::Data& data) override;
     common::enums::response_type Read_(common::utils::Data& data) override;
     common::enums::response_type Delete_(common::utils::Data& data) override;
@@ -37,11 +37,14 @@ class TaskWorker : public ITaskWorker {
     common::enums::response_type Connect_(common::utils::Data& data) override;
 //    common::enums::response_type DestroyDB_() override;
 
+    void AdjustCache_();
     void LoadInMemory_();
     void UnloadFromMemory_();
 
-    virtual void SendAnswer_(std::shared_ptr<network::Connection>& conn,
-                             common::enums::response_type result, bool read);
+    virtual void SendAnswer_(
+            std::shared_ptr<network::Connection>& conn,
+            common::enums::response_type result, bool read);
+
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& input_queue_;
     std::unordered_map<std::string, InMemoryData> local_storage_;

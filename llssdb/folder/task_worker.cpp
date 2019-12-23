@@ -1,6 +1,14 @@
 #include "llssdb/folder/task_worker.h"
 
 #include <memory>
+#include <sys/types.h>
+
+#ifdef __APPLE__
+    #include <sys/sysctl.h>
+#else
+    #include <sys/sysinfo.h>
+#endif
+
 #include <thread>
 
 #include <boost/algorithm/string/classification.hpp>
@@ -173,6 +181,18 @@ enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" erased from RAM";
     }
     return response;
+}
+
+void TaskWorker::AdjustCache_() {
+    int CPUs = sysconf(_SC_NPROCESSORS_ONLN);
+
+    int mib [] = { CTL_HW, HW_MEMSIZE };
+    int64_t value = 0;
+    size_t length = sizeof(value);
+
+    if ( -1 == sysctl(mib, 2, &value, &length, NULL, 0) ) {
+        return;
+    }
 }
 
 void TaskWorker::LoadInMemory_() { fs_->LoadInMemory(local_storage_); }
