@@ -8,7 +8,6 @@ fi
 
 cd "$DEPS_DIR" || exit
 CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6-Linux-x86_64.tar.gz"
-mkdir cmake
 wget ${CMAKE_URL}
 tar xf cmake-3.15.6-Linux-x86_64.tar.gz
 cp cmake-3.15.6-Linux-x86_64/bin/cmake .
