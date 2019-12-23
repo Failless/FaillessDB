@@ -2,12 +2,14 @@
 
 # cmake installation
 DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
-if not [ -d "$DEPS_DIR" ]; then
+if [ ! -d "$DEPS_DIR" ]; then
   mkdir "${DEPS_DIR}" && cd "${DEPS_DIR}" || exit
 fi
+
+cd "$DEPS_DIR" || exit
 CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6.tar.gz"
 mkdir cmake
-travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
 export PATH=${DEPS_DIR}/cmake/bin:${PATH}
 
 # rocksdb installation
