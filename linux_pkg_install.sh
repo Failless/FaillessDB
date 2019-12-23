@@ -36,3 +36,14 @@ cd msgpack-c || exit
 cmake -DMSGPACK_CXX17=ON .
 sudo make install -j 8
 cd "${TRAVIS_BUILD_DIR}" || exit
+
+# install gtest
+sudo apt-get install libgtest-dev
+#sudo apt-get install cmake # install cmake
+# shellcheck disable=SC2164
+cd /usr/src/gtest
+sudo "${DEPS_DIR}"/cmake/bin/cmake CMakeLists.txt
+sudo make
+
+#copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
+sudo cp *.a /usr/lib
