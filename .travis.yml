@@ -83,6 +83,7 @@ before_install:
 #  - gcc
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - sudo apt-get install libgtest-dev
 #  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
 
 #  - |

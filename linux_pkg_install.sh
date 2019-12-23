@@ -37,24 +37,10 @@ sudo make install -j 8
 cd "${TRAVIS_BUILD_DIR}" || exit
 
 # install gtest
-sudo apt-get install libgtest-dev
-cd /usr/src/googletest/googletest
-sudo mkdir build
-cd build
-sudo "${DEPS_DIR}"/cmake/bin/cmake ..
-sudo make
-sudo cp libgtest* /usr/lib/
-cd ..
-sudo rm -rf build
-sudo mkdir /usr/local/lib/googletest
-sudo ln -s /usr/lib/libgtest.a /usr/local/lib/googletest/libgtest.a
-sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
-#sudo apt-get install cmake # install cmake
-# shellcheck disable=SC2164
-#cd /usr/src/gtest
-#sudo "${DEPS_DIR}"/cmake/bin/cmake CMakeLists.txt
-#sudo make
-
-#copy or symlink libgtest.a and libgtest_main.a to your /usr/lib folder
-#sudo cp *.a /usr/lib
+cd "${TRAVIS_BUILD_DIR}"
+git clone https://github.com/google/googletest.git
+cd googletest
+mkdir build && cd build
+"${DEPS_DIR}"/cmake/bin/cmake ..
+make -j 8 && make install
 
