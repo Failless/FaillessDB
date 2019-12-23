@@ -124,13 +124,18 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
 }
 
 enums::response_type TaskWorker::Set_(common::utils::Data& data) {
+    /// Delete existing key
+    auto it = local_storage_.find(data.key);
+    if ( it == local_storage_.end() ) {
+        fs_->Remove(data.key);
+    }
+
     /// Create_ key-value pair(s) on hdd
     enums::response_type result = fs_->Set(data);
 
     /// Update_ in-memory storage
     if (result == enums::response_type::OK) {
         // TODO(EgorBedov): check RAM condition before loading in-memory
-        auto it = local_storage_.find(data.key);
         bool valid = false;
         if (it != local_storage_.end()) {
             it->second.value = data.value;
