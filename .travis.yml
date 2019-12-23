@@ -6,6 +6,12 @@
 
 # Enable C++ support
 language: cpp
+os:
+  - linux
+  - osx
+compiler:
+  - clang
+  - gcc
 branches:
   only:
     - feature/ci-cd
@@ -13,21 +19,31 @@ branches:
     - develop
 notifications:
   email: false
+
+addons:
+  apt:
+    update: true
+    sources:
+      - sourceline: 'ppa:mhier/libboost-latest'
+      - ubuntu-toolchain-r-test
+    packages: &precise_latest_boost_packages
+      - boost1.68
+      - g++-8
+      - gcc-8
+  homebrew:
+    update: true
+    packages:
+      - ccache
+      - gflags
+      - lz4
+      - snappy
+      - xz
+      - zstd
 jobs:
   include:
     # Ubuntu, g++-8
     - os: linux
       compiler: gcc
-      addons:
-        apt:
-          update: true
-          sources:
-            - sourceline: 'ppa:mhier/libboost-latest'
-            - ubuntu-toolchain-r-test
-          packages: &precise_latest_boost_packages
-            - boost1.68
-            - g++-8
-            - gcc-8
       env:
         - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
         - LABEL="linux"
@@ -74,6 +90,7 @@ jobs:
 before_install:
   - sudo apt-get install libao-dev
   - sudo apt-get install libcurl4-openssl-dev
+  - sudo apt-get install -y g++-8; CC=gcc-8 && CXX=g++-8;
   - chmod +x linux_pkg_install.sh
   - ./linux_pkg_install.sh
 
