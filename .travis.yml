@@ -2,6 +2,8 @@
 cache:
   directories:
     - "${TRAVIS_BUILD_DIR}/deps"
+# Enable C++ support
+language: cpp
 branches:
   only:
     - feature/ci-cd
@@ -21,7 +23,7 @@ jobs:
             - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages: &precise_latest_boost_packages
-            - boost1.67
+            - boost1.68
             - g++-8
             - gcc-8
       env:
@@ -29,7 +31,7 @@ jobs:
         - LABEL="linux"
         - _DEPLOYABLE="true"
         - STRIP="strip"
-
+#travis_retry
 #    ## OSX, g++-8
 #    - os: osx
 #      osx_image: xcode10
@@ -72,13 +74,10 @@ before_install:
   - chmod +x linux_pkg_install.sh
   - ./linux_pkg_install.sh
 
-# Enable C++ support
-language: cpp
 
-# Compiler selection
-compiler:
-  - gcc
-
+## Compiler selection
+#compiler:
+#  - gcc
 install:
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
