@@ -6,6 +6,8 @@ branches:
     - feature/ci-cd
     - master
     - develop
+notifications:
+  email: false
 matrix:
   include:
     # Ubuntu, g++-8
@@ -18,7 +20,7 @@ matrix:
             - sourceline: 'ppa:mhier/libboost-latest'
             - ubuntu-toolchain-r-test
           packages: &precise_latest_boost_packages
-            - libboost-all-dev
+            - boost1.67
             - g++-8
             - gcc-8
       env:
@@ -66,7 +68,7 @@ matrix:
 before_install:
   - sudo apt-get install libao-dev
   - sudo apt-get install libcurl4-openssl-dev
-  - chmod +x installMPG123.sh
+  - chmod +x linux_pkg_install.sh
   - ./linux_pkg_install.sh
 
 # Enable C++ support
@@ -122,7 +124,3 @@ script:
 
 after_success:
   - echo 'success'
-
-
-notifications:
-  email: false
