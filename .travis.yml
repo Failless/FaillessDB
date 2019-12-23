@@ -1,0 +1,120 @@
+sudo: required
+
+matrix:
+  include:
+    # Ubuntu, g++-8
+    - os: linux
+      compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages: &precise_latest_boost_packages
+            - libboost1.71-all-dev
+            - g++-8
+            - gcc-8
+      env:
+        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - LABEL="linux"
+        - _DEPLOYABLE="true"
+        - STRIP="strip"
+
+#    ## OSX, g++-8
+#    - os: osx
+#      osx_image: xcode10
+#      compiler: gcc
+#      env:
+#        # Need to uninstall oclint to get newer gcc installed https://github.com/travis-ci/travis-ci/issues/8826
+#        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+#        - LABEL="osx"
+#        - _DEPLOYABLE="true"
+#        - STRIP="strip"
+
+#    # Ubuntu, g++-7
+#    - os: linux
+#      compiler: gcc
+#      addons:
+#        apt:
+#          sources:
+#            - ubuntu-toolchain-r-test
+#          packages:
+#            - libboost1.55-all-dev
+#            - g++-7
+#            - gcc-7
+#      env:
+#        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+#        - LABEL="linux-g++-7"
+#        - STRIP="strip"
+
+#    # OSX, clang
+#    - os: osx
+#      osx_image: xcode10
+#      compiler: clang
+#      env:
+#        - MATRIX_EVAL="CC=clang && CXX=clang++"
+#        - LABEL="osx-clang"
+#        - STRIP="strip"
+
+
+before_install:
+  - sudo apt-get install libao-dev
+  - sudo apt-get install libcurl4-openssl-dev
+  - chmod +x installMPG123.sh
+  - ./linux_pkg_install.sh
+
+# Enable C++ support
+language: cpp
+
+# Compiler selection
+compiler:
+  - gcc
+
+install:
+  - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
+  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
+
+  - |
+    if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then
+      CMAKE_URL="https://github.com/Kitware/CMake/releases/download/v3.15.6/cmake-3.15.6.tar.gz"
+      mkdir cmake && travis_retry wget --no-check-certificate --quiet -O - ${CMAKE_URL} | tar --strip-components=1 -xz -C cmake
+      export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+    fi
+
+  # Go to the Root directory
+  - cd ..
+  if [[ "${LABEL:0:3}" == "osx" ]]; then brew cask uninstall --force oclint || true ; fi
+
+  # Install the correct gcc version
+  - if [[ "$LABEL" == "osx" ]]; then brew install gcc@8 ; fi
+  - if [[ "$LABEL" == "osx-g++-7" ]]; then brew install gcc@7 ; fi
+
+  - if [[ "$LABEL" == "aarch64" ]]; then export BASEDIR=`pwd` ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then cd $HOME ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then wget https://armkeil.blob.core.windows.net/developer/Files/downloads/gnu-a/8.2-2018.08/gcc-arm-8.2-2018.08-x86_64-aarch64-linux-gnu.tar.xz ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then wget http://sourceforge.net/projects/boost/files/boost/1.55.0/boost_1_55_0.tar.gz ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then mkdir toolchain && cd toolchain ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then tar xfv ../gcc-arm-8.2-2018.08-x86_64-aarch64-linux-gnu.tar.xz >/dev/null ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then cd gcc-arm-8.2-2018.08-x86_64-aarch64-linux-gnu ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then tar zxvf ../../boost_1_55_0.tar.gz >/dev/null ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then cd boost_1_55_0 ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then ./bootstrap.sh ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then curl https://raw.githubusercontent.com/turtlecoin/turtlecoin/development/scripts/fix_boost_aarch64.sh | sh ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then ./b2 toolset=gcc-aarch64 --with-system --with-filesystem --with-thread --with-date_time --with-chrono --with-regex --with-serialization --with-program_options >/dev/null; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then export CUSTOM_BOOST_ROOT="-DBOOST_ROOT=`pwd`" ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then export CUSTOM_TOOLCHAIN="-DCMAKE_TOOLCHAIN_FILE=../scripts/cross-aarch64.cmake" ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then export STRIP="$HOME/toolchain/gcc-arm-8.2-2018.08-x86_64-aarch64-linux-gnu/bin/aarch64-linux-gnu-strip" ; fi
+  - if [[ "$LABEL" == "aarch64" ]]; then cd $BASEDIR ; fi
+
+script:
+  - eval $MATRIX_EVAL
+  - mkdir build && cd build
+  - ${DEPS_DIR}/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release -DSTATIC=true .. ${CUSTOM_TOOLCHAIN} ${CUSTOM_BOOST_ROOT} && make -j4
+  - ./run-db-tests
+  - ./run-cli-tests
+
+after_success:
+  - echo 'success'
+
+
+notifications:
+  email: false
