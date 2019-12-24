@@ -19,8 +19,8 @@ cd "${TRAVIS_BUILD_DIR}/deps" || exit
 wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2
 tar --bzip2 -xf boost_1_71_0.tar.bz2
 cd boost_1_71_0
-./bootstrap.sh
-./b2 install
+sudo ./bootstrap.sh
+sudo ./b2 install
 
 # install gtest
 cd "${TRAVIS_BUILD_DIR}/deps" || exit
