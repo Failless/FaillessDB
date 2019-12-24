@@ -12,6 +12,7 @@
 #include <gtest/gtest.h>
 
 #include "llss3p/enums/operators.h"
+#include "llssdb/folder/in_memory_data.h"
 #include "tests/tests_db/mocks.h"
 
 namespace failless::db::tests {
@@ -22,6 +23,7 @@ using folder::FileSystem;
 using common::enums::response_type;
 
 common::utils::Data prepare_test() {
+    boost::filesystem::remove_all(kTestDbPath + "/1");
     boost::filesystem::create_directory(kTestDbPath + "/1");
 
     size_t size = 3;
@@ -43,7 +45,6 @@ TEST(FileSystem, Set) {
 
     fs.EraseAll();
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::NOT_FOUND);
-    boost::filesystem::remove_all(kTestDbPath + "/1");
 }
 
 TEST(FileSystem, Get) {
@@ -66,9 +67,6 @@ TEST(FileSystem, Get) {
     /// Actual Get()
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
     EXPECT_EQ(data_out.size, test_data.size);
-
-    fs.EraseAll();
-    boost::filesystem::remove_all(kTestDbPath + "/1");
 }
 
 TEST(FileSystem, Remove) {
@@ -91,9 +89,49 @@ TEST(FileSystem, Remove) {
     /// Actual Remove()
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::NOT_FOUND);
+}
 
+TEST(FileSystem, AmountOfKeys) {
+    /// Test values
+    auto test_data = prepare_test();
+    common::utils::Data data_out;
+
+    FileSystem fs(kTestDbPath + "/1");
+
+    EXPECT_EQ(fs.AmountOfKeys(), 0);
+    EXPECT_EQ(fs.Set(test_data), response_type::OK);
+    EXPECT_EQ(fs.AmountOfKeys(), 1);
+    EXPECT_EQ(fs.Set(test_data), response_type::OK);
+    EXPECT_EQ(fs.AmountOfKeys(), 2);
+    // 2 because rocksDB allows multiple values with the same key
+    // we don't so this behaviour is handled by TaskWorker
+    EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
     fs.EraseAll();
-    boost::filesystem::remove_all(kTestDbPath + "/1");
+    EXPECT_EQ(fs.AmountOfKeys(), 0);
+}
+
+TEST(FileSystem, LoadInMemory) {
+    /// Test values
+    auto test_data = prepare_test();
+    std::unordered_map<std::string, folder::InMemoryData> local_storage_;
+
+    FileSystem fs(kTestDbPath + "/1");
+
+    EXPECT_EQ(fs.Set(test_data), response_type::OK);
+    test_data.key = "test_key1";
+    test_data.size = 4;
+    test_data.value = {1, 2, 3, 4};
+    EXPECT_EQ(fs.Set(test_data), response_type::OK);
+    test_data.key = "test_key2";
+    test_data.size = 5;
+    test_data.value = {1, 2, 3, 4, 5};
+    EXPECT_EQ(fs.Set(test_data), response_type::OK);
+
+    fs.LoadInMemory(local_storage_);
+    EXPECT_EQ(local_storage_.size(), 3);
+    EXPECT_EQ(local_storage_.at("test_key").value.size(), 3);
+    EXPECT_EQ(local_storage_.at("test_key1").value.size(), 4);
+    EXPECT_EQ(local_storage_.at("test_key2").value.size(), 5);
 }
 
 TEST(FileSystem, Complex_Test) {
@@ -107,11 +145,7 @@ TEST(FileSystem, Complex_Test) {
     EXPECT_EQ(fs.Get(test_data.key, data_out.value, data_out.size), response_type::OK);
     EXPECT_EQ(data_out.size, test_data.size);
     EXPECT_EQ(fs.Remove(test_data.key), response_type::OK);
-
-    fs.EraseAll();
-    boost::filesystem::remove_all(kTestDbPath + "/1");
 }
-
 
 }
 

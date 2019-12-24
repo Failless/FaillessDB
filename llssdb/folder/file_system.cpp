@@ -187,9 +187,8 @@ void FileSystem::LoadInMemory(std::unordered_map<std::string, InMemoryData>& loc
         auto it = db_->NewIterator(rocksdb::ReadOptions());
         local_storage.reserve(AmountOfKeys());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            auto tmp_vector =
-                std::vector<uint8_t>(it->value()[0], it->value()[it->value().size() - 1]);
-            tmp_vector.shrink_to_fit();
+            std::vector<uint8_t> tmp_vector(it->value().data_,
+                                            it->value().data_ + it->value().size());
             all = std::min(all, local_storage
                                     .emplace(std::make_pair(
                                         it->key().ToString(),
