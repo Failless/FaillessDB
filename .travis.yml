@@ -156,4 +156,4 @@ script:
   - make failless-cli -j4
 
 after_success:
-  - echo 'success'git
+  - echo 'success'
