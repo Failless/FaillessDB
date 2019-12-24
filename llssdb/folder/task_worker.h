@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <boost/date_time.hpp>
+
 #include "llss3p/enums/operators.h"
 #include "llss3p/utils/queue.h"
 #include "llssdb/folder/file_system.h"
@@ -37,7 +39,8 @@ protected:
     common::enums::response_type Connect_(common::utils::Data& data) override;
 //    common::enums::response_type DestroyDB_() override;
 
-    void AdjustCache_();
+    void CheckCache_(long bytes);
+    void UpdateCache_(const std::string& key);
     void LoadCache_();
     void ClearCache_();
 
@@ -48,6 +51,7 @@ protected:
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& input_queue_;
     std::unordered_map<std::string, InMemoryData> local_storage_;
+    std::map<boost::posix_time::ptime, std::string> queue;
     std::unique_ptr<FileSystemInterface> fs_;
     std::string user_path_{};
     std::vector<size_t> dbs_{};
