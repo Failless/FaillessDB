@@ -30,13 +30,27 @@ addons:
         key_url: 'https://apt.llvm.org/llvm-snapshot.gpg.key'
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
     packages: &precise_latest_boost_packages
-      - boost1.69
+      - libgmp-dev
+      - libmpfr-dev
+      - libedit-dev
+      - libboost-dev
+      - libboost-test-dev
+      - libboost-regex-dev
+      - libboost-python-dev
+      - libboost-system-dev
+      - libboost-date-time-dev
+      - libboost-iostreams-dev
+      - libboost-filesystem-dev
+      - libboost-serialization-dev
       - cmake
       - gcc-9
       - g++-9
   homebrew:
     update: true
     packages:
+      - boost
+      - boost-python
+      - boost-python3
       - ccache
       - gflags
       - lz4
