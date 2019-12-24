@@ -1,6 +1,4 @@
 ---
-cache:
-  - ccache
 #cache:
 #  directories:
 #    - "${TRAVIS_BUILD_DIR}/deps/rocksdb"
