@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
+sudo apt-get update
 sudo apt-get install -y libgmp-dev libmpfr-dev libedit-dev libboost-dev libboost-test-dev libboost-regex-dev \
   libboost-python-dev libboost-system-dev libboost-date-time-dev libboost-iostreams-dev \
-  libboost-filesystem-dev libboost-serialization-dev
+  libboost-filesystem-dev libboost-serialization-dev libboost-all-dev
 
 # cmake installation
 DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
