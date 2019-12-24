@@ -23,15 +23,6 @@ notifications:
   email: false
 
 addons:
-  sources:
-
-  packages:
-
-    - libgoogle-perftools-dev
-    - libkyotocabinet-dev
-    - libsnappy-dev
-    - libsqlite3-dev
-    - ninja-build
   apt:
     update: true
     sources:

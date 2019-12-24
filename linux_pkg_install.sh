@@ -36,8 +36,8 @@ cp "${TRAVIS_BUILD_DIR}"/*.patch .
 git am *.patch
 mkdir build && cd build
 "${DEPS_DIR}"/cmake/bin/cmake .. -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=OFF -DWITH_TOOLS=OFF
-make rocksdb -j 8 # (TODO: change it on core num)
-sudo make install
+#make rocksdb -j 8 # (TODO: change it on core num)
+sudo make install -j 8
 
 # msgpack installation
 cd "${TRAVIS_BUILD_DIR}/deps" || exit
