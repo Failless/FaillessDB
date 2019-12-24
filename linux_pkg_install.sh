@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-sudo apt-get update
-sudo apt-get install -y libgmp-dev libmpfr-dev libedit-dev libboost-dev libboost-test-dev libboost-regex-dev \
-  libboost-python-dev libboost-system-dev libboost-date-time-dev libboost-iostreams-dev \
-  libboost-filesystem-dev libboost-serialization-dev libboost-all-dev
-
 # cmake installation
 DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
 if [ ! -d "$DEPS_DIR" ]; then
@@ -17,6 +12,14 @@ tar xf cmake-3.15.6-Linux-x86_64.tar.gz
 #cp cmake-3.15.6-Linux-x86_64/bin/cmake .
 mv cmake-3.15.6-Linux-x86_64 cmake
 export PATH=${DEPS_DIR}/cmake/bin:${PATH}
+
+
+# install boost
+cd "${TRAVIS_BUILD_DIR}/deps" || exit
+wget https://dl.bintray.com/boostorg/release/1.71.0/source/boost_1_71_0.tar.bz2
+tar --bzip2 -xf boost_1_71_0.tar.bz2
+cd boost_1_71_0
+./b2 install
 
 # install gtest
 cd "${TRAVIS_BUILD_DIR}/deps" || exit
