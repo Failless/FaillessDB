@@ -100,6 +100,8 @@ before_install:
   - sudo apt-get install libcurl4-openssl-dev
   - sudo apt-get install -y g++-8; CC=gcc-8 && CXX=g++-8;
   - chmod +x linux_pkg_install.sh
+  - export PORTABLE=1
+  - export USE_RTTI=1
   - ./linux_pkg_install.sh
 
 
@@ -107,6 +109,8 @@ before_install:
 #compiler:
 #  - gcc
 install:
+  - export PORTABLE=1
+  - export USE_RTTI=1
   - DEPS_DIR="${TRAVIS_BUILD_DIR}/deps"
   - sudo apt-get install libgtest-dev
   #  - mkdir ${DEPS_DIR} && cd ${DEPS_DIR}
