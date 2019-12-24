@@ -10,8 +10,8 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include -lboost_log-mt -lboost_log_setup-mt -lboost_thread-mt -lboost_system-mt")
     set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include -lboost_log-mt -lboost_log_setup-mt -lboost_thread-mt -lboost_system-mt")
 else()
-    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
-    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
+    set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -lrocksdb -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
+    set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -std=c++17 -DBOOST_LOG_DYN_LINK -lrocksdb -pthread -lpthread -lbz2 -lz -lssl -lcrypto -L/usr/local/opt/openssl/lib -I/usr/local/opt/openssl/include")
 endif()
 
 #remove -lrocksdb, -lsnappy and -lrt
