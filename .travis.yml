@@ -12,7 +12,6 @@ os:
   - linux
   - osx
 compiler:
-  - clang
   - gcc
 branches:
   only:
@@ -52,7 +51,7 @@ jobs:
     - os: linux
       compiler: gcc
       env:
-        - MATRIX_EVAL="CC=gcc-8 && CXX=g++-8"
+        - MATRIX_EVAL="CC=gcc-9 && CXX=g++-9"
         - LABEL="linux"
         - _DEPLOYABLE="true"
         - STRIP="strip"
