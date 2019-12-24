@@ -3,6 +3,7 @@
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <llss3p/utils/packet.h>
 #include "llss3p/serialization/serializer.h"
 #include "llsscli/config/config.h"
 
@@ -12,17 +13,17 @@ namespace test {
 
 namespace srz = common::serializer;
 
-class MockSerializer : public srz::Serializer<config::Task> {
+class MockSerializer : public srz::Serializer<common::utils::Packet> {
  public:
-    MockSerializer() : Serializer<config::Task>(){};
-    MOCK_METHOD1(Serialize, size_t(std::shared_ptr<config::Task>& current_task));
+    MockSerializer() : Serializer<common::utils::Packet>(){};
+    MOCK_METHOD1(Serialize, size_t(std::shared_ptr<common::utils::Packet>& current_task));
     MOCK_METHOD1(Deserialize, size_t(std::shared_ptr<std::stringstream>& current_task));
 };
 
 TEST(Serializer, Ser_And_Deser) {
     MockSerializer ser;
 
-    std::shared_ptr<config::Task> current_task_in(new config::Task());
+    std::shared_ptr<common::utils::Packet> current_task_in(new common::utils::Packet());
     std::shared_ptr<std::stringstream> current_task_out(new std::stringstream());
 
     EXPECT_CALL(ser, Serialize(current_task_in)).Times(1);

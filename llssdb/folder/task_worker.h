@@ -6,7 +6,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-
 #include "llss3p/enums/operators.h"
 #include "llss3p/utils/queue.h"
 #include "llssdb/folder/file_system.h"
@@ -22,8 +21,7 @@ namespace folder {
 class TaskWorker : public ITaskWorker {
  public:
     TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-               std::string storage_path,
-               bool do_backup);
+               std::string storage_path, bool do_backup);
     ~TaskWorker() override = default;
 
     void Work() override;
@@ -35,7 +33,7 @@ class TaskWorker : public ITaskWorker {
     common::enums::response_type Delete_(common::utils::Data& data) override;
     common::enums::response_type Create_() override;
     common::enums::response_type Connect_(common::utils::Data& data) override;
-//    common::enums::response_type DestroyDB_() override;
+    //    common::enums::response_type DestroyDB_() override;
 
     void LoadInMemory_();
     void UnloadFromMemory_();

@@ -1,15 +1,12 @@
 #include "llssdb/folder/task_worker.h"
-
-#include <memory>
-#include <thread>
-
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
-
+#include <memory>
+#include <thread>
 #include "llss3p/enums/operators.h"
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
@@ -30,11 +27,10 @@ void TaskWorker::SendAnswer_(std::shared_ptr<network::Connection>& conn,
 }
 
 TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>>& queue,
-                       std::string storage_path,
-                       bool _do_backup = false)
+                       std::string storage_path, bool _do_backup = false)
     : input_queue_(queue), user_path_(storage_path), do_backup_(_do_backup), alive_(true) {
     boost::filesystem::create_directory("/tmp/failless");
-    if ( boost::filesystem::create_directory(user_path_) ) {
+    if (boost::filesystem::create_directory(user_path_)) {
         BOOST_LOG_TRIVIAL(debug) << "[TW]: Created new folder at " << user_path_;
     }
 
