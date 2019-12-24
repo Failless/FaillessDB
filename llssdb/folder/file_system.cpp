@@ -1,33 +1,42 @@
 #include "llssdb/folder/file_system.h"
+
+#include <cstdlib>
+#include <string>
+#include <unordered_map>
+
+#include <boost/log/core.hpp>
+#include <boost/date_time.hpp>
+#include <boost/log/expressions.hpp>
+#include <boost/log/trivial.hpp>
 #include <rocksdb/db.h>
 #include <rocksdb/iterator.h>
 #include <rocksdb/options.h>
 #include <rocksdb/utilities/backupable_db.h>
-#include <boost/log/core.hpp>
-#include <boost/log/expressions.hpp>
-#include <boost/log/trivial.hpp>
-#include <cstdlib>
-#include <string>
-#include <unordered_map>
+
 #include "llss3p/enums/operators.h"
 
-namespace failless {
-namespace db {
-namespace folder {
-namespace enums = common::enums;
+#define BACKUPS 1
 
-FileSystem::FileSystem(const std::string& folder_path, bool do_backup)
-    : folder_path_(folder_path),
-      db_path_(folder_path + "/db/"),
-      backup_path_(folder_path + "/backup/"),
-      do_backup_(do_backup) {
-    if (OpenDB_() && do_backup_) BackUp_();
+namespace failless::db::folder {
+
+using namespace rocksdb;
+using common::enums::response_type;
+
+FileSystem::FileSystem(const std::string &folder_path, bool do_backup)
+      : folder_path_(folder_path),
+        db_path_(folder_path + "/db/"),
+        backup_path_(folder_path + "/backup/"),
+        do_backup_(do_backup)
+        {
+            if ( OpenDB_() && do_backup_ ) BackUp_();
+        }
+
+FileSystem::~FileSystem() {
+    CloseDB_();
 }
 
-FileSystem::~FileSystem() { CloseDB_(); }
-
 bool FileSystem::OpenDB_() {
-    rocksdb::Options options;
+    Options options;
 
     /// Optimize RocksDB. This is the easiest way to get RocksDB to perform well
     options.IncreaseParallelism();
@@ -37,7 +46,7 @@ bool FileSystem::OpenDB_() {
     options.create_if_missing = true;
 
     /// Open DB with default ColumnFamily
-    rocksdb::Status s = rocksdb::DB::Open(options, db_path_, &db_);
+    Status s = DB::Open(options, db_path_, &db_);
     if (!s.ok()) {
         is_open_ = false;
         BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to open db at " << db_path_;
@@ -50,8 +59,8 @@ bool FileSystem::OpenDB_() {
 
 void FileSystem::CloseDB_() {
     if (is_open_) {
-        if (do_backup_) {
-            backup_engine_->PurgeOldBackups(kBackupNum_);
+        if ( do_backup_ ) {
+            backup_engine_->PurgeOldBackups(BACKUPS);
             delete backup_engine_;
         }
         delete db_;
@@ -61,11 +70,10 @@ void FileSystem::CloseDB_() {
 }
 
 void FileSystem::BackUp_() {
-    rocksdb::Status status = rocksdb::BackupEngine::Open(
-        rocksdb::Env::Default(), rocksdb::BackupableDBOptions(backup_path_), &backup_engine_);
-    if (status.ok()) {
-        status = backup_engine_->CreateNewBackup(db_);
-        if (status.ok()) {
+    Status s = BackupEngine::Open(Env::Default(), BackupableDBOptions(backup_path_), &backup_engine_);
+    if (s.ok()) {
+        s = backup_engine_->CreateNewBackup(db_);
+        if (s.ok()) {
             BOOST_LOG_TRIVIAL(debug) << "[FS]: Backed up db at " << backup_path_;
         } else {
             BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to backup db at " << backup_path_;
@@ -76,86 +84,81 @@ void FileSystem::BackUp_() {
 }
 
 bool FileSystem::RestoreFromBackup() {
-    rocksdb::BackupEngineReadOnly* r_backup_engine;
-    rocksdb::Status status = rocksdb::BackupEngineReadOnly::Open(
-        rocksdb::Env::Default(), rocksdb::BackupableDBOptions(backup_path_), &r_backup_engine);
-    if (status.ok()) {
+    BackupEngineReadOnly* r_backup_engine;
+    Status s = BackupEngineReadOnly::Open(Env::Default(), BackupableDBOptions(backup_path_), &r_backup_engine);
+    if (s.ok()) {
         r_backup_engine->RestoreDBFromLatestBackup(db_path_, db_path_);
         BOOST_LOG_TRIVIAL(info) << "[FS]: Successfully restored db at " << db_path_;
     } else {
         BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to restore db at " << db_path_;
     }
     delete r_backup_engine;
-    return status.ok();
+    return s.ok();
 }
 
-enums::response_type FileSystem::Get(const std::string& key, std::vector<uint8_t>& value_out,
-                                     size_t& size_out) {
+response_type FileSystem::Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) {
     if (is_open_) {
-        rocksdb::PinnableSlice pinnable_value;
-        auto status =
-            db_->Get(rocksdb::ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
+        PinnableSlice pinnable_value;
+        auto status = db_->Get(ReadOptions(), db_->DefaultColumnFamily(), key, &pinnable_value);
 
-        if (status.IsNotFound()) {
+        if ( status.IsNotFound() ) {
             BOOST_LOG_TRIVIAL(error) << "[FS]: Key \"" << key << "\" doesn't exist";
-            return enums::response_type::NOT_FOUND;
+            return response_type::NOT_FOUND;
         }
 
         /// Copy to output arguments
         size_out = pinnable_value.size();
-        value_out =
-            std::vector<uint8_t>(pinnable_value.data()[0], pinnable_value.data()[size_out - 1]);
+        value_out = std::vector<uint8_t>(pinnable_value.data()[0], pinnable_value.data()[size_out - 1]);
         BOOST_LOG_TRIVIAL(debug) << "[FS]: \"" << key << "\" retrieved from HDD";
-        return enums::response_type::OK;
+        return response_type::OK;
     } else {
         BOOST_LOG_TRIVIAL(error) << "[FS]: DB isn't open";
-        return enums::response_type::SERVER_ERROR;
+        return response_type::SERVER_ERROR;
     }
 }
 
-enums::response_type FileSystem::Set(common::utils::Data& data) {
+response_type FileSystem::Set(common::utils::Data& data) {
     if (is_open_) {
         std::string string_value{};
 
-        for (const auto& byte : data.value) {
+        for ( const auto& byte: data.value ) {
             string_value += std::to_string(byte);
         }
 
-        auto status = db_->Put(rocksdb::WriteOptions(), data.key, string_value);
+        auto status = db_->Put(WriteOptions(), data.key, string_value);
         if (!status.ok()) {
-            BOOST_LOG_TRIVIAL(error)
-                << "[FS]: Value of size " << data.size << " was not loaded into HDD";
-            return enums::response_type::SERVER_ERROR;
+            BOOST_LOG_TRIVIAL(error) << "[FS]: Value of size " << data.size << " was not loaded into HDD";
+            return response_type::SERVER_ERROR;
         }
         BOOST_LOG_TRIVIAL(debug) << "[FS]: Value of size " << data.size << " was loaded into HDD";
-        return enums::response_type::OK;
+        return response_type::OK;
     } else {
         BOOST_LOG_TRIVIAL(error) << "[FS]: DB isn't open";
-        return enums::response_type::SERVER_ERROR;
+        return response_type::SERVER_ERROR;
     }
 }
 
-enums::response_type FileSystem::Remove(const std::string& key) {
+response_type FileSystem::Remove(const std::string &key) {
     if (is_open_) {
         /// Find key first
-        auto status = db_->Get(rocksdb::ReadOptions(), key, new std::string);
+        auto status = db_->Get(ReadOptions(), key, new std::string);
 
         if (status.IsNotFound()) {
             BOOST_LOG_TRIVIAL(error) << "[FS]: Key \"" << key << "\" doesn't exist in db";
-            return enums::response_type::NOT_FOUND;
+            return response_type::NOT_FOUND;
         }
 
         /// Remove key
-        status = db_->Delete(rocksdb::WriteOptions(), key);
+        status = db_->Delete(WriteOptions(), key);
         if (!status.ok()) {
             BOOST_LOG_TRIVIAL(error) << "[FS]: Failed to delete a key \"" << key << "\"";
-            return enums::response_type::SERVER_ERROR;
+            return response_type::SERVER_ERROR;
         }
         BOOST_LOG_TRIVIAL(debug) << "[FS]: Key \"" << key << "\" erased from HDD";
-        return enums::response_type::OK;
+        return response_type::OK;
     } else {
         BOOST_LOG_TRIVIAL(error) << "[FS]: DB isn't open";
-        return enums::response_type::SERVER_ERROR;
+        return response_type::SERVER_ERROR;
     }
 }
 
@@ -165,7 +168,7 @@ void FileSystem::EraseAll() {
     CloseDB_();
 
     /// Erase everything
-    DestroyDB(db_path_, rocksdb::Options());
+    DestroyDB(db_path_, Options());
 
     /// Open DB again because we call for this func in destructor
     OpenDB_();
@@ -181,31 +184,50 @@ uint64_t FileSystem::AmountOfKeys() {
     }
 }
 
-void FileSystem::LoadInMemory(std::unordered_map<std::string, InMemoryData>& local_storage) {
-    bool all = true;
+// This func meant to be called only when cache is empty
+void FileSystem::LoadCache(
+        std::unordered_map<std::string, InMemoryData> &local_storage,
+        std::map<boost::posix_time::ptime, std::string>& queue,
+        long max_bytes,
+        long& cur_bytes) {
+    long byte_counter = 0;
     if (is_open_) {
-        auto it = db_->NewIterator(rocksdb::ReadOptions());
+        auto it = db_->NewIterator(ReadOptions());
         local_storage.reserve(AmountOfKeys());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            std::vector<uint8_t> tmp_vector(it->value().data_,
-                                            it->value().data_ + it->value().size());
-            all = std::min(all, local_storage
-                                    .emplace(std::make_pair(
-                                        it->key().ToString(),
-                                        InMemoryData(tmp_vector, it->value().size(), true)))
-                                    .second);
+            std::vector<uint8_t> tmp_vector;
+            // if max capacity is reached - insert empty value but keep the size
+            if ( byte_counter + it->value().size() < max_bytes ) {
+                tmp_vector.assign(it->value().data_, it->value().data_ + it->value().size());
+                byte_counter += it->value().size();
+                local_storage.emplace(std::make_pair(
+                        it->key().ToString(),
+                        InMemoryData(
+                                tmp_vector,
+                                it->value().size(),
+                                true)));
+            } else {    // TODO(EgorBedov): fix this duplicated garbage
+                local_storage.emplace(std::make_pair(
+                        it->key().ToString(),
+                        InMemoryData(
+                                tmp_vector,
+                                it->value().size(),
+                                false)));
+            }
+            queue.emplace(boost::posix_time::microsec_clock::local_time(), it->key().ToString());
         }
     }
-    if (all) {
-        BOOST_LOG_TRIVIAL(info) << "[FS]: Everything was loaded into RAM";
+    if ( byte_counter < 1024 ) {
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter << " bytes was loaded into RAM";
+    } else if ( byte_counter > 1024 && byte_counter < 1048576 ) {
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter / 1024 << "MB was loaded into RAM";
     } else {
-        BOOST_LOG_TRIVIAL(info) << "[FS]: Not everything was loaded into RAM";
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter / 1048576 << "GB was loaded into RAM";
     }
+    cur_bytes += byte_counter;
 }
 
-}  // namespace folder
-}  // namespace db
-}  // namespace failless
+}
 
 // https://github.com/facebook/rocksdb/blob/master/examples/column_families_example.cc
 // TODO(EgorBedov): https://github.com/facebook/rocksdb/wiki/A-Tutorial-of-RocksDB-SST-formats

@@ -61,8 +61,8 @@ public:
     MOCK_METHOD1(Set_, common::enums::response_type(common::utils::Data& data));
     MOCK_METHOD1(Read_, common::enums::response_type(common::utils::Data& data));
     MOCK_METHOD1(Delete_, common::enums::response_type(common::utils::Data& data));
-    MOCK_METHOD0(LoadInMemory_, void());
-    MOCK_METHOD0(UnloadFromMemory_, void());
+    MOCK_METHOD0(LoadCache_, void());
+    MOCK_METHOD0(ClearCache_, void());
 };
 
 class MockFileSystem : public folder::FileSystem {
