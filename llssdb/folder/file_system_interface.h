@@ -7,6 +7,7 @@
 #include <string>
 #include <unordered_map>
 
+#include <boost/date_time.hpp>
 #include <boost/noncopyable.hpp>
 
 #include "llss3p/enums/operators.h"
@@ -29,6 +30,7 @@ public:
     virtual void EraseAll() = 0;
     virtual void LoadCache(
             std::unordered_map<std::string, failless::db::folder::InMemoryData> &local_storage,
+            std::map<boost::posix_time::ptime, std::string>& queue,
             long max_bytes,
             long& cur_bytes) = 0;
 };

@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <boost/log/core.hpp>
+#include <boost/date_time.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
 #include <rocksdb/db.h>
@@ -183,8 +184,12 @@ uint64_t FileSystem::AmountOfKeys() {
     }
 }
 
-// This func meant to be called only after ClearCache()
-void FileSystem::LoadCache(std::unordered_map<std::string, InMemoryData> &local_storage, long max_bytes, long& cur_bytes) {
+// This func meant to be called only when cache is empty
+void FileSystem::LoadCache(
+        std::unordered_map<std::string, InMemoryData> &local_storage,
+        std::map<boost::posix_time::ptime, std::string>& queue,
+        long max_bytes,
+        long& cur_bytes) {
     long byte_counter = 0;
     if (is_open_) {
         auto it = db_->NewIterator(ReadOptions());
@@ -209,7 +214,7 @@ void FileSystem::LoadCache(std::unordered_map<std::string, InMemoryData> &local_
                                 it->value().size(),
                                 false)));
             }
-
+            queue.emplace(boost::posix_time::microsec_clock::local_time(), it->key().ToString());
         }
     }
     if ( byte_counter < 1024 ) {

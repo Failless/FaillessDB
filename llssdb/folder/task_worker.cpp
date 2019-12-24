@@ -1,6 +1,5 @@
 #include "llssdb/folder/task_worker.h"
 
-#include <iostream>
 #include <memory>
 #include <thread>
 #include <unistd.h>
@@ -139,7 +138,7 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
 
     /// Update_ in-memory storage
     if (result == enums::response_type::OK) {
-        CheckCache_(data.size);
+        PrepareCache_(data.size);
         if (it == local_storage_.end()) {
             local_storage_
                     .emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
@@ -149,7 +148,7 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
             existed.size = data.size;
             existed.in_memory = true;
         }
-        queue.emplace(boost::posix_time::microsec_clock::local_time(), data.key);
+        queue_.emplace(boost::posix_time::microsec_clock::local_time(), data.key);
         cur_memory_ += data.size;
     }
 
@@ -160,19 +159,27 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
 enums::response_type TaskWorker::Read_(common::utils::Data& data) {
     auto response = enums::response_type::SERVER_ERROR;
 
-    /// Grab file from memory if it's in there
-    if (!local_storage_.empty() && (local_storage_.at(data.key).in_memory)) {
-        data.size = local_storage_.at(data.key).size;
-        data.value = local_storage_.at(data.key).value;
+    auto it = local_storage_.find(data.key);
+
+    /// Check for existence of this key
+    if ( it == local_storage_.end() ) {
+        return enums::response_type::NOT_FOUND;
+    }
+    /// Get data from cache if it's in there
+    else if ( it->second.in_memory ) {
+        data.size = it->second.size;
+        data.value = it->second.value;
         UpdateCache_(data.key);
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" retrieved from RAM";
         return enums::response_type::OK;
-    } else {
+    }
+    /// Get data from HDD and put it into cache
+    else {
         response = fs_->Get(data.key, data.value, data.size);
-        CheckCache_(data.size);
-        local_storage_.at(data.key).value = data.value;
-        local_storage_.at(data.key).size = data.size;
-        local_storage_.at(data.key).in_memory = true;
+        PrepareCache_(data.size);
+        it->second.value = data.value;
+        it->second.size = data.size;
+        it->second.in_memory = true;
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" loaded from HDD into RAM";
     }
     return response;
@@ -186,9 +193,9 @@ enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
     if (local_storage_.at(data.key).in_memory) {
         cur_memory_ -= local_storage_.at(data.key).size;
         local_storage_.erase(data.key.c_str());  // no, it's not redundant
-        queue.erase(std::find_if(  // yeah it's O(n) sorry
-            queue.begin(),
-            queue.end(),
+        queue_.erase(std::find_if(  // yeah it's O(n) sorry
+            queue_.begin(),
+            queue_.end(),
             [key = data.key](const auto& pair){ return pair.second == key; }));
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" erased from RAM";
     }
@@ -196,7 +203,7 @@ enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
 }
 
 void TaskWorker::LoadCache_() {
-    fs_->LoadCache(local_storage_, max_memory_, cur_memory_);
+    fs_->LoadCache(local_storage_, queue_, max_memory_, cur_memory_);
 }
 
 void TaskWorker::ClearCache_() {
@@ -242,29 +249,30 @@ common::enums::response_type TaskWorker::Connect_(common::utils::Data& data) {
     fs_ = std::make_unique<FileSystem>(new_folder_path, do_backup_);
     BOOST_LOG_TRIVIAL(info) << "[TW]: Connected to db at " << new_folder_path;
 
+    LoadCache_();
     return common::enums::response_type::OK;
 }
 
-void TaskWorker::CheckCache_(long bytes) {
+void TaskWorker::PrepareCache_(long bytes) {
     while ( cur_memory_ + bytes > max_memory_ ) {
-        InMemoryData& to_clear = local_storage_.find(queue.begin()->second)->second;
+        InMemoryData& to_clear = local_storage_.find(queue_.begin()->second)->second;
         to_clear.value.clear();
         to_clear.value.shrink_to_fit();
         to_clear.in_memory = false;
 
         cur_memory_ -= to_clear.size;
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << queue.begin()->second << "\" removed from RAM";
-        queue.erase(queue.begin());
+        BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << queue_.begin()->second << "\" removed from RAM";
+        queue_.erase(queue_.begin());
     }
     return;
 }
 
 void TaskWorker::UpdateCache_(const std::string& key) {
-    queue.erase(std::find_if(  // yeah it's O(n) sorry
-            queue.begin(),
-            queue.end(),
+    queue_.erase(std::find_if(  // yeah it's O(n) sorry
+            queue_.begin(),
+            queue_.end(),
             [key](const auto& pair){ return pair.second == key; }));
-    queue.emplace(boost::posix_time::microsec_clock::local_time(), key);
+    queue_.emplace(boost::posix_time::microsec_clock::local_time(), key);
     BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << key << "\" updated in cache";
 }
 
@@ -273,5 +281,5 @@ void TaskWorker::UpdateCache_(const std::string& key) {
 }  // namespace failless
 
 // TODO(EgorBedov): make cache more dynamic
-// TODO(EgorBedov): replace queue with container that sorts by key and finds by value
+// TODO(EgorBedov): replace queue_ with container that sorts by key and finds by value
 //  or store timestamp (delete and updatecache)

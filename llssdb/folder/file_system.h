@@ -8,6 +8,7 @@
 #include <string>
 #include <unordered_map>
 
+#include <boost/date_time.hpp>
 #include <rocksdb/db.h>
 #include <rocksdb/utilities/backupable_db.h>
 
@@ -30,6 +31,7 @@ public:
     void EraseAll() override;
     void LoadCache(
             std::unordered_map<std::string, InMemoryData>& local_storage,
+            std::map<boost::posix_time::ptime, std::string>& queue,
             long max_bytes,
             long& cur_bytes) override;
     uint64_t AmountOfKeys();

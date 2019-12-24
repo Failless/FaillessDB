@@ -114,6 +114,7 @@ TEST(FileSystem, LoadCache) {
     /// Test values
     auto test_data = prepare_test();
     std::unordered_map<std::string, folder::InMemoryData> local_storage_;
+    std::map<boost::posix_time::ptime, std::string> queue_;
 
     FileSystem fs(kTestDbPath + "/1");
 
@@ -128,7 +129,7 @@ TEST(FileSystem, LoadCache) {
     EXPECT_EQ(fs.Set(test_data), response_type::OK);
 
     long cur_bytes = 0;
-    fs.LoadCache(local_storage_, 1024*1024*4, cur_bytes);
+    fs.LoadCache(local_storage_, queue_, 1024*1024*4, cur_bytes);
     EXPECT_EQ(local_storage_.size(), 3);
     EXPECT_EQ(local_storage_.at("test_key").value.size(), 3);
     EXPECT_EQ(local_storage_.at("test_key1").value.size(), 4);

@@ -16,6 +16,7 @@
 #include "llssdb/folder/in_memory_data.h"
 #include "llssdb/folder/task_worker_interface.h"
 #include "llssdb/network/transfer/hookup.h"
+#include "file_system.h"
 
 namespace failless {
 namespace db {
@@ -39,7 +40,7 @@ protected:
     common::enums::response_type Connect_(common::utils::Data& data) override;
 //    common::enums::response_type DestroyDB_() override;
 
-    void CheckCache_(long bytes);
+    void PrepareCache_(long bytes);
     void UpdateCache_(const std::string& key);
     void LoadCache_();
     void ClearCache_();
@@ -51,7 +52,7 @@ protected:
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& input_queue_;
     std::unordered_map<std::string, InMemoryData> local_storage_;
-    std::map<boost::posix_time::ptime, std::string> queue;
+    std::map<boost::posix_time::ptime, std::string> queue_;
     std::unique_ptr<FileSystemInterface> fs_;
     std::string user_path_{};
     std::vector<size_t> dbs_{};
