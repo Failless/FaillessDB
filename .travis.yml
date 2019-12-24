@@ -156,7 +156,7 @@ script:
   - eval $MATRIX_EVAL
   - mkdir build && cd build
   - ${DEPS_DIR}/cmake/bin/cmake -DCMAKE_BUILD_TYPE=Release .. ${CUSTOM_TOOLCHAIN} ${CUSTOM_BOOST_ROOT}
-  - make failless-server -j4
+#  - make failless-server -j4
   - make failless-cli -j4
 
 after_success:
