@@ -34,7 +34,7 @@ int main(/*int argc, char **argv*/) {
 
     std::thread start_manager(StartManager, manager);
     std::unique_ptr<failless::db::network::ITcpServer> tcp_server(
-        new failless::db::network::TcpServer(queue, "127.0.0.1", 11556));
+        new failless::db::network::TcpServer(queue, settings.bind, settings.port));
     tcp_server->Listen();
     start_manager.join();
     /*
