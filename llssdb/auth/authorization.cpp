@@ -118,7 +118,7 @@ bool Authorization::AddingUser_(const UserInfo &User) {
                                  << "' can't be opened";
         return false;
     }
-    std::cout << "login: " << User.login << std::endl;
+    BOOST_LOG_TRIVIAL(debug) << "login: " << User.login << std::endl;
     filer << "login = " << User.login << std::endl;
     filer << "is_conn = " << User.is_conn << std::endl;
     filer << "table_id = " << User.table_id << std::endl;
