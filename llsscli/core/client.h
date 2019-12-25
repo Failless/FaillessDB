@@ -31,6 +31,8 @@ class Client : public ClientInterface {
     size_t ExecNet_() override;
     size_t ParseInput_(std::string raw_query) override;
 
+    size_t SetUserTask_(common::utils::Data& data, common::enums::operators action) override;
+
     size_t SendToDb_() override;
     size_t SetDBKey_() override;
     size_t GetDBKey_() override;

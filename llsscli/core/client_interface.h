@@ -23,6 +23,8 @@ class ClientInterface : boost::noncopyable {
     virtual size_t ExecNet_() = 0;
     virtual size_t ParseInput_(std::string raw_query) = 0;
 
+    virtual size_t SetUserTask_(common::utils::Data& data, common::enums::operators action) = 0;
+
     virtual size_t SendToDb_() = 0;
     virtual size_t SetDBKey_() = 0;
     virtual size_t GetDBKey_() = 0;

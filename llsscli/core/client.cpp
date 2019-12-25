@@ -123,6 +123,18 @@ size_t Client::InitNetSettings_() {
     return 0;
 }
 
+size_t Client::SetUserTask_(common::utils::Data& data, common::enums::operators action) {
+    // Init user Task struct
+    current_task_.reset(new common::utils::Packet());
+    current_task_->login = config_.user_name;
+    current_task_->pass = config_.user_pass;
+    current_task_->data = data;
+    current_task_->command = action;
+    current_task_->ret_value = common::enums::response_type::NOT_SET;
+    current_task_->request = config_.user_request;
+    return 0;
+}
+
 size_t Client::SendToDb_() {
     //    // Define file container and its size
     //    std::unique_ptr<std::vector<unsigned char>> value;
@@ -149,22 +161,12 @@ size_t Client::SendToDb_() {
 
 size_t Client::SetDBKey_() {
     if (query_tokens_.size() == 3) {
-        // Init user Data struct
         std::vector<unsigned char> value =
             std::vector<unsigned char>(query_tokens_[2].begin(), query_tokens_[2].end());
         common::utils::Data data(config_.payload_dest_id, value.size(), value);
 
-        // Init user Task struct
-        current_task_.reset(new common::utils::Packet());
-        current_task_->login = config_.user_name;
-        current_task_->pass = config_.user_pass;
-        current_task_->data = data;
-        current_task_->command = common::enums::operators::SET;
-        current_task_->ret_value = common::enums::response_type::NOT_SET;
-        current_task_->request = config_.user_request;
-
+        SetUserTask_(data, common::enums::operators::SET);
         SerializeQuery_();
-
         ExecNet_();
     } else {
         std::cout << "[CLIENT] Error with SET command!" << std::endl;
@@ -174,20 +176,10 @@ size_t Client::SetDBKey_() {
 }
 
 size_t Client::GetDBKey_() {
-    // Init user Data struct
     common::utils::Data data(config_.payload_dest_id, 0);
 
-    // Init user Task struct
-    current_task_.reset(new common::utils::Packet());
-    current_task_->login = config_.user_name;
-    current_task_->pass = config_.user_pass;
-    current_task_->data = data;
-    current_task_->command = common::enums::operators::GET;
-    current_task_->ret_value = common::enums::response_type::NOT_SET;
-    current_task_->request = config_.user_request;
-
+    SetUserTask_(data, common::enums::operators::GET);
     SerializeQuery_();
-
     ExecNet_();
     return 0;
 }
@@ -195,24 +187,14 @@ size_t Client::GetDBKey_() {
 size_t Client::CreateDBFolder_() {
     std::string input;
     std::getline(std::cin, input);
-    // Init user Data struct
 
     int payload_id = 0;
     std::stringstream folder_ss(input);
     folder_ss >> payload_id;
     common::utils::Data data(payload_id, 0);
 
-    // Init user Task struct
-    current_task_.reset(new common::utils::Packet());
-    current_task_->login = config_.user_name;
-    current_task_->pass = config_.user_pass;
-    current_task_->data = data;
-    current_task_->command = common::enums::operators::CREATE;
-    current_task_->ret_value = common::enums::response_type::NOT_SET;
-    current_task_->request = config_.user_request;
-
+    SetUserTask_(data, common::enums::operators::CREATE);
     SerializeQuery_();
-
     ExecNet_();
     return 0;
 }
@@ -222,22 +204,12 @@ size_t Client::Connect_() {
         std::string input;
         std::getline(std::cin, input);
 
-        // Init user Data struct
         common::utils::Data data;
         std::stringstream folder_ss(query_tokens_[2]);
         folder_ss >> data.folder_id;
 
-        // Init user Task struct
-        current_task_.reset(new common::utils::Packet());
-        current_task_->login = query_tokens_[1];
-        current_task_->pass = input;
-        current_task_->data = data;
-        current_task_->command = common::enums::operators::CONNECT;
-        current_task_->ret_value = common::enums::response_type::NOT_SET;
-        current_task_->request = config_.user_request;
-
+        SetUserTask_(data, common::enums::operators::CREATE);
         SerializeQuery_();
-
         ExecNet_();
     } else {
         std::cout << "[CONNECT] Error with command!" << std::endl;
@@ -246,17 +218,9 @@ size_t Client::Connect_() {
 }
 
 size_t Client::Disconnect_() {
-    // Init user Data struct
     common::utils::Data data(config_.payload_dest_id, 0);
 
-    // Init user Task struct
-    current_task_.reset(new common::utils::Packet());
-    current_task_->login = config_.user_name;
-    current_task_->pass = config_.user_pass;
-    current_task_->data = data;
-    current_task_->command = common::enums::operators::DISCONNECT;
-    current_task_->ret_value = common::enums::response_type::NOT_SET;
-    current_task_->request = config_.user_request;
+    SetUserTask_(data, common::enums::operators::CREATE);
 
     SerializeQuery_();
 
@@ -269,20 +233,10 @@ size_t Client::Register_() {
         std::string input;
         std::getline(std::cin, input);
 
-        // Init user Data struct
         common::utils::Data data;
 
-        // Init user Task struct
-        current_task_.reset(new common::utils::Packet());
-        current_task_->login = query_tokens_[1];
-        current_task_->pass = input;
-        current_task_->data = data;
-        current_task_->command = common::enums::operators::REG;
-        current_task_->ret_value = common::enums::response_type::NOT_SET;
-        current_task_->request = config_.user_request;
-
+        SetUserTask_(data, common::enums::operators::REG);
         SerializeQuery_();
-
         ExecNet_();
     } else {
         std::cout << "[CLIENT] Error with REGISTER command!" << std::endl;
@@ -295,22 +249,12 @@ size_t Client::Kill_() {
         std::string input;
         std::getline(std::cin, input);
 
-        // Init user Data struct
         common::utils::Data data;
         std::stringstream folder_ss(query_tokens_[1]);
         folder_ss >> data.folder_id;
 
-        // Init user Task struct
-        current_task_.reset(new common::utils::Packet());
-        current_task_->login = config_.user_name;
-        current_task_->pass = input;
-        current_task_->data = data;
-        current_task_->command = common::enums::operators::REG;
-        current_task_->ret_value = common::enums::response_type::NOT_SET;
-        current_task_->request = config_.user_request;
-
+        SetUserTask_(data, common::enums::operators::KILL);
         SerializeQuery_();
-
         ExecNet_();
     } else {
         std::cout << "[CLIENT] Error with KILL command!" << std::endl;
@@ -320,20 +264,9 @@ size_t Client::Kill_() {
 
 size_t Client::RemoveKey_() {
     if (query_tokens_.size() == 2) {
-        // Init user Data struct
         common::utils::Data data(config_.payload_dest_id, 0);
-
-        // Init user Task struct
-        current_task_.reset(new common::utils::Packet());
-        current_task_->login = config_.user_name;
-        current_task_->pass = config_.user_pass;
-        current_task_->data = data;
-        current_task_->command = common::enums::operators::DELETE;
-        current_task_->ret_value = common::enums::response_type::NOT_SET;
-        current_task_->request = config_.user_request;
-
+        SetUserTask_(data, common::enums::operators::DELETE);
         SerializeQuery_();
-
         ExecNet_();
     } else {
         std::cout << "[CLIENT] Error with DELETE command!" << std::endl;
