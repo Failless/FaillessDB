@@ -21,15 +21,14 @@ std::string kStoragePath("/tmp/failless/storage");
 
 namespace failless::db::tests {
 using ::testing::_;
-using namespace boost::filesystem;
 
 void set_test_db_path() {
     /// DEBUG
-    create_directory("/tmp/failless");
-    create_directory("/tmp/failless/storage");
-    remove_all("/tmp/failless/storage");
-    create_directory("/tmp/failless/storage");
-    create_directory("/tmp/failless/storage/test_user");
+    boost::filesystem::create_directory("/tmp/failless");
+    boost::filesystem::create_directory("/tmp/failless/storage");
+    boost::filesystem::remove_all("/tmp/failless/storage");
+    boost::filesystem::create_directory("/tmp/failless/storage");
+    boost::filesystem::create_directory("/tmp/failless/storage/test_user");
 }
 
 class TestTaskWorker : public folder::TaskWorker {

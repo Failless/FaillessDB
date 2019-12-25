@@ -265,7 +265,6 @@ void TaskWorker::PrepareCache_(long bytes) {
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << queue_.begin()->second << "\" removed from RAM";
         queue_.erase(queue_.begin());
     }
-    return;
 }
 
 void TaskWorker::UpdateCache_(const std::string& key) {
