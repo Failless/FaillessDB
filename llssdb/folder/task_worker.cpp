@@ -46,7 +46,7 @@ TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>
 
     /// Find amount of users' databases
     for (size_t folder_id = 1; folder_id < UINT_MAX; ++folder_id) {
-        if (boost::filesystem::exists(user_path_ + "/" + std::to_string(folder_id))) {
+        if ( boost::filesystem::exists(user_path_ + "/" + std::to_string(folder_id)) ) {
             dbs_.push_back(folder_id);
         } else {
             break;
@@ -95,10 +95,8 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command CONNECT";
             SendAnswer_(conn, Connect_(conn->GetPacket()->data), false);
             break;
-        /// Destroy DB
-        case common::enums::operators::KILL:
-            BOOST_LOG_TRIVIAL(debug)
-                << "[TW]: Received command KILL which destroys db (under construction)";
+        case common::enums::operators::KILL:  // Destroy DB
+            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command KILL";
             //            SendAnswer_(conn, Destroy_(conn->GetPacket()->data), false);
             SendAnswer_(conn, enums::response_type::OK, false);
             break;
@@ -106,10 +104,8 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command CREATE";
             SendAnswer_(conn, Create_(), false);
             break;
-        /// Kill thread
-        case common::enums::operators::DISCONNECT:
-            BOOST_LOG_TRIVIAL(debug)
-                << "[TW]: Received command DISCONNECT which for some reason kills thread";
+        case common::enums::operators::DISCONNECT:  // Kill thread
+            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command DISCONNECT";
             BOOST_LOG_TRIVIAL(info) << "[TW]: TaskWorker finished working";
             SendAnswer_(conn, enums::response_type::OK, false);
             alive_ = false;
@@ -123,9 +119,9 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
 
 enums::response_type TaskWorker::Set_(common::utils::Data& data) {
     /// Delete existing key
-    auto it = local_storage_.find(data.key);
+    auto it = cache_.find(data.key);
     InMemoryData& existed = it->second;
-    if ( it != local_storage_.end() ) {
+    if ( it != cache_.end() ) {
         fs_->Remove(data.key);
         existed.value.clear();
         existed.value.shrink_to_fit();
@@ -139,14 +135,16 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
     /// Update_ in-memory storage
     if (result == enums::response_type::OK) {
         PrepareCache_(data.size);
-        if (it == local_storage_.end()) {
-            local_storage_
-                    .emplace(std::make_pair(data.key, InMemoryData(data.value, data.size, true)));
+        if (it == cache_.end()) {
+            cache_.emplace(std::make_pair(
+                    data.key,
+                    InMemoryData {
+                        std::move(data.value),
+                        data.size,
+                        true
+                    }));
         } else {
-//            existed = InMemoryData{data.value, data.size, true};
-            existed.value = data.value;
-            existed.size = data.size;
-            existed.in_memory = true;
+            existed = InMemoryData{std::move(data.value), data.size, true};
         }
         queue_.emplace(boost::posix_time::microsec_clock::local_time(), data.key);
         cur_memory_ += data.size;
@@ -157,12 +155,10 @@ enums::response_type TaskWorker::Set_(common::utils::Data& data) {
 }
 
 enums::response_type TaskWorker::Read_(common::utils::Data& data) {
-    auto response = enums::response_type::SERVER_ERROR;
-
-    auto it = local_storage_.find(data.key);
+    auto it = cache_.find(data.key);
 
     /// Check for existence of this key
-    if ( it == local_storage_.end() ) {
+    if ( it == cache_.end() ) {
         return enums::response_type::NOT_FOUND;
     }
     /// Get data from cache if it's in there
@@ -175,40 +171,45 @@ enums::response_type TaskWorker::Read_(common::utils::Data& data) {
     }
     /// Get data from HDD and put it into cache
     else {
-        response = fs_->Get(data.key, data.value, data.size);
+        auto response = fs_->Get(data.key, data.value, data.size);
         PrepareCache_(data.size);
         it->second.value = data.value;
         it->second.size = data.size;
         it->second.in_memory = true;
         BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" loaded from HDD into RAM";
+        return response;
     }
-    return response;
 }
 
 enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
+    auto it = cache_.find(data.key);
+
+    /// Check for existence of this key
+    if ( it == cache_.end() ) {
+        return enums::response_type::NOT_FOUND;
+    }
+
     /// Delete_ key-value pair on HDD
     enums::response_type response = fs_->Remove(data.key);
 
     /// Update_ in-memory storage
-    if (local_storage_.at(data.key).in_memory) {
-        cur_memory_ -= local_storage_.at(data.key).size;
-        local_storage_.erase(data.key.c_str());  // no, it's not redundant
-        queue_.erase(std::find_if(  // yeah it's O(n) sorry
-            queue_.begin(),
-            queue_.end(),
-            [key = data.key](const auto& pair){ return pair.second == key; }));
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" erased from RAM";
-    }
+    cur_memory_ -= it->second.size;
+    cache_.erase(data.key.c_str());  // no, it's not redundant
+    queue_.erase(std::find_if(  // yeah it's O(n) sorry
+        queue_.begin(),
+        queue_.end(),
+        [key = data.key](const auto& pair){ return pair.second == key; }));
+    BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" erased from RAM";
     return response;
 }
 
 void TaskWorker::LoadCache_() {
-    fs_->LoadCache(local_storage_, queue_, max_memory_, cur_memory_);
+    fs_->LoadCache(cache_, queue_, max_memory_, cur_memory_);
 }
 
 void TaskWorker::ClearCache_() {
     /// Clear vector and free space it occupied
-    for (auto& it : local_storage_) {
+    for (auto& it : cache_) {
         it.second.value.clear();
         it.second.value.shrink_to_fit();
         it.second.in_memory = false;
@@ -255,7 +256,7 @@ common::enums::response_type TaskWorker::Connect_(common::utils::Data& data) {
 
 void TaskWorker::PrepareCache_(long bytes) {
     while ( cur_memory_ + bytes > max_memory_ ) {
-        InMemoryData& to_clear = local_storage_.find(queue_.begin()->second)->second;
+        InMemoryData& to_clear = cache_.find(queue_.begin()->second)->second;
         to_clear.value.clear();
         to_clear.value.shrink_to_fit();
         to_clear.in_memory = false;

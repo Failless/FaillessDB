@@ -191,30 +191,26 @@ void FileSystem::LoadCache(
         long max_bytes,
         long& cur_bytes) {
     long byte_counter = 0;
-    if (is_open_) {
+    if ( is_open_ ) {
+        boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
         auto it = db_->NewIterator(ReadOptions());
         local_storage.reserve(AmountOfKeys());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
             std::vector<uint8_t> tmp_vector;
             // if max capacity is reached - insert empty value but keep the size
-            if ( byte_counter + it->value().size() < max_bytes ) {
+            bool flag = byte_counter + it->value().size() < max_bytes;
+            if ( flag ) {
                 tmp_vector.assign(it->value().data_, it->value().data_ + it->value().size());
                 byte_counter += it->value().size();
-                local_storage.emplace(std::make_pair(
-                        it->key().ToString(),
-                        InMemoryData(
-                                tmp_vector,
-                                it->value().size(),
-                                true)));
-            } else {    // TODO(EgorBedov): fix this duplicated garbage
-                local_storage.emplace(std::make_pair(
-                        it->key().ToString(),
-                        InMemoryData(
-                                tmp_vector,
-                                it->value().size(),
-                                false)));
             }
-            queue.emplace(boost::posix_time::microsec_clock::local_time(), it->key().ToString());
+            local_storage.emplace(std::make_pair(
+                    it->key().ToString(),
+                    InMemoryData {
+                            std::move(tmp_vector),
+                            it->value().size(),
+                            flag
+                        }));
+            queue.emplace(time, it->key().ToString());
         }
     }
     if ( byte_counter < 1024 ) {

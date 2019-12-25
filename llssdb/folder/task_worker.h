@@ -51,7 +51,7 @@ protected:
 
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& input_queue_;
-    std::unordered_map<std::string, InMemoryData> local_storage_;
+    std::unordered_map<std::string, InMemoryData> cache_;
     std::map<boost::posix_time::ptime, std::string> queue_;
     std::unique_ptr<FileSystemInterface> fs_;
     std::string user_path_{};
