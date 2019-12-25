@@ -33,21 +33,15 @@ class ServerManager : public IServerManager {
         common::utils::Queue<::std::shared_ptr<network::Connection>>& task_queue);
     ~ServerManager() override = default;
 
-    void SetTask(utils::Task task) override;
     void Reload() override;
     void Run() override;
     void Stop() override;
     void SetSettings(utils::Settings& settings) override;
 
- protected:
-    bool Execute_(utils::Task& task) override;
-
  private:
     int CreateFolder_(::boost::uuids::uuid& client_id);
     bool KillFolder_(int folder_id);
-    bool RedirectTask_(utils::Task& task);
     short FindEmpty_();
-    common::enums::operators HandleRequest_(utils::Task& Task);
 
     common::utils::Queue<std::shared_ptr<network::Connection>>& task_queue_;
     std::vector<VirtualFolder> folders_;

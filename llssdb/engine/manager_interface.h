@@ -4,7 +4,6 @@
 #include <boost/noncopyable.hpp>
 #include "llss3p/enums/operators.h"
 #include "llssdb/utils/settings.h"
-#include "llssdb/utils/task.h"
 
 namespace failless {
 namespace db {
@@ -17,12 +16,6 @@ namespace engine {
 class IServerManager : boost::noncopyable {
  public:
     virtual ~IServerManager() = default;
-
-    /**
-     * Set_ task to utils queue for inside task handler
-     * @param task
-     */
-    virtual void SetTask(utils::Task task) = 0;
 
     /**
      * Reload server. This method create server restart and reinitialize its settings.
@@ -45,14 +38,6 @@ class IServerManager : boost::noncopyable {
      * @param settings
      */
     virtual void SetSettings(utils::Settings& settings) = 0;
-
- protected:
-    /**
-     * This method used for execute all queries or commands from client
-     * @param task
-     * @return
-     */
-    virtual bool Execute_(utils::Task& task) = 0;
 };
 
 }  // namespace engine

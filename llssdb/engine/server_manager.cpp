@@ -17,8 +17,6 @@ void WorkInThread(common::utils::Queue<std::shared_ptr<network::Connection>>* qu
     worker->Work();
 }
 
-void ServerManager::SetTask(utils::Task task) {}
-
 void ServerManager::Reload() {}
 
 void ServerManager::Run() {
@@ -49,11 +47,14 @@ void ServerManager::Run() {
             continue;
         }
 
-        //        if (!users_->IsAuth(*task.login, *task.password, 0)) {
-        //            packet.ret_value = common::enums::response_type::NOT_ALLOWED;
-        //            connection->SendData(packet);
-        //            continue;
-        //        }
+        if (!users_->IsAuth(*task.login, *task.password, 0)) {
+            packet.ret_value = common::enums::response_type::NOT_ALLOWED;
+            connection->SendData(packet);
+            BOOST_LOG_TRIVIAL(warning) << "[AUTH]: User is not authenticated";
+            continue;
+        } else {
+            BOOST_LOG_TRIVIAL(debug) << "[AUTH]: User is authenticated";
+        }
 
         switch (task.command) {
             case common::enums::operators::CREATE: {
@@ -112,17 +113,9 @@ void ServerManager::Run() {
 
 void ServerManager::Stop() { is_run_ = false; }
 
-bool ServerManager::Execute_(utils::Task& task) { return false; }
-
 int ServerManager::CreateFolder_(boost::uuids::uuid& client_id) { return false; }
 
 bool ServerManager::KillFolder_(int folder_id) { return false; }
-
-bool ServerManager::RedirectTask_(utils::Task& task) { return false; }
-
-common::enums::operators ServerManager::HandleRequest_(utils::Task& Task) {
-    return common::enums::DELETE;
-}
 
 void ServerManager::SetSettings(utils::Settings& settings) {
     w_settings_ = utils::WorkerSettings(settings.data_path, settings.do_backup);

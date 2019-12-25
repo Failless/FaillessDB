@@ -8,7 +8,6 @@
 #include <boost/uuid/random_generator.hpp>
 #include "llssdb/network/tcp_server.h"
 #include "llssdb/network/tcp_server_interface.h"
-#include "llssdb/utils/task.h"
 #include "tcp_server_mock.h"
 #include "tests/tests_db/tcp_server_mock.h"
 #include "tests/tests_db/test_tcp_server.h"

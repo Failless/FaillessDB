@@ -25,7 +25,6 @@ class TcpServer : public ITcpServer {
     void SetQueue(common::utils::Queue<std::shared_ptr<Connection>>& queue) override;
 
  protected:
-    void PushTask_(utils::Task task);
     Host host_{};
 
  private:
@@ -40,7 +39,6 @@ class TcpServer : public ITcpServer {
 
  private:
     std::unique_ptr<ip::tcp::acceptor> acceptor_;
-    std::vector<utils::Task> tasks_;
     std::vector<Connection> connections_;
     bool is_run_ = false;
 };

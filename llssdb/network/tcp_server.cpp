@@ -49,8 +49,6 @@ void TcpServer::SetQueue(common::utils::Queue<std::shared_ptr<Connection>>& queu
     //                                     std::placeholders::_1));
 }
 
-void TcpServer::PushTask_(utils::Task task) {}
-
 TcpServer::TcpServer(common::utils::Queue<std::shared_ptr<Connection>>& queue, Host host)
     : host_(std::move(host)) {
     acceptor_ =

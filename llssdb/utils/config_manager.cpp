@@ -1,8 +1,11 @@
 #include "llssdb/utils/config_manager.h"
+
 #include <algorithm>
-#include <boost/filesystem.hpp>
 #include <fstream>
 #include <iostream>
+
+#include <boost/filesystem.hpp>
+#include <boost/log/trivial.hpp>
 
 namespace failless {
 namespace db {
@@ -10,6 +13,7 @@ namespace utils {
 
 bool failless::db::utils::ConfigManager::Initialize(Settings &settings) {
     if (!boost::filesystem::exists(config_path)) {
+        BOOST_LOG_TRIVIAL(error) << "[CM]: No config file at " << config_path;
         std::cerr << "No such file";
         return false;
     }
@@ -19,7 +23,7 @@ bool failless::db::utils::ConfigManager::Initialize(Settings &settings) {
     if (cFile.is_open()) {
         WriteToSettings_(settings, cFile);
     } else {
-        std::cerr << "Couldn't find file or open for reading\n";
+        BOOST_LOG_TRIVIAL(error) << "[CM]: Failed to open for reading at " << config_path;
         return false;
     }
     return true;
