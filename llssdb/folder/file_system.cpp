@@ -5,7 +5,6 @@
 #include <unordered_map>
 
 #include <boost/log/core.hpp>
-#include <boost/date_time.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
 #include <rocksdb/db.h>
@@ -14,6 +13,7 @@
 #include <rocksdb/utilities/backupable_db.h>
 
 #include "llss3p/enums/operators.h"
+#include "llssdb/utils/cache.h"
 
 #define BACKUPS 1
 
@@ -184,42 +184,29 @@ uint64_t FileSystem::AmountOfKeys() {
 }
 
 // This func meant to be called only when cache is empty
-void FileSystem::LoadCache(
-        std::unordered_map<std::string, InMemoryData> &local_storage,
-        std::map<boost::posix_time::ptime, std::string>& queue,
-        long max_bytes,
-        long& cur_bytes) {
-    long byte_counter = 0;
+void FileSystem::LoadCache(utils::cache &cache) {
     if ( is_open_ ) {
-        boost::posix_time::ptime time = boost::posix_time::microsec_clock::local_time();
         auto it = db_->NewIterator(rocksdb::ReadOptions());
-        local_storage.reserve(AmountOfKeys());
         for (it->SeekToFirst(); it->Valid(); it->Next()) {
-            std::vector<uint8_t> tmp_vector;
-            // if max capacity is reached - insert empty value but keep the size
-            bool flag = byte_counter + it->value().size() < max_bytes;
-            if ( flag ) {
-                tmp_vector.assign(it->value().data_, it->value().data_ + it->value().size());
-                byte_counter += it->value().size();
+            std::string tmp_key = it->key().ToString();
+            size_t tmp_size = it->value().size();
+
+            if (cache.cur_size + tmp_size + tmp_key.size() < cache.max_size) {
+                std::vector<uint8_t> tmp_vector(it->value().data_, it->value().data_ + tmp_size);
+                cache.insert(tmp_key, tmp_vector);
+            } else {
+                break;
             }
-            local_storage.emplace(std::make_pair(
-                    it->key().ToString(),
-                    InMemoryData {
-                            std::move(tmp_vector),
-                            it->value().size(),
-                            flag
-                        }));
-            queue.emplace(time, it->key().ToString());
         }
     }
-    if ( byte_counter < 1024 ) {
-        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter << " bytes was loaded into RAM";
-    } else if ( byte_counter > 1024 && byte_counter < 1048576 ) {
-        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter / 1024 << "MB was loaded into RAM";
+    auto cur_size = cache.cur_size;
+    if ( cur_size < 1024 ) {
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << cur_size << " bytes was loaded into RAM";
+    } else if ( cur_size > 1024 && cur_size < 1048576 ) {
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << cur_size / 1024 << "MB was loaded into RAM";
     } else {
-        BOOST_LOG_TRIVIAL(info) << "[FS]: " << byte_counter / 1048576 << "GB was loaded into RAM";
+        BOOST_LOG_TRIVIAL(info) << "[FS]: " << cur_size / 1048576 << "GB was loaded into RAM";
     }
-    cur_bytes += byte_counter;
 }
 
 }  // namespace folder

@@ -14,7 +14,6 @@
 
 #include "llss3p/enums/operators.h"
 #include "llss3p/utils/data.h"
-#include "llssdb/folder/in_memory_data.h"
 
 namespace failless {
 namespace db {
@@ -32,11 +31,7 @@ public:
     common::enums::response_type Remove(const std::string &key) override;
 
     void EraseAll() override;
-    void LoadCache(
-            std::unordered_map<std::string, InMemoryData> &local_storage,
-            std::map<boost::posix_time::ptime, std::string> &queue,
-            long max_bytes,
-            long &cur_bytes) override;
+    void LoadCache(utils::cache &cache) override;
 
     uint64_t AmountOfKeys();
     bool RestoreFromBackup();

@@ -7,8 +7,6 @@
 #include <vector>
 #include <unordered_map>
 
-#include "llssdb/folder/in_memory_data.h"
-
 
 namespace failless {
 namespace db {
@@ -34,13 +32,10 @@ class cache {
 
     typedef std::unordered_map <key_type, lru_record_t> cache_t;
     cache_t cache_;
-    long max_size_;
-    long cur_size_ = 0;
-
 public:
-    cache(long bytes) : max_size_(bytes) {}
+    cache(long bytes) : max_size(bytes) {}
 
-    bool find(const key_type& key, data_type *item = nullptr) const;
+    bool get(const key_type& key, data_type& item) const;
 
     void insert(const key_type& key, const data_type &data);
 
@@ -51,6 +46,9 @@ public:
     bool empty() const;
 
     void clear();
+
+    long max_size;
+    long cur_size = 0;
 };
 
 }
