@@ -14,7 +14,9 @@
 #include "llss3p/utils/data.h"
 #include "llssdb/folder/in_memory_data.h"
 
-namespace failless::db::folder {
+namespace failless {
+namespace db {
+namespace folder {
 
 class FileSystemInterface : boost::noncopyable {
 public:
@@ -35,7 +37,9 @@ public:
             long& cur_bytes) = 0;
 };
 
-}
+}  // namespace folder
+}  // namespace db
+}  // namespace failless
 
 
 #endif // FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_INTERFACE_H_

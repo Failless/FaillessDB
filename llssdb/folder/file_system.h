@@ -16,7 +16,9 @@
 #include "llss3p/utils/data.h"
 #include "llssdb/folder/in_memory_data.h"
 
-namespace failless::db::folder {
+namespace failless {
+namespace db {
+namespace folder {
 
 class FileSystem : public FileSystemInterface {
 public:
@@ -24,18 +26,21 @@ public:
     explicit FileSystem(const std::string &folder_path, bool do_backup = false);
     ~FileSystem() override;
 
-    common::enums::response_type Get(const std::string &key, std::vector<uint8_t>& value_out, size_t& size_out) override;
-    common::enums::response_type Set(common::utils::Data& data) override;
+    common::enums::response_type
+    Get(const std::string &key, std::vector<uint8_t> &value_out, size_t &size_out) override;
+    common::enums::response_type Set(common::utils::Data &data) override;
     common::enums::response_type Remove(const std::string &key) override;
 
     void EraseAll() override;
     void LoadCache(
-            std::unordered_map<std::string, InMemoryData>& local_storage,
-            std::map<boost::posix_time::ptime, std::string>& queue,
+            std::unordered_map<std::string, InMemoryData> &local_storage,
+            std::map<boost::posix_time::ptime, std::string> &queue,
             long max_bytes,
-            long& cur_bytes) override;
+            long &cur_bytes) override;
+
     uint64_t AmountOfKeys();
     bool RestoreFromBackup();
+
 private:
     bool OpenDB_();
     void CloseDB_();
@@ -51,7 +56,9 @@ private:
     bool do_backup_ = false;
 };
 
-}  // namespace failless::db::folder
+}  // namespace folder
+}  // namespace db
+}  // namespace failless
 
 
 #endif  // FAILLESS_LLSSDB_FOLDER_FILE_SYSTEM_H
