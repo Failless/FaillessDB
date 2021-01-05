@@ -3,6 +3,7 @@
 #include <memory>
 #include <thread>
 #include <unistd.h>
+#include <utility>
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -10,11 +11,11 @@
 #include <boost/log/core.hpp>
 #include <boost/log/expressions.hpp>
 #include <boost/log/trivial.hpp>
-#include <utility>
 
 #include "llss3p/enums/operators.h"
-#include "llssdb/folder/in_memory_data.h"
 #include "llssdb/network/transfer/hookup.h"
+#include "llssdb/utils/cache.h"
+
 
 namespace failless {
 namespace db {
@@ -35,8 +36,8 @@ TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>
                        std::string storage_path,
                        bool _do_backup = false)
       : input_queue_(queue),
+        cache_( (sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE) - 1048576 ) / 2 ),
         user_path_(std::move(storage_path)),
-        max_memory_( (sysconf(_SC_PHYS_PAGES) * sysconf(_SC_PAGE_SIZE) - 1048576 ) / 2 ),
         do_backup_(_do_backup),
         alive_(true) {
     boost::filesystem::create_directory("/tmp/failless");
@@ -46,7 +47,7 @@ TaskWorker::TaskWorker(common::utils::Queue<std::shared_ptr<network::Connection>
 
     /// Find amount of users' databases
     for (size_t folder_id = 1; folder_id < UINT_MAX; ++folder_id) {
-        if ( boost::filesystem::exists(user_path_ + "/" + std::to_string(folder_id)) ) {
+        if (boost::filesystem::exists(user_path_ + "/" + std::to_string(folder_id))) {
             dbs_.push_back(folder_id);
         } else {
             break;
@@ -95,8 +96,10 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command CONNECT";
             SendAnswer_(conn, Connect_(conn->GetPacket()->data), false);
             break;
-        case common::enums::operators::KILL:  // Destroy DB
-            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command KILL";
+        /// Destroy DB
+        case common::enums::operators::KILL:
+            BOOST_LOG_TRIVIAL(debug)
+                << "[TW]: Received command KILL which destroys db (under construction)";
             //            SendAnswer_(conn, Destroy_(conn->GetPacket()->data), false);
             SendAnswer_(conn, enums::response_type::OK, false);
             break;
@@ -104,8 +107,10 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
             BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command CREATE";
             SendAnswer_(conn, Create_(), false);
             break;
-        case common::enums::operators::DISCONNECT:  // Kill thread
-            BOOST_LOG_TRIVIAL(debug) << "[TW]: Received command DISCONNECT";
+        /// Kill thread
+        case common::enums::operators::DISCONNECT:
+            BOOST_LOG_TRIVIAL(debug)
+                << "[TW]: Received command DISCONNECT which for some reason kills thread";
             BOOST_LOG_TRIVIAL(info) << "[TW]: TaskWorker finished working";
             SendAnswer_(conn, enums::response_type::OK, false);
             alive_ = false;
@@ -119,103 +124,40 @@ int TaskWorker::DoTask(std::shared_ptr<network::Connection> conn) {
 
 enums::response_type TaskWorker::Set_(common::utils::Data& data) {
     /// Delete existing key
-    auto it = cache_.find(data.key);
-    InMemoryData& existed = it->second;
-    if ( it != cache_.end() ) {
-        fs_->Remove(data.key);
-        existed.value.clear();
-        existed.value.shrink_to_fit();
-        existed.in_memory = false;
-        cur_memory_ -= existed.size;    // don't forget to change tmp.size !
-    }
+    fs_->Remove(data.key);
 
     /// Create_ key-value pair(s) on hdd
     enums::response_type result = fs_->Set(data);
 
     /// Update_ in-memory storage
-    if (result == enums::response_type::OK) {
-        PrepareCache_(data.size);
-        if (it == cache_.end()) {
-            cache_.emplace(std::make_pair(
-                    data.key,
-                    InMemoryData {
-                        std::move(data.value),
-                        data.size,
-                        true
-                    }));
-        } else {
-            existed = InMemoryData{std::move(data.value), data.size, true};
-        }
-        queue_.emplace(boost::posix_time::microsec_clock::local_time(), data.key);
-        cur_memory_ += data.size;
-    }
+    cache_.insert(data.key, data.value);
 
     BOOST_LOG_TRIVIAL(debug) << "[TW]: Value of size " << data.size << " was loaded into RAM";
     return result;
 }
 
 enums::response_type TaskWorker::Read_(common::utils::Data& data) {
-    auto it = cache_.find(data.key);
+    auto response = enums::response_type::SERVER_ERROR;
 
-    /// Check for existence of this key
-    if ( it == cache_.end() ) {
-        return enums::response_type::NOT_FOUND;
-    }
     /// Get data from cache if it's in there
-    else if ( it->second.in_memory ) {
-        data.size = it->second.size;
-        data.value = it->second.value;
-        UpdateCache_(data.key);
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" retrieved from RAM";
+    if (cache_.get(data.key, data.value)) {
         return enums::response_type::OK;
     }
     /// Get data from HDD and put it into cache
     else {
-        auto response = fs_->Get(data.key, data.value, data.size);
-        PrepareCache_(data.size);
-        it->second.value = data.value;
-        it->second.size = data.size;
-        it->second.in_memory = true;
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" loaded from HDD into RAM";
-        return response;
+        response = fs_->Get(data.key, data.value, data.size);
+        cache_.insert(data.key, data.value);
     }
+    return response;
 }
 
 enums::response_type TaskWorker::Delete_(common::utils::Data& data) {
-    auto it = cache_.find(data.key);
-
-    /// Check for existence of this key
-    if ( it == cache_.end() ) {
-        return enums::response_type::NOT_FOUND;
-    }
-
     /// Delete_ key-value pair on HDD
     enums::response_type response = fs_->Remove(data.key);
 
     /// Update_ in-memory storage
-    cur_memory_ -= it->second.size;
-    cache_.erase(data.key.c_str());  // no, it's not redundant
-    queue_.erase(std::find_if(  // yeah it's O(n) sorry
-        queue_.begin(),
-        queue_.end(),
-        [key = data.key](const auto& pair){ return pair.second == key; }));
-    BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << data.key << "\" erased from RAM";
+    cache_.erase(data.key);
     return response;
-}
-
-void TaskWorker::LoadCache_() {
-    fs_->LoadCache(cache_, queue_, max_memory_, cur_memory_);
-}
-
-void TaskWorker::ClearCache_() {
-    /// Clear vector and free space it occupied
-    for (auto& it : cache_) {
-        it.second.value.clear();
-        it.second.value.shrink_to_fit();
-        it.second.in_memory = false;
-        cur_memory_ -= it.second.size;
-    }
-    BOOST_LOG_TRIVIAL(debug) << "[TW]: Unloaded everything from RAM";
 }
 
 enums::response_type TaskWorker::Create_() {
@@ -254,32 +196,10 @@ common::enums::response_type TaskWorker::Connect_(common::utils::Data& data) {
     return common::enums::response_type::OK;
 }
 
-void TaskWorker::PrepareCache_(long bytes) {
-    while ( cur_memory_ + bytes > max_memory_ ) {
-        InMemoryData& to_clear = cache_.find(queue_.begin()->second)->second;
-        to_clear.value.clear();
-        to_clear.value.shrink_to_fit();
-        to_clear.in_memory = false;
-
-        cur_memory_ -= to_clear.size;
-        BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << queue_.begin()->second << "\" removed from RAM";
-        queue_.erase(queue_.begin());
-    }
-}
-
-void TaskWorker::UpdateCache_(const std::string& key) {
-    queue_.erase(std::find_if(  // yeah it's O(n) sorry
-            queue_.begin(),
-            queue_.end(),
-            [key](const auto& pair){ return pair.second == key; }));
-    queue_.emplace(boost::posix_time::microsec_clock::local_time(), key);
-    BOOST_LOG_TRIVIAL(debug) << "[TW]: \"" << key << "\" updated in cache";
+void TaskWorker::LoadCache_() {
+    fs_->LoadCache(cache_);
 }
 
 }  // namespace folder
 }  // namespace db
 }  // namespace failless
-
-// TODO(EgorBedov): make cache more dynamic
-// TODO(EgorBedov): replace queue_ with container that sorts by key and finds by value
-//  or store timestamp (delete and updatecache)

@@ -12,7 +12,7 @@
 
 #include "llss3p/enums/operators.h"
 #include "llss3p/utils/data.h"
-#include "llssdb/folder/in_memory_data.h"
+#include "llssdb/utils/cache.h"
 
 namespace failless {
 namespace db {
@@ -30,11 +30,7 @@ public:
     virtual common::enums::response_type Remove(const std::string &key) = 0;
 
     virtual void EraseAll() = 0;
-    virtual void LoadCache(
-            std::unordered_map<std::string, failless::db::folder::InMemoryData> &local_storage,
-            std::map<boost::posix_time::ptime, std::string>& queue,
-            long max_bytes,
-            long& cur_bytes) = 0;
+    virtual void LoadCache(utils::cache &cache) = 0;
 };
 
 }  // namespace folder

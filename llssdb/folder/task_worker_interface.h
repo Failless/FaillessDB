@@ -7,9 +7,7 @@
 #include "llssdb/folder/file_system_interface.h"
 #include "llssdb/network/transfer/hookup.h"
 
-namespace failless {
-namespace db {
-namespace folder {
+namespace failless::db::folder {
 
 class ITaskWorker : boost::noncopyable {
 public:
@@ -26,9 +24,7 @@ protected:
     //    virtual common::enums::response_type DestroyDB_() = 0;
 };
 
-}  // namespace folder
-}  // namespace db
-}  // namespace failless
+}  // namespace failless::db::folder
 
 
 #endif  // FAILLESS_LLSSDB_FOLDER_TASK_WORKER_INTERFACE_H_

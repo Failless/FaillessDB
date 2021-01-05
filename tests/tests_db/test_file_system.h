@@ -12,7 +12,7 @@
 #include <gtest/gtest.h>
 
 #include "llss3p/enums/operators.h"
-#include "llssdb/folder/in_memory_data.h"
+#include "llssdb/utils/cache.h"
 #include "tests/tests_db/mocks.h"
 
 namespace failless {
@@ -116,8 +116,7 @@ TEST(FileSystem, AmountOfKeys) {
 TEST(FileSystem, LoadCache) {
     /// Test values
     auto test_data = prepare_test();
-    std::unordered_map<std::string, folder::InMemoryData> cache_;
-    std::map<boost::posix_time::ptime, std::string> queue_;
+    utils::cache cache(1024 * 1024 * 4);
 
     folder::FileSystem fs(kTestDbPath + "/1");
 
@@ -132,11 +131,15 @@ TEST(FileSystem, LoadCache) {
     EXPECT_EQ(fs.Set(test_data), common::enums::response_type::OK);
 
     long cur_bytes = 0;
-    fs.LoadCache(cache_, queue_, 1024 * 1024 * 4, cur_bytes);
-    EXPECT_EQ(cache_.size(), 3);
-    EXPECT_EQ(cache_.at("test_key").value.size(), 3);
-    EXPECT_EQ(cache_.at("test_key1").value.size(), 4);
-    EXPECT_EQ(cache_.at("test_key2").value.size(), 5);
+    fs.LoadCache(cache);
+    EXPECT_EQ(cache.size(), 3);
+    std::vector<uint8_t> tmp_vec;
+    cache.get("test_key", tmp_vec);
+    EXPECT_EQ(tmp_vec.size(), 3);
+    cache.get("test_key1", tmp_vec);
+    EXPECT_EQ(tmp_vec.size(), 4);
+    cache.get("test_key2", tmp_vec);
+    EXPECT_EQ(tmp_vec.size(), 5);
 }
 
 TEST(FileSystem, Complex_Test) {
